@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Source and destination folder paths
-source_folder="/home/rafael/CNIC/Metabolomics/turbo-omics-integrator/out"
+source_folder="/home/rafael/CNIC/Metabolomics/turbo-omics-integration/out"
 destination_folder="/home/rafael/CNIC/Metabolomics/TurboPutative-web/src/TurboOmicsIntegrator/App"
 
 # New name for the file
