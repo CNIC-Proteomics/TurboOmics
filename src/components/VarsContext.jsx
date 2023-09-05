@@ -3,7 +3,8 @@
 import React, { createContext, useContext } from 'react';
 
 const VarsContext = createContext({
-    BASE_URL:'/turboputative'
+    BASE_URL:'/turboputative',
+    API_URL: 'http://localhost:8080/turboputative/api/tbomics'
 });
 
 export function VarsProvider({ children }) {
