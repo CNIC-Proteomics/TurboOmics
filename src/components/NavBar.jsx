@@ -7,6 +7,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useVars } from './VarsContext';
 
+import Image from 'next/image';
+
 export default function MyNavBar() {
     
     const BASE_URL = useVars().BASE_URL;
@@ -15,7 +17,7 @@ export default function MyNavBar() {
         <Navbar bg="dark" data-bs-theme="dark" className="bg-body-tertiary" style={{fontSize:"1.2em"}}>
             <Container className='mx-0'>
                 <Navbar.Brand href="#home">
-                    <img
+                    <Image
                         src={`${BASE_URL}/icon.ico`}
                         width="30"
                         height="30"

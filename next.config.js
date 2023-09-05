@@ -2,6 +2,7 @@
 const nextConfig = {
     output: 'export',
     basePath: '/turboputative',
+    images: { unoptimized: true },
 }
 
 module.exports = nextConfig

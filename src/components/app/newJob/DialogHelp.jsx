@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import { useVars } from '../../VarsContext';
+import Image from 'next/image';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -64,7 +65,7 @@ export default function DialogHelp({ title }) {
                     </Typography>
 
                     <div className='text-center mt-3'>
-                        <img src={`${BASE_URL}/table.png`}></img>
+                        <img src={`${BASE_URL}/table.png`} alt="Table" />
                     </div>
 
                 </DialogContent>

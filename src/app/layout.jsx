@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={roboto.className}>
         {children}
-        <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js" async />
       </body>
     </html>
   )
