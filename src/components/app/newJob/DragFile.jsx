@@ -26,6 +26,14 @@ export default function DragFile({ title, fileName }) {
             df: df
         })
 
+        if (fileName == 'xq' || fileName == 'xm') {
+            dispatchJob({
+                type: 'get-mv-data',
+                fileType: fileName,
+                df: df
+            })
+        }
+
     };
 
     return (

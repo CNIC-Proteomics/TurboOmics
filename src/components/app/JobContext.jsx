@@ -1,3 +1,4 @@
+import generateArray from '@/utils/generateArray';
 import React, { createContext, useContext } from 'react';
 import { useImmerReducer } from 'use-immer';
 
@@ -25,6 +26,8 @@ export function JobProvider({ children }) {
     )
 }
 
+
+
 function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
     switch (action.type) {
@@ -35,8 +38,18 @@ function jobReducer(draft, action) {
         case 'user-upload': {
             draft.user[action.fileType] = action.df;
         }
-    }
 
+        case 'get-mv-data': {
+            let df = action.df;
+            df = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
+            
+            //let thr = Array.from(Array(101).keys()).map(i => i/100);
+            let thr = generateArray(0, 1, 0.05);
+            thr = thr.map(i => ({MVThr: Math.round(i * 100) / 100, Features: df.lt(i).sum()}))
+            
+            draft.results.PRE.MV[action.fileType] = thr;
+        }
+    }
 }
 
 const jobTemplate = {
@@ -49,6 +62,12 @@ const jobTemplate = {
         "m2i": null
     },
     "results": {
+        "PRE": { // Results computed when user upload the files
+            'MV': { // Missing values
+                'xq': null, // [{thr: x, nFeatures: y}, ...]
+                'xm': null
+            }
+        },
         "EDA": null,
         "MOFA": null,
         "CORR": null,
