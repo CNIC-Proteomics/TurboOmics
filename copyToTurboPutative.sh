@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Source and destination folder paths
-source_folder="/home/rbarreror/projects/TurboOmics/out"
-destination_folder="/home/rbarreror/projects/TurboPutative-web/src/TurboOmicsIntegrator/App"
+source_folder="/home/$USER/projects/TurboOmics/out"
+destination_folder="/home/$USER/projects/TurboPutative-web/src/TurboOmicsIntegrator/App"
 
 # New name for the file
 old_name="index.html"

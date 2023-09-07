@@ -42,10 +42,8 @@ function jobReducer(draft, action) {
         case 'get-mv-data': {
             let df = action.df;
             df = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
-            
-            //let thr = Array.from(Array(101).keys()).map(i => i/100);
-            let thr = generateArray(0, 1, 0.05);
-            thr = thr.map(i => ({MVThr: Math.round(i * 100) / 100, Features: df.lt(i).sum()}))
+            let thr = generateArray(0, 1.05, 0.05);
+            thr = thr.map(i => ({MVThr: Math.round(i * 100) / 100, Features: df.le(i).sum()}))
             
             draft.results.PRE.MV[action.fileType] = thr;
         }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import DragFile from "./DragFile";
@@ -16,6 +16,9 @@ const PlotMV = dynamic(
 
 export default function NewJob() {
 
+    const [qThr, setQThr] = useState(0.2);
+    const [mThr, setMThr] = useState(0.2);
+
     return (
         <Box sx={{ width: '100%' }} className='p-4'>
 
@@ -26,15 +29,15 @@ export default function NewJob() {
             </div>
             <div className='py-4 d-flex justify-content-between align-items-center'>
                 <DragFile title="Proteomic Quantifications" fileName="xq" />
-                <SummaryTable />
+                <SummaryTable qThr={qThr} mThr={mThr} />
                 <DragFile title="Metabolomic Quantifications" fileName="xm" />
             </div>
             <div className='py-4 d-flex justify-content-between align-items-center'>
-                <div>
-                    <PlotMV fileName='xq' />
+                <div className='text-center'>
+                    <PlotMV fileName='xq' omic='Proteomic' thr={qThr} setThr={setQThr} />
                 </div>
-                <div>
-                    <PlotMV fileName='xm' />
+                <div className='text-center'>
+                    <PlotMV fileName='xm' omic='Metabolomic' thr={mThr} setThr={setMThr} />
                 </div>
             </div>
         </Box>

@@ -6,7 +6,7 @@ export function tsvToJSON(tsvString, sep = '\t') {
     return new Promise(resolve => {
 
         
-        const lines = tsvString.trim().split(/[\r\n]+/);
+        const lines = tsvString.split(/[\r\n]+/);
         
         if (lines.length < 2) {
             throw new Error('String text does not have expected DataFrame format');
@@ -24,6 +24,7 @@ export function tsvToJSON(tsvString, sep = '\t') {
                 }
                 data.push(record);
             } else {
+                console.log(values);
                 console.log(`Row number ${i} could not be read`)
             }
         }
