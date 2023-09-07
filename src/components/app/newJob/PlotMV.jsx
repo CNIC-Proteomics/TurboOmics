@@ -7,14 +7,14 @@ import { useJob } from '../JobContext';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
 
 
-export default function PlotMV({ fileName, omic, thr, setThr }) {
+export default function PlotMV({ fileType, omic, thr, setThr }) {
 
     //const [thr, setThr] = useState(0.2);
-    const job = useJob().results.PRE.MV[fileName];
+    const job = useJob().results.PRE.MV[fileType];
 
     if (job == null) return (<></>)
 
-    const plotJob = job.concat([{ MVThr: thr, refThr: 0 }, { MVThr: thr, refThr: job[job.length - 1].Features }]);
+    //const plotJob = job.concat([{ MVThr: thr, refThr: 0 }, { MVThr: thr, refThr: job[job.length - 1].Features }]);
 
     const error = console.error;
     console.error = (...args) => {
@@ -47,7 +47,7 @@ export default function PlotMV({ fileName, omic, thr, setThr }) {
             </div>
             <div className='d-flex justify-content-end px-3'>
 
-            <Typography>Selected MV Threshold: {thr}</Typography>
+                <Typography>Selected MV Threshold: {thr}</Typography>
             </div>
         </>
     )

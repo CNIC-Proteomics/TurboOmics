@@ -4,17 +4,18 @@ import React, { useState } from 'react';
 
 import { JobProvider } from './JobContext';
 import MyMotion from '../MyMotion'
-import Menu from './Menu';
+import Menu from './menu/Menu';
 
 import NewJob from './newJob/NewJob'
 import FindJob from './findJob/FindJob';
 import Results from './results/Results'
+import CreateJob from './createJob/CreateJob';
 
 
 
 export default function App() {
 
-    const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
+    const [page, setPage] = useState('new-job'); // "new-job", "create-job", "find-job", "results"
 
     return (
         <div>
@@ -26,6 +27,10 @@ export default function App() {
                     <MyMotion>
                         <NewJob />
                     </MyMotion>
+                }
+
+                {
+                    <CreateJob page={page} setPage={setPage} />
                 }
 
                 {

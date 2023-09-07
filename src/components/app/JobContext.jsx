@@ -32,11 +32,14 @@ function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
     switch (action.type) {
         case 'find-job': {
+            console.log('findJob')
             return action.results;
         }
 
         case 'user-upload': {
             draft.user[action.fileType] = action.df;
+            draft.userFileNames[action.fileType] = action.userFileName;
+            break;
         }
 
         case 'get-mv-data': {
@@ -46,13 +49,33 @@ function jobReducer(draft, action) {
             thr = thr.map(i => ({MVThr: Math.round(i * 100) / 100, Features: df.le(i).sum()}))
             
             draft.results.PRE.MV[action.fileType] = thr;
+            break;
+        }
+
+        case 'set-mv-thr': {
+            draft.results.PRE.MVThr[action.fileType] = action.thr;
+            break;
         }
     }
 }
 
 const jobTemplate = {
     "jobID": null,
-    "user": {
+    "userFileNames": { // Name of the files uploaded by the user
+        "xq": null,
+        "xm": null,
+        "mdata": null,
+        "q2i": null,
+        "m2i": null
+    },
+    "user": { // Danfo dataframes uploaded by the user
+        "xq": null,
+        "xm": null,
+        "mdata": null,
+        "q2i": null,
+        "m2i": null
+    },
+    "norm": { // Feature-center and scaled Danfo dataframes
         "xq": null,
         "xm": null,
         "mdata": null,
@@ -61,9 +84,13 @@ const jobTemplate = {
     },
     "results": {
         "PRE": { // Results computed when user upload the files
-            'MV': { // Missing values
+            'MV': { // Missing values --> Array of objects used to plot graph
                 'xq': null, // [{thr: x, nFeatures: y}, ...]
                 'xm': null
+            },
+            'MVThr': { // MV Threshold selected by the user
+                'xq': 0.2,
+                'xm': 0.2
             }
         },
         "EDA": null,

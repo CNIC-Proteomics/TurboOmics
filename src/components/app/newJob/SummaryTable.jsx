@@ -11,7 +11,6 @@ import Paper from '@mui/material/Paper';
 import { useJob } from '../JobContext';
 
 import { styled } from '@mui/system';
-import MyMotion from '@/components/MyMotion';
 
 const StyledCell = styled(TableCell)(({ theme }) => ({
     textAlign: 'center'
@@ -19,7 +18,7 @@ const StyledCell = styled(TableCell)(({ theme }) => ({
 
 export default function SummaryTable({ qThr, mThr }) {
 
-    const job = useJob();
+    const user = useJob().user;
 
     return (
 
@@ -27,33 +26,33 @@ export default function SummaryTable({ qThr, mThr }) {
             <Table size="small" aria-label="a dense table">
                 <TableBody>
                     {
-                        job.user.mdata != null &&
+                        user.mdata != null &&
                         <>
                             <TableRow>
                                 <StyledCell>Observations</StyledCell>
-                                <StyledCell>{job.user.mdata.shape[0]}</StyledCell>
+                                <StyledCell>{user.mdata.shape[0]}</StyledCell>
                             </TableRow>
                             <TableRow>
                                 <StyledCell>Meta-variables</StyledCell>
-                                <StyledCell>{job.user.mdata.shape[1]}</StyledCell>
+                                <StyledCell>{user.mdata.shape[1]}</StyledCell>
                             </TableRow>
                         </>
                     }
                     {
-                        job.user.xq != null &&
+                        user.xq != null &&
                         <TableRow>
                             <StyledCell>Proteomic features</StyledCell>
                             <StyledCell>
-                                {job.user.xq.isNa().sum({ axis: 0 }).div(job.user.xq.shape[0]).le(qThr).sum()} / {job.user.xq.shape[1]}
+                                {user.xq.isNa().sum({ axis: 0 }).div(user.xq.shape[0]).le(qThr).sum()} / {user.xq.shape[1]}
                             </StyledCell>
                         </TableRow>
                     }
                     {
-                        job.user.xm != null &&
+                        user.xm != null &&
                         <TableRow>
                             <StyledCell>Metabolomic features</StyledCell>
                             <StyledCell>
-                                {job.user.xm.isNa().sum({ axis: 0 }).div(job.user.xm.shape[0]).le(mThr).sum()} / {job.user.xm.shape[1]}
+                                {user.xm.isNa().sum({ axis: 0 }).div(user.xm.shape[0]).le(mThr).sum()} / {user.xm.shape[1]}
                             </StyledCell>
                         </TableRow>
                     }
