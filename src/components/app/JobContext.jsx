@@ -3,14 +3,14 @@ import React, { createContext, useContext } from 'react';
 import { useImmerReducer } from 'use-immer';
 
 const JobContext = createContext(null);
-const DispathJobContext = createContext(null);
+const DispatchJobContext = createContext(null);
 
 export function useJob() {
     return useContext(JobContext);
 }
 
 export function useDispatchJob() {
-    return useContext(DispathJobContext);
+    return useContext(DispatchJobContext);
 }
 
 export function JobProvider({ children }) {
@@ -19,9 +19,9 @@ export function JobProvider({ children }) {
 
     return (
         <JobContext.Provider value={job}>
-            <DispathJobContext.Provider value={dispatchJob}>
+            <DispatchJobContext.Provider value={dispatchJob}>
                 {children}
-            </DispathJobContext.Provider>
+            </DispatchJobContext.Provider>
         </JobContext.Provider>
     )
 }

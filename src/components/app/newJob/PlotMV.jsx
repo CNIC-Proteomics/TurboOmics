@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Slider from '@mui/material/Slider';
 
 import { useJob } from '../JobContext';
@@ -9,12 +9,9 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } 
 
 export default function PlotMV({ fileType, omic, thr, setThr }) {
 
-    //const [thr, setThr] = useState(0.2);
-    const job = useJob().results.PRE.MV[fileType];
+    const MVdata = useJob().results.PRE.MV[fileType];
 
-    if (job == null) return (<></>)
-
-    //const plotJob = job.concat([{ MVThr: thr, refThr: 0 }, { MVThr: thr, refThr: job[job.length - 1].Features }]);
+    if (MVdata == null) return (<></>)
 
     const error = console.error;
     console.error = (...args) => {
@@ -29,7 +26,7 @@ export default function PlotMV({ fileType, omic, thr, setThr }) {
                 id='1'
                 width={550}
                 height={300}
-                data={job}
+                data={MVdata}
                 margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
                 onClick={e => e != null && setThr(e.activeLabel)}
             >
@@ -46,7 +43,6 @@ export default function PlotMV({ fileType, omic, thr, setThr }) {
                 <DiscreteSlider thr={thr} setThr={setThr} />
             </div>
             <div className='d-flex justify-content-end px-3'>
-
                 <Typography>Selected MV Threshold: {thr}</Typography>
             </div>
         </>

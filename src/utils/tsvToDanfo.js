@@ -2,7 +2,7 @@
 
 const NA_values = ["", "#N/A", "#N/A", "N/A", "#NA", "-1.#IND", "-1.#QNAN", "-NaN", "-nan", "1.#IND", "1.#QNAN", "<NA>", "N/A", "NA", "NULL", "NaN", "None", "n/a", "nan", "null"]
 
-export function tsvToJSON(tsvString, sep = '\t') {
+export function tsvToDanfo(tsvString, sep = '\t') {
     return new Promise(resolve => {
 
         

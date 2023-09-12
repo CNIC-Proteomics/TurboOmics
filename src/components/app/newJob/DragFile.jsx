@@ -5,28 +5,22 @@ import { FileUploader } from "react-drag-drop-files";
 import { useDispatchJob, useJob } from "../JobContext";
 
 import DialogHelp from './DialogHelp';
-import { tsvToJSON } from "../../../utils/tsvToJSON.js";
-import MyMotion from "@/components/MyMotion";
+import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
 const fileFormat = ["TSV"];
 
 
-export default function DragFile({ title, fileType }) {
-    const [fileName, setFileName] = useState(useJob().userFileNames[fileType]);
-    const [border, setBorder] = useState(false);
+export default function DragFile({ title, fileType, fileName }) {
     const dispatchJob = useDispatchJob();
-
-    // console.log(fileType, file);
 
     async function handleChange(file) {
         setFileName(file.name);
         const fileText = await file.text();
-        let df = await tsvToJSON(fileText);
-        //df.print()
+        let df = await tsvToDanfo(fileText);
 
         dispatchJob({
             type: 'user-upload',
             fileType: fileType,
-            userFileName: file.name,
+            userFileName: fileName,
             df: df
         })
 
@@ -37,13 +31,11 @@ export default function DragFile({ title, fileType }) {
                 df: df
             })
         }
-
-        setBorder(true);
     };
 
     return (
         <div className="DragFile mx-2 text-center" style={{ width: '30%' }}>
-            <Card variant='outlined' className={`px-4 ${border && "border-dark"}`} style={{transition: "all 1s ease"}} >
+            <Card variant='outlined' className={`px-4 ${fileName && "border-dark"}`} style={{transition: "all 1s ease"}} >
                 <Typography variant="h5" className="pt-2">{title}</Typography>
                 <DialogHelp title={title} />
                 <FileUploader
