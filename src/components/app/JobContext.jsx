@@ -27,9 +27,9 @@ export function JobProvider({ children }) {
 }
 
 
-
 function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
+    //console.log(action);
     switch (action.type) {
         case 'find-job': {
             console.log('findJob')
@@ -46,8 +46,8 @@ function jobReducer(draft, action) {
             let df = action.df;
             df = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
             let thr = generateArray(0, 1.05, 0.05);
-            thr = thr.map(i => ({MVThr: Math.round(i * 100) / 100, Features: df.le(i).sum()}))
-            
+            thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: df.le(i).sum() }))
+
             draft.results.PRE.MV[action.fileType] = thr;
             break;
         }
@@ -56,6 +56,22 @@ function jobReducer(draft, action) {
             draft.results.PRE.MVThr[action.fileType] = action.thr;
             break;
         }
+
+        case 'set-mv-type': {
+            draft.results.PRE.MVType[action.fileType] = action.MVType;
+            break;
+        }
+
+        case 'set-annotations-mode': {
+            draft.annotations.mode = action.mode
+            break;
+        }
+
+        case 'set-annotations-column': {
+            draft.annotations.column = action.column
+            break;
+        }
+
     }
 }
 
@@ -82,6 +98,10 @@ const jobTemplate = {
         "q2i": null,
         "m2i": null
     },
+    "annotations": {
+        "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)
+        "column": null
+    },
     "results": {
         "PRE": { // Results computed when user upload the files
             'MV': { // Missing values --> Array of objects used to plot graph
@@ -91,6 +111,10 @@ const jobTemplate = {
             'MVThr': { // MV Threshold selected by the user
                 'xq': 0.2,
                 'xm': 0.2
+            },
+            'MVType': {
+                'xq': 'KNN',
+                'xm': 'KNN'
             }
         },
         "EDA": null,

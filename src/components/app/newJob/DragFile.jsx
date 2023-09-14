@@ -9,27 +9,28 @@ import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
 const fileFormat = ["TSV"];
 
 
-export default function DragFile({ title, fileType, fileName }) {
+export default function DragFile({ title, fileType }) {
+
+    const fileName = useJob().userFileNames[fileType];
     const dispatchJob = useDispatchJob();
 
     async function handleChange(file) {
-        setFileName(file.name);
         const fileText = await file.text();
         let df = await tsvToDanfo(fileText);
 
         dispatchJob({
             type: 'user-upload',
             fileType: fileType,
-            userFileName: fileName,
+            userFileName: file.name,
             df: df
-        })
+        });
 
         if (fileType == 'xq' || fileType == 'xm') {
             dispatchJob({
                 type: 'get-mv-data',
                 fileType: fileType,
                 df: df
-            })
+            });
         }
     };
 

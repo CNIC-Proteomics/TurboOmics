@@ -4,11 +4,10 @@ import React from 'react'
 import { useDispatchJob } from '../JobContext'
 
 export default function LoadSampleBtn({ children, page }) {
-    if (page != 'new-job') return <></>
 
     const API_URL = useVars().API_URL
     const dispatchJob = useDispatchJob();
-
+    
     const handleClick = async e => {
         console.log(`Loading sample data`);
         
@@ -42,6 +41,8 @@ export default function LoadSampleBtn({ children, page }) {
             }
         })
     }
+    
+    if (page != 'new-job') return <></>
 
     return (
         <div className='align-self-center' style={{ position: 'absolute', left: '10%' }}>

@@ -16,8 +16,10 @@ const StyledCell = styled(TableCell)(({ theme }) => ({
     textAlign: 'center'
 }));
 
-export default function SummaryTable({ qThr, mThr }) {
+export default function SummaryTable() {
 
+    const qThr = useJob().results.PRE.MVThr.xq;
+    const mThr = useJob().results.PRE.MVThr.xm;
     const user = useJob().user;
 
     return (
@@ -29,7 +31,7 @@ export default function SummaryTable({ qThr, mThr }) {
                         user.mdata != null &&
                         <>
                             <TableRow>
-                                <StyledCell>Observations</StyledCell>
+                                <StyledCell>n</StyledCell>
                                 <StyledCell>{user.mdata.shape[0]}</StyledCell>
                             </TableRow>
                             <TableRow>

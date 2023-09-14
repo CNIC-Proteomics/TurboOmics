@@ -13,6 +13,8 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import { Box } from '@mui/material';
+import SelectColumn from './SelectColumn';
+import MainContent from './MainContent';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -40,13 +42,10 @@ export default function CreateJob({ page, setPage }) {
                         <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
                             Metabolomic Putative Annotations
                         </Typography>
-                        <Button autoFocus color="inherit" onClick={() => console.log('save')}>
-                            save
-                        </Button>
                     </Toolbar>
                 </AppBar>
                 <Box className="m-2">
-                    Configure Metabolomics Putative Annotations
+                    <MainContent />
                 </Box>
             </Dialog>
         </div>
