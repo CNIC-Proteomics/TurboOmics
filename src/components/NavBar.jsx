@@ -29,7 +29,7 @@ export default function MyNavBar() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="home" className='mx-2'>Home</Nav.Link>
-                        <Nav.Link href="turboomics.html" active className='mx-2'>TurboOmics</Nav.Link>
+                        <Nav.Link href="TurboOmicsApp.html" active className='mx-2'>TurboOmics</Nav.Link>
                         <Nav.Link href="webserver" className='mx-2'>Web Server</Nav.Link>
                         <Nav.Link href="webservices" className='mx-2'>Web Services</Nav.Link>
                         <NavDropdown title="Help" id="basic-nav-dropdown">

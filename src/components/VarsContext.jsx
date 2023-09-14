@@ -3,8 +3,8 @@
 import React, { createContext, useContext } from 'react';
 
 const VarsContext = createContext({
-    BASE_URL:'/turboputative',
-    API_URL: 'http://localhost:8080/turboputative/api/tbomics'
+    BASE_URL:'/TurboPutative',
+    API_URL: 'https://proteomics.cnic.es/TurboPutative/api/tbomics'
 });
 
 export function VarsProvider({ children }) {
