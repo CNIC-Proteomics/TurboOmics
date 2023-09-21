@@ -11,8 +11,8 @@ export default function FindJob({ setPage }) {
 
     const [searchedJobID, setSearchedJobID] = useState('');
     const [exist, setExist] = useState(true);
+    
     const dispatchJob = useDispatchJob();
-
     const API_URL = useVars().API_URL;
 
     async function handleSearch(searchedJobID) {
@@ -20,7 +20,7 @@ export default function FindJob({ setPage }) {
         const response = await fetch(`${API_URL}/search/${searchedJobID}`);
         const results = await response.json();
         console.log('Server response received:');
-        console.log(results);
+        //console.log(results);
 
         if (results.exist) {
             //updateJob(results.results);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -15,6 +15,7 @@ import Slide from '@mui/material/Slide';
 import { Box } from '@mui/material';
 import SelectColumn from './SelectColumn';
 import MainContent from './MainContent';
+import MyBackdrop from './MyBackdrop';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -22,6 +23,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function CreateJob({ page, setPage }) {
     console.log(page)
+    const [loading, setLoading] = useState(false);
+
     return (
         <div>
             <Dialog
@@ -45,7 +48,8 @@ export default function CreateJob({ page, setPage }) {
                     </Toolbar>
                 </AppBar>
                 <Box className="m-2">
-                    <MainContent />
+                    <MainContent setPage={setPage} loading={loading} setLoading={setLoading} />
+                    <MyBackdrop loading={loading} />
                 </Box>
             </Dialog>
         </div>

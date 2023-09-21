@@ -63,13 +63,22 @@ function jobReducer(draft, action) {
         }
 
         case 'set-annotations-mode': {
-            draft.annotations.mode = action.mode
+            draft.annotations.mode = action.mode;
             break;
         }
 
         case 'set-annotations-column': {
-            draft.annotations.column = action.column
+            draft.annotations.column = action.column;
             break;
+        }
+
+        case 'set-job-id': {
+            draft.jobID = action.jobID;
+            break;
+        }
+
+        case 'set-job-context': {
+            return action.jobContext;
         }
 
     }
@@ -93,10 +102,7 @@ const jobTemplate = {
     },
     "norm": { // Feature-center and scaled Danfo dataframes
         "xq": null,
-        "xm": null,
-        "mdata": null,
-        "q2i": null,
-        "m2i": null
+        "xm": null
     },
     "annotations": {
         "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)

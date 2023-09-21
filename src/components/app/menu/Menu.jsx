@@ -17,12 +17,15 @@ export default function Menu({ page, setPage }) {
 
     return (
         <div className='my-2 d-flex justify-content-center'>
-            <LoadSampleBtn page={page}><CloudDownloadIcon /></LoadSampleBtn>
+            {
+                page == 'new-job' &&
+                <LoadSampleBtn page={page}><CloudDownloadIcon /></LoadSampleBtn>
+            }
             <MenuOption text='New Job' id='new-job' setPage={setPage} page={page}><CreateIcon /></MenuOption>
             <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
             <MenuOption text='Results' id='results' setPage={setPage} page={page}><ScienceIcon /></MenuOption>
             {
-                jobID == null && user.mdata && ((user.xm && user.m2i) || (user.xq && user.q2i)) &&
+                page == 'new-job' && user.mdata && ((user.xm && user.m2i) || (user.xq && user.q2i)) &&
                 <MyMotion><CreateJobBtn text='Create Job' setPage={setPage}><NoteAddIcon /></CreateJobBtn></MyMotion>
             }
         </div>

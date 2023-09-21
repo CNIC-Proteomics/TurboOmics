@@ -7,7 +7,7 @@ export default function SelectColumn() {
 
     const xmColumns = useJob().user.m2i.columns.map(e => ({ label: e, value: e }));
     const dispatchJob = useDispatchJob();
-    const annotationColumn = 'Name'//useJob().annotations.column;
+    //const annotationColumn = 'Name'//useJob().annotations.column;
 
     return (
         <Box sx={{ p: 2, textAlign: 'center' }}>

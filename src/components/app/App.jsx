@@ -30,6 +30,7 @@ export default function App() {
                 }
 
                 {
+                    page == 'create-job' &&
                     <CreateJob page={page} setPage={setPage} />
                 }
 

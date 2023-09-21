@@ -24,8 +24,8 @@ export default function LoadSampleBtn({ children, page }) {
         });
 
         // Update Job state
-        Object.keys(resJson).forEach(key => {
-            dispatchJob({ // save dando df
+        Object.keys(resDf).forEach(key => {
+            dispatchJob({ // save danfo df
                 type: 'user-upload',
                 fileType: key,
                 userFileName: `${key}.tsv`,
@@ -41,8 +41,6 @@ export default function LoadSampleBtn({ children, page }) {
             }
         })
     }
-    
-    if (page != 'new-job') return <></>
 
     return (
         <div className='align-self-center' style={{ position: 'absolute', left: '10%' }}>

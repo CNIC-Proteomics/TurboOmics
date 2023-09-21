@@ -7,14 +7,18 @@ import { useDispatchJob, useJob } from '../JobContext';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
 
 
-const currencies = [
+const MVmethod = [
     {
         value: 'KNN',
         label: 'KNN',
     },
-    {
+    /*{
         value: 'Minimum',
         label: 'Minimum',
+    },*/
+    {
+        value: 'RF',
+        label: 'RF'
     },
     {
         value: 'Mean',
@@ -97,7 +101,7 @@ export default function PlotMV({ fileType, omic }) {
                                 sx={{ width: "50%" }}
                                 onChange={e => setMVType(e.target.value)}
                             >
-                                {currencies.map((option) => (
+                                {MVmethod.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                         {option.label}
                                     </MenuItem>

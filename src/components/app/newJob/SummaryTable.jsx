@@ -23,7 +23,6 @@ export default function SummaryTable() {
     const user = useJob().user;
 
     return (
-
         <TableContainer component={Paper} sx={{ width: 300 }}>
             <Table size="small" aria-label="a dense table">
                 <TableBody>

@@ -14,8 +14,8 @@ export default function Page() {
     <main>
     <StrictMode>
       <VarsProvider>
-      <MyNavBar/>
-      <App/>
+        <MyNavBar/>
+        <App/>
       </VarsProvider>
     </StrictMode>
     </main>
