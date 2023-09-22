@@ -1,9 +1,11 @@
-import * as React from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { useJob } from '../JobContext';
+import DataDistribution from './EDA/DataDistribution';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -39,74 +41,67 @@ function a11yProps(index) {
 }
 
 export default function Results() {
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = useState(0.1);
+    const section = Math.floor(value);
+
+    const jobID = useJob().jobID;
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
     return (
-        <Box
-            sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: "80vh" }}
-        >
-            <Tabs
-                orientation="vertical"
-                //variant="scrollable"
-                value={value}
-                onChange={handleChange}
-                aria-label="Vertical tabs example"
-                sx={{ borderRight: 1, borderColor: 'divider', width:'15%' }}
+        <>
+            <Box
+                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: "80vh" }}
             >
-                <Tab label="EXPLORATORY DATA ANALYSIS" {...a11yProps(0)} sx={{mt:2}} />
-                <Tab label="MULTIOMICS FACTOR ANALYSIS" {...a11yProps(1)} sx={{mt:2}} />
-                <Tab label="COMMUNITY ANALYSIS" {...a11yProps(2)} sx={{mt:2}} />
-                <Tab label="REGULARIZED CANONICAL CORRELATION ANALYSIS" {...a11yProps(3)} sx={{mt:2}} />
-                <Tab label="DIFFERENTIAL CORRELATION ANALYSIS" {...a11yProps(4)} sx={{mt:2}} />
-                <Tab label="ELASTIC NET" {...a11yProps(5)} sx={{mt:2}} />
-            </Tabs>
-            <TabPanel value={value} index={0}>
-                Item One
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-                Item Two
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-                Item Three
-            </TabPanel>
-            <TabPanel value={value} index={3}>
-                Item Four
-            </TabPanel>
-            <TabPanel value={value} index={4}>
-                Item Five
-            </TabPanel>
-            <TabPanel value={value} index={5}>
-                Item Six
-            </TabPanel>
-        </Box>
+                <Tabs
+                    orientation="vertical"
+                    //variant="scrollable"
+                    value={value}
+                    onChange={handleChange}
+                    aria-label="Vertical tabs example"
+                    sx={{ borderRight: 1, borderColor: 'divider', width: '15%' }}
+                >
+                    <Tab
+                        label="EXPLORATORY DATA ANALYSIS"
+                        value={0.1}
+                        {...a11yProps(0)}
+                        sx={{ mt: 2, p: 0, color: section == 0 ? '#1976d2' : '#00000099' }}
+                    />
+                    {section == 0 && <Tab label="DATA DISTRIBUTION" value={0.1} {...a11yProps(1)} sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }} />}
+                    {section == 0 && <Tab label="PCA" value={0.2} {...a11yProps(2)} sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }} />}
+
+                    <Tab label="MULTIOMICS FACTOR ANALYSIS" value={1.1} {...a11yProps(1)} sx={{ mt: 2 }} />
+                    <Tab label="COMMUNITY ANALYSIS" value={2.1} {...a11yProps(3)} sx={{ mt: 2 }} />
+                    <Tab label="REGULARIZED CANONICAL CORRELATION ANALYSIS" value={3.1} {...a11yProps(4)} sx={{ mt: 2 }} />
+                    <Tab label="DIFFERENTIAL CORRELATION ANALYSIS" value={4.1} {...a11yProps(5)} sx={{ mt: 2 }} />
+                    <Tab label="ELASTIC NET" value={5.1} {...a11yProps(6)} sx={{ mt: 2 }} />
+                </Tabs>
+
+                <Box sx={{ width: '85%' }}>
+                    {value == 0.1 && <Box sx={{ p: 1, borderTop: '1px solid #cccccc' }}><DataDistribution /></Box>}
+                    <TabPanel value={value} index={0.2}>
+                        PCA
+                    </TabPanel>
+                    <TabPanel value={value} index={1.1}>
+                        MOFA
+                    </TabPanel>
+                    <TabPanel value={value} index={2.1}>
+                        Community Analysis
+                    </TabPanel>
+                    <TabPanel value={value} index={3.1}>
+                        rCCA
+                    </TabPanel>
+                    <TabPanel value={value} index={4.1}>
+                        Differential Correlation Analysis
+                    </TabPanel>
+                    <TabPanel value={value} index={5.1}>
+                        Elastic Net
+                    </TabPanel>
+                </Box>
+            </Box>
+            <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
+        </>
     );
 }
-
-/*
-export default function Results() {
-
-    const [value, setValue] = useState(0);
-    const job = useJob();
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-
-    return (
-        <Box>
-            <Tabs value={value} onChange={handleChange} aria-label="disabled tabs example">
-                <Tab label="EXPLORATORY ANALYSIS" />
-                <Tab label="MULTIOMICS FACTOR ANALYSIS" />
-                <Tab label="COMMUNITY ANALYSIS" />
-                <Tab label="REG-CANONICAL CORRELATION ANALYSIS" />
-                <Tab label="DIFFERENTIAL CORRELATION ANALYSIS" />
-                <Tab label="ELASTIC NET" />
-            </Tabs>
-        </Box>
-    )
-}
-*/
