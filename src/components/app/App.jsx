@@ -10,6 +10,7 @@ import NewJob from './newJob/NewJob'
 import FindJob from './findJob/FindJob';
 import Results from './results/Results'
 import CreateJob from './createJob/CreateJob';
+import { ResultsProvider } from './ResultsContext';
 
 
 
@@ -20,6 +21,7 @@ export default function App() {
     return (
         <div>
             <JobProvider>
+                <ResultsProvider>
                 <Menu page={page} setPage={setPage} />
 
                 {
@@ -47,6 +49,7 @@ export default function App() {
                         <Results />
                     </MyMotion>
                 }
+                </ResultsProvider>
             </JobProvider>
         </div>
     )

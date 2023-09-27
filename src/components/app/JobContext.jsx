@@ -37,18 +37,20 @@ function jobReducer(draft, action) {
         }
 
         case 'user-upload': {
-            draft.user[action.fileType] = action.df;
+            let df = new dfd.DataFrame(action.dfJson)
+            df.setIndex({ column: df.columns[0], inplace: true });
+
+            if (action.fileType == 'xq' || action.fileType == 'xm') {
+                df.drop({ columns: [df.columns[0]], inplace: true });
+                let dfMV = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
+                let thr = generateArray(0, 1.05, 0.05);
+                thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }))
+                draft.results.PRE.MV[action.fileType] = thr;
+            }
+
+            draft.user[action.fileType] = df;
             draft.userFileNames[action.fileType] = action.userFileName;
-            break;
-        }
-
-        case 'get-mv-data': {
-            let df = action.df;
-            df = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
-            let thr = generateArray(0, 1.05, 0.05);
-            thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: df.le(i).sum() }))
-
-            draft.results.PRE.MV[action.fileType] = thr;
+            draft.index[action.fileType] = df.index;
             break;
         }
 
@@ -94,6 +96,13 @@ const jobTemplate = {
         "m2i": null
     },
     "user": { // Danfo dataframes uploaded by the user
+        "xq": null,
+        "xm": null,
+        "mdata": null,
+        "q2i": null,
+        "m2i": null
+    },
+    "index": { // Index of danfo dataframes (we need it to preserve it after json conversion)
         "xq": null,
         "xm": null,
         "mdata": null,

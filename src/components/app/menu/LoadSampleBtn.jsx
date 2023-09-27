@@ -15,30 +15,14 @@ export default function LoadSampleBtn({ children, page }) {
         const res = await fetch(`${API_URL}/load_sample_data`);
         const resJson = await res.json();
 
-        // Create Danfo dataframe
-        const resDf = {}
-        Object.keys(resJson).forEach(key => {
-            resDf[key] = new dfd.DataFrame(resJson[key]);
-            resDf[key].setIndex({ column: resDf[key].columns[0], inplace: true });
-            resDf[key].drop({ columns: [resDf[key].columns[0]], inplace: true });
-        });
-
         // Update Job state
-        Object.keys(resDf).forEach(key => {
+        Object.keys(resJson).forEach(key => {
             dispatchJob({ // save danfo df
                 type: 'user-upload',
                 fileType: key,
                 userFileName: `${key}.tsv`,
-                df: resDf[key]
+                dfJson: resJson[key]
             });
-
-            if (key == 'xq' || key == 'xm') {
-                dispatchJob({ // get and save MV plot data
-                    type: 'get-mv-data',
-                    fileType: key,
-                    df: resDf[key]
-                })
-            }
         })
     }
 

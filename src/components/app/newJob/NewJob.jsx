@@ -16,20 +16,20 @@ const PlotMV = dynamic(
 export default function NewJob() {
 
     return (
-        <Box sx={{ width: '100%' }} className='p-4'>
+        <Box sx={{ width: '100%' }} className='p-2'>
 
-            <div className='py-4 d-flex justify-content-between'>
+            <div className='py-2 d-flex justify-content-between'>
                 <DragFile title="Proteomic Metadata" fileType="q2i" />
                 <DragFile title="Metadata" fileType="mdata" />
                 <DragFile title="Metabolomic Metadata" fileType="m2i" />
             </div>
-            <div className='py-4 d-flex justify-content-between align-items-center'>
+            <div className='py-2 d-flex justify-content-between align-items-center'>
                 <DragFile title="Proteomic Quantifications" fileType="xq" />
                 <SummaryTable />
                 <DragFile title="Metabolomic Quantifications" fileType="xm" />
             </div>
 
-            <div className='py-4 d-flex justify-content-between'>
+            <div className='py-2 d-flex justify-content-between'>
                 <PlotMV fileType='xq' omic='Proteomic' />
                 <PlotMV fileType='xm' omic='Metabolomic' />
             </div>

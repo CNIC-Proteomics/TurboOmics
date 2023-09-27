@@ -73,7 +73,7 @@ export default function PlotMV({ fileType, omic }) {
                     <LineChart
                         id='1'
                         width={550}
-                        height={300}
+                        height={200}
                         data={MVdata}
                         margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
                         onClick={e => e != null && setThr(e.activeLabel)}
@@ -90,7 +90,7 @@ export default function PlotMV({ fileType, omic }) {
                     </div>
                     <div className='d-flex justify-content-end px-3 flex-column'>
                         <Typography>Selected MV Threshold: {thr}</Typography>
-                        <div className='p-4'>
+                        <div className='p-2'>
                             <TextField
                                 id="outlined-select-currency"
                                 select

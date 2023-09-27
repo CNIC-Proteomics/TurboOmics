@@ -29,8 +29,9 @@ export function tsvToDanfo(tsvString, sep = '\t') {
             }
         }
 
-        let df = new dfd.DataFrame(data).setIndex({column: headers[0]});
+        resolve(data);
+        /*let df = new dfd.DataFrame(data).setIndex({column: headers[0]});
         df.drop({ columns: [headers[0]], inplace: true });
-        resolve(df);
+        resolve(df);*/
     })
 }

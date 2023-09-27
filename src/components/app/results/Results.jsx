@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useJob } from '../JobContext';
-import DataDistribution from './EDA/DataDistribution';
+import DataDistribution from './EDA/DataDistribution/DataDistribution';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -52,6 +52,7 @@ export default function Results() {
 
     return (
         <>
+            <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
             <Box
                 sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: "80vh" }}
             >
@@ -101,7 +102,6 @@ export default function Results() {
                     </TabPanel>
                 </Box>
             </Box>
-            <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
         </>
     );
 }
