@@ -43,22 +43,14 @@ export default function DataDistribution() {
     }, [])
 
     const handleSelect = useCallback(e => {
-        /*e != null && dispatchResults({
-            type: 'set-eda-dd-groupby',
-            groupby: e.value
-        });*/
         setGroupby({ label: e.value, value: e.value })
         updatePlot(['q', 'm']);
     }, [updatePlot])
 
     const handleSwitch = useCallback(e => {
-        /*dispatchResults({
-            type: 'set-eda-dd-norm',
-            showNorm: !showNorm
-        });*/
         setShowNorm(e.target.checked);
         updatePlot(['q', 'm']);
-    }, [showNorm, updatePlot]);
+    }, [updatePlot]);
 
     return (
         <Box>
