@@ -30,7 +30,7 @@ export default function MyBoxPlotPlotly({data, range, xTicks}) {
             data={data}
             layout={{
                 width:570,
-                height: 330,
+                height: 280,
                 showlegend: true,
                 legend: {"orientation": "h"},
                 xaxis: {
@@ -46,7 +46,8 @@ export default function MyBoxPlotPlotly({data, range, xTicks}) {
                     t:0
                 }
             }}
-            config={{staticPlot: false, displayModeBar:false}}
+            config={{staticPlot: true, displayModeBar:false}}
+            onChange={e => console.log(e)}
         />
     )
 }

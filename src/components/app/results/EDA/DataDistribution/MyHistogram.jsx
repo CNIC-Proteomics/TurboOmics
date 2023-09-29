@@ -15,7 +15,7 @@ export default function MyHistogram({ dataHist, gValues, range, xTicks }) {
         <AreaChart
             style={{margin:'auto'}}
             width={500}
-            height={230}
+            height={210}
             data={dataHist}
             margin={{
                 top: 10,

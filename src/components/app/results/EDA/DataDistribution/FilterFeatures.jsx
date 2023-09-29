@@ -7,18 +7,20 @@ import { MySelect } from './MyFormComponents';
 import FilterTable from './FilterTable';
 import MyMotion from '@/components/MyMotion';
 
-export default function FilterFeatures({ fileType, lastFilterText, filteredID, setFilteredID, updatePlot }) {
+export default function FilterFeatures({ omic, fileType, filteredID, setFilteredID, updatePlot }) {
     //useResults().EDA.DD.filterText[fileType]
 
-    const [filterText, setFilterText] = useState(lastFilterText);
-    const filterCol = useResults().EDA.DD.filterCol[fileType];
+    const [filterText, setFilterText] = useState('');
+    const [filterCol, setFilterCol] = useState('All features');
+    //const filterCol = useResults().EDA.DD.filterCol[fileType];
     //const filterText = useResults().EDA.DD.filterText[fileType];
 
 
-    const dispatchResults = useDispatchResults();
+    //const dispatchResults = useDispatchResults();
     const f2i = useJob().user[fileType];
 
     const { filteredFeatures, columns } = useMemo(() => {
+        console.log('calculating filteredFeatures')
 
         let filteredFeatures = {}
         let columns = [{
@@ -39,7 +41,9 @@ export default function FilterFeatures({ fileType, lastFilterText, filteredID, s
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
-                    return featureObj[filterCol] != null && featureObj[filterCol].toLowerCase().includes(filterText.toLowerCase())
+                    return (
+                        featureObj[filterCol] != null && 
+                        `${featureObj[filterCol]}`.toLowerCase().includes(filterText.toLowerCase()))
                 }
             );
 
@@ -62,22 +66,27 @@ export default function FilterFeatures({ fileType, lastFilterText, filteredID, s
     }, [filterText, filterCol, f2i]);
 
     useEffect(() => {
+        console.log('useEffect: Recalculating features');
         let newFilteredID = filteredFeatures.map(feature => feature.ID);
-        if (newFilteredID.every(e => filteredID.includes(e)) && filteredID.every(e => newFilteredID.includes(e))) return;
+        if (
+            newFilteredID.every(e => filteredID.includes(e)) && 
+            filteredID.every(e => newFilteredID.includes(e))
+         ) return;
 
         const myTimeout = setTimeout(() => {
             setFilteredID(prevState => ({
                 ...prevState, [fileType]: filteredFeatures.map(feature => feature.ID)
             }));
-            updatePlot()
-        }, 1000);
+            updatePlot([omic]);
+            console.log('Features recalculated');
+        }, 500);
 
         return () => clearTimeout(myTimeout);
-    }, [filteredFeatures, fileType, setFilteredID, updatePlot, filteredID]);
+    }, [filteredFeatures, fileType, setFilteredID, updatePlot, filteredID, omic]);
 
-    const handlePlot = e => {
+    /*const handlePlot = e => {
         console.log(filterText);
-    }
+    }*/
 
     /*const MySearchBtn = () => (
         <IconButton aria-label="delete" onClick={handlePlot}>
@@ -87,17 +96,18 @@ export default function FilterFeatures({ fileType, lastFilterText, filteredID, s
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
-            <Box sx={{ display: 'flex', height: '8vh' }}>
+            <Box sx={{ display: 'flex', height: '10vh' }}>
                 <Box sx={{ width: '40%', pt: 1 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={
                             e => {
-                                e != null && dispatchResults({
+                                /*e != null && dispatchResults({
                                     type: 'set-eda-dd-filter',
                                     fileType: fileType,
                                     filterCol: e.value
-                                })
+                                })*/
+                                setFilterCol(e.value);
                             }
                         }
                         value={{ label: filterCol, value: filterCol }}
@@ -117,7 +127,7 @@ export default function FilterFeatures({ fileType, lastFilterText, filteredID, s
                     </Box></MyMotion>
                 }
             </Box>
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 0 }}>
                 <FilterTable data={filteredFeatures} columns={columns} />
             </Box>
         </Box>
