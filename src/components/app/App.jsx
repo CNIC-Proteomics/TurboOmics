@@ -9,7 +9,7 @@ import Menu from './menu/Menu';
 import NewJob from './newJob/NewJob'
 import FindJob from './findJob/FindJob';
 import Results from './results/Results'
-import CreateJob from './createJob/CreateJob';
+import CreateJobDialog from './createJob/CreateJobDialog';
 import { ResultsProvider } from './ResultsContext';
 
 
@@ -33,7 +33,7 @@ export default function App() {
 
                 {
                     page == 'create-job' &&
-                    <CreateJob page={page} setPage={setPage} />
+                    <CreateJobDialog page={page} setPage={setPage} />
                 }
 
                 {

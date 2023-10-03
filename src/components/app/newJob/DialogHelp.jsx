@@ -40,7 +40,6 @@ export default function DialogHelp({ title }) {
                 open={open}
                 maxWidth='md'
             >
-
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
                     {title} Table
                 </DialogTitle>
@@ -63,13 +62,10 @@ export default function DialogHelp({ title }) {
                     <Typography gutterBottom>
                         Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2
                     </Typography>
-
                     <div className='text-center mt-3'>
                         <img src={`${BASE_URL}/table.png`} alt="Table" />
                     </div>
-
                 </DialogContent>
-
             </BootstrapDialog>
         </div>
     )

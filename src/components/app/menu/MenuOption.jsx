@@ -28,31 +28,28 @@ export default function MenuOption({ children, text, id, setPage, page }) {
 
     return (
         <>
-            {
-                resultsDisable ?
-
-                    <Card
-                        sx={style}>
-                        <div className='py-2'>
-                            {children}
-                        </div>
-                        <div>
-                            <Typography gutterBottom variant="h7" component="div">{text}</Typography>
-                        </div>
-                    </Card>
-                    :
-
-                    <StyledCard
-                        sx={style}
-                        onClick={() => setPage(id)}
-                    >
-                        <div className='py-2'>
-                            {children}
-                        </div>
-                        <div>
-                            <Typography gutterBottom variant="h7" component="div">{text}</Typography>
-                        </div>
-                    </StyledCard>
+            {resultsDisable ?
+                <Card
+                    sx={style}>
+                    <div className='py-2'>
+                        {children}
+                    </div>
+                    <div>
+                        <Typography gutterBottom variant="h7" component="div">{text}</Typography>
+                    </div>
+                </Card>
+                :
+                <StyledCard
+                    sx={style}
+                    onClick={() => setPage(id)}
+                >
+                    <div className='py-2'>
+                        {children}
+                    </div>
+                    <div>
+                        <Typography gutterBottom variant="h7" component="div">{text}</Typography>
+                    </div>
+                </StyledCard>
             }
         </>
     )

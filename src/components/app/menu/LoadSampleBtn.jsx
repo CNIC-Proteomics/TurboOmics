@@ -3,14 +3,14 @@ import { Button } from '@mui/material'
 import React from 'react'
 import { useDispatchJob } from '../JobContext'
 
-export default function LoadSampleBtn({ children, page }) {
+export default function LoadSampleBtn({ children }) {
 
-    const API_URL = useVars().API_URL
+    const { API_URL } = useVars();
     const dispatchJob = useDispatchJob();
-    
+
     const handleClick = async e => {
         console.log(`Loading sample data`);
-        
+
         // Fetch data from server
         const res = await fetch(`${API_URL}/load_sample_data`);
         const resJson = await res.json();

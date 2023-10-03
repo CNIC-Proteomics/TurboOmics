@@ -127,7 +127,7 @@ const jobTemplate = {
                 'xq': 0.2,
                 'xm': 0.2
             },
-            'MVType': {
+            'MVType': { // Type of missing value imputation
                 'xq': 'KNN',
                 'xm': 'KNN'
             }

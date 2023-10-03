@@ -44,7 +44,7 @@ export default function Results() {
     const [value, setValue] = useState(0.1);
     const section = Math.floor(value);
 
-    const jobID = useJob().jobID;
+    const { jobID } = useJob();
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -80,8 +80,8 @@ export default function Results() {
                     <Tab label="ELASTIC NET" value={5.1} {...a11yProps(6)} sx={{ mt: 2 }} />
                 </Tabs>
 
-                <Box sx={{ width: '85%' }}>
-                    {value == 0.1 && <Box sx={{ p: 1, borderTop: '1px solid #cccccc' }}><DataDistribution /></Box>}
+                <Box sx={{ width: '85%', borderTop: '1px solid #cccccc' }}>
+                    {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
                     <TabPanel value={value} index={0.2}>
                         PCA
                     </TabPanel>

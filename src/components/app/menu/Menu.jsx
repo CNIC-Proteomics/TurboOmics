@@ -25,7 +25,7 @@ export default function Menu({ page, setPage }) {
             <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
             <MenuOption text='Results' id='results' setPage={setPage} page={page}><ScienceIcon /></MenuOption>
             {
-                page == 'new-job' && user.mdata && ((user.xm && user.m2i) || (user.xq && user.q2i)) &&
+                page == 'new-job' && user.mdata && ((user.xm && user.m2i) && (user.xq && user.q2i)) &&
                 <MyMotion><CreateJobBtn text='Create Job' setPage={setPage}><NoteAddIcon /></CreateJobBtn></MyMotion>
             }
         </div>

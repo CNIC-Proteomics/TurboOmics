@@ -45,7 +45,7 @@ function a11yProps(index) {
     };
 }
 
-export default function MainContent({ setPage, loading, setLoading }) {
+export default function CreateJobContent({ setPage, loading, setLoading }) {
 
     const dispatchJob = useDispatchJob();
     const job = useJob();
