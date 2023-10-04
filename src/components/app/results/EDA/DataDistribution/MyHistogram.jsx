@@ -10,7 +10,7 @@ import {
 import { myPalette } from "@/utils/myPalette";
 
 
-export default function MyHistogram({ dataHist, gValues, range, xTicks }) {
+export default function MyHistogram({ dataHist, gValues, xrange, yrange, xTicks }) {
     return (
         <AreaChart
             style={{margin:'auto'}}
@@ -25,8 +25,8 @@ export default function MyHistogram({ dataHist, gValues, range, xTicks }) {
             }}
         >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={'binCenter'} type='number' ticks={xTicks} domain={range} />
-            <YAxis />
+            <XAxis dataKey={'binCenter'} type='number' ticks={xTicks} domain={xrange} />
+            <YAxis domain={yrange}/>
             <Tooltip />
             {
                 gValues.map(

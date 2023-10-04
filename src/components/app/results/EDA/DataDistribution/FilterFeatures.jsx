@@ -1,22 +1,15 @@
 import { useJob } from '@/components/app/JobContext';
-import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
-import { Box, IconButton, TextField } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search';
+import { Box, TextField } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { MySelect } from './MyFormComponents';
 import FilterTable from './FilterTable';
 import MyMotion from '@/components/MyMotion';
 
-export default function FilterFeatures({ omic, fileType, filteredID, setFilteredID, updatePlot }) {
-    //useResults().EDA.DD.filterText[fileType]
+export default function FilterFeatures({ omic, fileType, setFilteredID, updatePlot }) {
 
     const [filterText, setFilterText] = useState('');
     const [filterCol, setFilterCol] = useState('All features');
-    //const filterCol = useResults().EDA.DD.filterCol[fileType];
-    //const filterText = useResults().EDA.DD.filterText[fileType];
 
-
-    //const dispatchResults = useDispatchResults();
     const f2i = useJob().user[fileType];
 
     const { filteredFeatures, columns } = useMemo(() => {
@@ -67,11 +60,6 @@ export default function FilterFeatures({ omic, fileType, filteredID, setFiltered
 
     useEffect(() => {
         console.log('useEffect: Recalculating features');
-        let newFilteredID = filteredFeatures.map(feature => feature.ID);
-        if (
-            newFilteredID.every(e => filteredID.includes(e)) && 
-            filteredID.every(e => newFilteredID.includes(e))
-         ) return;
 
         const myTimeout = setTimeout(() => {
             setFilteredID(prevState => ({
@@ -82,17 +70,7 @@ export default function FilterFeatures({ omic, fileType, filteredID, setFiltered
         }, 500);
 
         return () => clearTimeout(myTimeout);
-    }, [filteredFeatures, fileType, setFilteredID, updatePlot, filteredID, omic]);
-
-    /*const handlePlot = e => {
-        console.log(filterText);
-    }*/
-
-    /*const MySearchBtn = () => (
-        <IconButton aria-label="delete" onClick={handlePlot}>
-            <SearchIcon />
-        </IconButton>
-    );*/
+    }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
@@ -101,17 +79,9 @@ export default function FilterFeatures({ omic, fileType, filteredID, setFiltered
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={
-                            e => {
-                                /*e != null && dispatchResults({
-                                    type: 'set-eda-dd-filter',
-                                    fileType: fileType,
-                                    filterCol: e.value
-                                })*/
-                                setFilterCol(e.value);
-                            }
+                            e => setFilterCol(e.value)
                         }
                         value={{ label: filterCol, value: filterCol }}
-                    //label='Filter features by column'
                     />
                 </Box>
                 {f2i.columns.includes(filterCol) &&
@@ -119,10 +89,8 @@ export default function FilterFeatures({ omic, fileType, filteredID, setFiltered
                         <TextField
                             id="standard-name"
                             placeholder='Filter text'
-                            //label="Filter text"
                             value={filterText}
                             onChange={e => setFilterText(e.target.value)}
-                        //InputProps={{ endAdornment: <MySearchBtn /> }}
                         />
                     </Box></MyMotion>
                 }

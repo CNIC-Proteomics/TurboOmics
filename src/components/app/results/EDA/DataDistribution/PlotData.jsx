@@ -12,13 +12,8 @@ import { danfo2RowColJson } from "@/utils/jobDanfoJsonConverter";
 import MyMotion from '@/components/MyMotion';
 import { useVars } from "@/components/VarsContext";
 
-export default function PlotData({ omic, fileType, showPlot, filteredID, groupby, showNorm, pvalue, setPvalue }) {
+export default function PlotData({ fileType, filteredID, groupby, showNorm }) {
 
-    //const [pvalue, setPvalue] = useState(null);
-    //const { showNorm } = useResults().EDA.DD;
-
-    const { API_URL } = useVars();
-    const { jobID } = useJob();
     const mdata = useJob().user.mdata
 
     const xi_all = {
@@ -32,8 +27,10 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
         // From index to group
         const idx2g = {}
         for (let i = 0; i < mdata.shape[0]; i++) {
-            if (mdata.columns.includes(groupby)) { // La columna seleccionada es distinta de All values
-                if (mdata.column(groupby).values[i] != null){ // Ese indice tiene valor para esa columna
+            // La columna seleccionada es distinta de All values
+            if (mdata.columns.includes(groupby)) {
+                // Ese indice tiene valor para esa columna
+                if (mdata.column(groupby).values[i] != null) {
                     idx2g[mdata.index[i]] = mdata.column(groupby).values[i];
                 }
             } else {
@@ -63,7 +60,12 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
                                 filteredID.includes(feature)
                             ) {
                                 myData[idx2g[idx]].push(xiJson[idx][feature]);
-                                dataAnova.push({ ID: idx, feature: feature, g: idx2g[idx], x: xiJson[idx][feature] });
+                                dataAnova.push({
+                                    ID: idx,
+                                    feature: feature,
+                                    g: idx2g[idx],
+                                    x: xiJson[idx][feature]
+                                });
                             }
                         }
                     )
@@ -73,22 +75,22 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
     }, [groupby, mdata, xi, filteredID])
 
     // Get maximum and minimum 
-    const { range, xTicks, minimum, maximum } = useMemo(e => {
+    const { xrange, xTicks, minimum, maximum } = useMemo(e => {
         const values = Object.keys(myData).map(g => myData[g]).flat();
         const minimum = calculateQuantile(values, 0.0001);
         const maximum = calculateQuantile(values, 0.9999);
-        const range = [
+        const xrange = [
             minimum - Math.abs(0.05 * minimum),
             maximum + Math.abs(0.05 * maximum)
         ];
         const xTicks = calculateXTicks(minimum, maximum, 6);
 
-        return { range, xTicks, minimum, maximum };
+        return { xrange, xTicks, minimum, maximum };
 
     }, [myData]);
 
     // Get data used used for histogram
-    const dataHist = useMemo(() => {
+    const { dataHist, yrange } = useMemo(() => {
         let dataHist = {};
         Object.keys(myData).map(
             g => {
@@ -102,7 +104,8 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
                     if (dataHist[g].length > 0) {
                         dataHist[g] = getHistogramValues(
                             dataHist[g],
-                            1 + Math.ceil(Math.log2(dataHist[g].length)) // Sturges rule to get numBins
+                            // Sturges rule to get numBins
+                            1 + Math.ceil(Math.log2(dataHist[g].length))
                         );
                     } else {
                         delete dataHist[g];
@@ -118,7 +121,11 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
             g => (
                 dataHist[g].map(
                     ({ binCenter, density }) => (
-                        { binCenter: Math.round(binCenter * 100) / 100, [g]: density }
+                        {
+                            binCenter: Math.round(binCenter * 100) / 100,
+                            [g]: Number.parseFloat(density).toExponential(3), //Math.round(density * 10000) / 10000 
+                            d: density
+                        }
                     )
                 )
             )
@@ -127,10 +134,11 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
         dataHist = dataHist.flat();
         dataHist.sort((a, b) => a.binCenter - b.binCenter);
 
-        return dataHist;
+        const yMaxHist = Math.max(...dataHist.map(e => e.d))
+        const yrange = [0, Number.parseFloat((1.05 * yMaxHist).toPrecision(2))]
 
+        return { dataHist, yrange };
     }, [myData, minimum, maximum])
-
 
     // Generate data used for BoxPlot
     const dataBox = useMemo(() => {
@@ -142,7 +150,7 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
                         x: myData[g],
                         type: 'box',
                         name: `${g}`,
-                        marker: { color: myPalette[i] }
+                        marker: { color: myPalette[i % myPalette.length] }
                     })
                 } else {
                     return null;
@@ -155,46 +163,19 @@ export default function PlotData({ omic, fileType, showPlot, filteredID, groupby
 
     }, [myData])
 
-    // Obtain ANOVA pvalue // Disabled... useless
-    /*useEffect(() => {
-        console.log('useEffect: Calculating ANOVA');
-        const myTimeout = setTimeout(() => {
-            fetch(`${API_URL}/get_anova`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ dataAnova: dataAnova, jobID: jobID })
-            })
-                .then(res => res.json())
-                .then(data => setPvalue(prevState => ({ ...prevState, [omic]: data.pvalue })));
-            console.log('Anova was calculated');
-        }, 2000)
-
-        return () => clearTimeout(myTimeout);
-
-    }, [dataAnova, API_URL, jobID, setPvalue, omic])*/
-
     return (
         <>
-            {false && <Box sx={{ height: '2vh', margin: 'auto', width: 380 }}>
-                {showPlot && pvalue != null &&
-                    <MyMotion><Typography variant='body2' sx={{ color: '#555555' }}>ANOVA pvalue: {pvalue}</Typography></MyMotion>
-                }
-            </Box>}
-            <Box sx={{ height: '22vh' }}>
-                {true ?
-                    <MyHistogram dataHist={dataHist} gValues={gValues} range={range} xTicks={xTicks} />
-                    :
-                    <Box sx={{ textAlign: 'center', pt: 10 }}><CircularProgress size={100} thickness={2} /></Box>
-                }
+            <Box sx={{ height: 210 }}>
+                <MyHistogram
+                    dataHist={dataHist}
+                    gValues={gValues}
+                    xrange={xrange}
+                    xTicks={xTicks}
+                    yrange={yrange}
+                />
             </Box>
-            <Box sx={{ height: '30vh', width: 500, margin: 'auto', overflowX: 'hidden', overflowY: 'visible' }}>
-                {true ?
-                    <MyMotion><MyBoxPlotPlotly data={dataBox} range={range} xTicks={xTicks} /></MyMotion>
-                    :
-                    <Box sx={{ textAlign: 'center', pt: 15 }}><CircularProgress size={100} thickness={2} /></Box>
-                }
+            <Box sx={{ height: 280, width: 500, margin: 'auto', overflowX: 'hidden', overflowY: 'hidden' }}>
+                <MyMotion><MyBoxPlotPlotly data={dataBox} xrange={xrange} xTicks={xTicks} /></MyMotion>
             </Box>
         </>
     );

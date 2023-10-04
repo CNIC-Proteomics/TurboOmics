@@ -2,13 +2,35 @@ import { Box, FormControlLabel, Switch } from '@mui/material';
 import React, { useState } from 'react'
 import Select from 'react-select';
 
-export function MySelectGroupby({ options, onChange, label }) {
+export function MySwitch({ handleSwitch, label }) {
+    // Desdoblamos el estado checked para que sea más fluido
+    const [myChecked, setMyChecked] = useState(true);
+
+    const handleClick = (e) => {
+        setMyChecked(e.target.checked);
+        setTimeout(() => { handleSwitch(e) }, 100);
+    }
+
+    return (
+        <FormControlLabel
+            control={
+                <Switch
+                    checked={myChecked}//{checked}
+                    onChange={handleClick}//{e => { setMyChecked(!myChecked); onChange(e) }}
+                />
+            }
+            label={label}
+        />
+    )
+}
+
+export function MySelectGroupby({ options, handleSelect, label }) {
 
     const [groupby, setGroupby] = useState({ label: 'All values', value: 'All values' });
 
     const handleChange = e => {
         setGroupby({ label: e.value, value: e.value });
-        setTimeout( () => onChange(e), 100);
+        setTimeout( () => handleSelect(e), 100);
     }
     
     return (
@@ -52,26 +74,5 @@ export function MySelect({ options, value, onChange, label }) {
                 onChange={onChange}
             />
         </Box>
-    )
-}
-
-export function MySwitch({ checked, onChange, label }) {
-    const [myChecked, setMyChecked] = useState(true);
-
-    const handleClick = (e) => {
-        setMyChecked(e.target.checked);
-        setTimeout(() => { onChange(e) }, 100);
-    }
-
-    return (
-        <FormControlLabel
-            control={
-                <Switch
-                    checked={myChecked}//{checked}
-                    onChange={handleClick}//{e => { setMyChecked(!myChecked); onChange(e) }}
-                />
-            }
-            label={label}
-        />
     )
 }
