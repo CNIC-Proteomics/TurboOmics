@@ -48,6 +48,43 @@ function jobReducer(draft, action) {
                 draft.results.PRE.MV[action.fileType] = thr;
             }
 
+            if (action.fileType == 'mdata') {
+                const df_ctypes = df.ctypes;
+                df_ctypes.values.map((ctype, i) => {
+                    let columnName = df_ctypes.index[i];
+
+                    // Set variable type ({categorical, numeric})
+                    if (
+                        ctype.includes('string')
+                    ) {
+                        draft.mdataType[columnName] = { type: 'categorical' };
+                    } else if (
+                        columnName.toLowerCase().includes('[categorical]')
+                    ) {
+                        const parsedColumnName = columnName.replace(/\[categorical\]/i, '')
+                        draft.mdataType[parsedColumnName] = { type: 'categorical' };
+                        df.rename({ [columnName]: parsedColumnName }, { inplace: true });
+                        columnName = parsedColumnName;
+                    } else if (
+                        ctype.includes('int') ||
+                        ctype.includes('float')
+                    ) {
+                        draft.mdataType[columnName] = { type: 'numeric' };
+                    } else {
+                        draft.mdataType[columnName] = { type: null };
+                    }
+
+                    // If categorical, set levels (or number of posible values)
+                    if (draft.mdataType[columnName].type == 'categorical') {
+                        let levels = new Set(df.column(columnName).values);
+                        levels = [...levels];
+                        levels = levels.filter(e => e != null);
+                        draft.mdataType[columnName].nlevels = levels.length;
+                        draft.mdataType[columnName].levels = levels;
+                    }
+                })
+            }
+
             draft.user[action.fileType] = df;
             draft.userFileNames[action.fileType] = action.userFileName;
             draft.index[action.fileType] = df.index;
@@ -113,6 +150,7 @@ const jobTemplate = {
         "xq": null,
         "xm": null
     },
+    "mdataType": {}, // {mdata_columns} --> {Categorical, Numeric}
     "annotations": {
         "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)
         "column": null

@@ -1,13 +1,20 @@
-import { Box, CircularProgress, FormControlLabel, Switch, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, FormControlLabel, IconButton, Switch, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { useJob } from '../../../JobContext';
 import PlotData from './PlotData';
 import { MySwitch, MySelectGroupby } from './MyFormComponents';
 import FilterFeatures from './FilterFeatures';
+import DownloadIcon from '@mui/icons-material/Download';
 
+import downloadImage from './downloadImage';
 
 export default function DataDistribution() {
+
+    const qHistRef = useRef();
+    const qBoxRef = useRef();
+    const mHistRef = useRef();
+    const mBoxRef = useRef();
 
     const [showPlot, setShowPlot] = useState({ 'q': false, 'm': false });
 
@@ -15,8 +22,9 @@ export default function DataDistribution() {
     const [showNorm, setShowNorm] = useState(true);
     const [groupby, setGroupby] = useState({ label: 'All values', value: 'All values' });
 
-
+    const { mdataType } = useJob();
     let mdataCols = useJob().user.mdata.columns.map(e => ({ label: e, value: e }));
+    mdataCols = mdataCols.filter( e => mdataType[e.value].type == 'categorical' );
     mdataCols = [{ label: 'All values', value: 'All values' }, ...mdataCols];
 
     const updatePlot = useCallback((omics = ['q', 'm']) => {
@@ -74,14 +82,24 @@ export default function DataDistribution() {
                             sx={{ textAlign: 'center', color: '#555555' }}
                         >
                             Proteomics
+                            <IconButton
+                                aria-label="download"
+                                size='small'
+                                onClick={e => downloadImage(qHistRef.current, qBoxRef.current, 'Proteomics')}
+                                sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden' }}
+                            >
+                                <DownloadIcon />
+                            </IconButton>
                         </Typography>
                         {showPlot['q'] ?
-                            <Box sx={{ height: 510, overflowX: 'auto' }}>
+                            <Box sx={{ height: 550, overflowX: 'auto' }}>
                                 <PlotData
                                     fileType='xq'
                                     filteredID={filteredID.q2i}
                                     groupby={groupby.value}
                                     showNorm={showNorm}
+                                    histRef={qHistRef}
+                                    boxRef={qBoxRef}
                                 />
                             </Box>
                             :
@@ -102,14 +120,24 @@ export default function DataDistribution() {
                             sx={{ textAlign: 'center', color: '#555555' }}
                         >
                             Metabolomics
+                            <IconButton
+                                aria-label="download"
+                                size='small'
+                                onClick={e => downloadImage(mHistRef.current, mBoxRef.current, 'Metabolomics')}
+                                sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden' }}
+                            >
+                                <DownloadIcon />
+                            </IconButton>
                         </Typography>
                         {showPlot['m'] ?
-                            <Box sx={{ height: 510, overflowX: 'auto' }}>
+                            <Box sx={{ height: 550, overflowX: 'auto' }}>
                                 <PlotData
                                     fileType='xm'
                                     filteredID={filteredID.m2i}
                                     groupby={groupby.value}
                                     showNorm={showNorm}
+                                    histRef={mHistRef}
+                                    boxRef={mBoxRef}
                                 />
                             </Box>
                             :

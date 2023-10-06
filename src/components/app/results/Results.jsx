@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useJob } from '../JobContext';
 import DataDistribution from './EDA/DataDistribution/DataDistribution';
+import PCA from './EDA/PCA/PCA';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -41,7 +42,7 @@ function a11yProps(index) {
 }
 
 export default function Results() {
-    const [value, setValue] = useState(0.1);
+    const [value, setValue] = useState(0.2);
     const section = Math.floor(value);
 
     const { jobID } = useJob();
@@ -82,9 +83,7 @@ export default function Results() {
 
                 <Box sx={{ width: '85%', borderTop: '1px solid #cccccc' }}>
                     {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
-                    <TabPanel value={value} index={0.2}>
-                        PCA
-                    </TabPanel>
+                    {value == 0.2 && <Box sx={{ p: 1 }}><PCA /></Box>}
                     <TabPanel value={value} index={1.1}>
                         MOFA
                     </TabPanel>

@@ -1,20 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useJob } from "../../../JobContext";
-import { useResults } from "../../../ResultsContext";
 import { getHistogramValues, calculateQuantile, calculateXTicks } from "@/components/app/results/EDA/DataDistribution/utils";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import MyHistogram from "./MyHistogram";
 
 import MyBoxPlotPlotly from "./MyBoxPlotPlotly";
 import { myPalette } from '@/utils/myPalette';
 import { danfo2RowColJson } from "@/utils/jobDanfoJsonConverter";
 import MyMotion from '@/components/MyMotion';
-import { useVars } from "@/components/VarsContext";
+import PhotoIcon from '@mui/icons-material/Photo';
+import DownloadIcon from '@mui/icons-material/Download';
 
-export default function PlotData({ fileType, filteredID, groupby, showNorm }) {
+export default function PlotData({ fileType, filteredID, groupby, showNorm, histRef, boxRef }) {
 
-    const mdata = useJob().user.mdata
+    //const histRef = useRef();
+    //const boxRef = useRef();
+
+    const mdata = useJob().user.mdata;
 
     const xi_all = {
         norm: useJob().norm[fileType],
@@ -163,6 +166,8 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm }) {
 
     }, [myData])
 
+
+
     return (
         <>
             <Box sx={{ height: 210 }}>
@@ -172,10 +177,18 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm }) {
                     xrange={xrange}
                     xTicks={xTicks}
                     yrange={yrange}
+                    histRef={histRef}
                 />
             </Box>
             <Box sx={{ height: 280, width: 500, margin: 'auto', overflowX: 'hidden', overflowY: 'hidden' }}>
-                <MyMotion><MyBoxPlotPlotly data={dataBox} xrange={xrange} xTicks={xTicks} /></MyMotion>
+                <MyMotion>
+                    <MyBoxPlotPlotly
+                        data={dataBox}
+                        xrange={xrange}
+                        xTicks={xTicks}
+                        boxRef={boxRef}
+                    />
+                </MyMotion>
             </Box>
         </>
     );

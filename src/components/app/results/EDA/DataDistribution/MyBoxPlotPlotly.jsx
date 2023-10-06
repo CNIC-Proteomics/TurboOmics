@@ -1,11 +1,14 @@
 import React from 'react'
 
 import dynamic from "next/dynamic";
+import { Box } from '@mui/material';
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false, })
 
-export default function MyBoxPlotPlotly({data, xrange, xTicks}) {
+export default function MyBoxPlotPlotly({data, xrange, xTicks, boxRef}) {
     return (
+        <Box ref={boxRef}>
         <Plot
+            //ref={boxRef}
             style={{ position:'relative', left: -20}}
             data={data}
             layout={{
@@ -29,5 +32,6 @@ export default function MyBoxPlotPlotly({data, xrange, xTicks}) {
             config={{staticPlot: true, displayModeBar:false}}
             onChange={e => console.log(e)}
         />
+        </Box>
     )
 }
