@@ -25,6 +25,7 @@
     "encoding": "^0.1.13",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
+    "export-to-csv": "^1.2.0",
     "framer-motion": "^10.16.3",
     "html2canvas": "^1.4.1",
     "immer": "^10.0.2",
