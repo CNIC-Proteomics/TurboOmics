@@ -1,3 +1,5 @@
+const { default: downloadSVG } = require("@/utils/downloadSVG");
+
 const downloadImage = async (histComp, boxComp, omic) => {
     const histSVG = histComp.container.firstChild.cloneNode(true);
     const boxSVG = boxComp.firstChild.firstChild.firstChild//.cloneNode(true);
@@ -26,21 +28,7 @@ const downloadImage = async (histComp, boxComp, omic) => {
     fullFig.appendChild(box1Div);
     fullFig.appendChild(box2Div);
 
-    // Get data URL with image
-    let svgURL = new XMLSerializer().serializeToString(fullFig);
-    let svgBlob = new Blob([svgURL], { type: "image/svg+xml;charset=utf-8" });
-    var url = URL.createObjectURL(svgBlob);
-
-    // Download the image
-    const fakeLink = window.document.createElement('a');
-    fakeLink.style = "display:none";
-    fakeLink.download = `DataDistribution_${omic}`;
-    fakeLink.href = url;
-    document.body.appendChild(fakeLink);
-    fakeLink.click();
-    document.body.removeChild(fakeLink);
-    fakeLink.remove();
-
+    downloadSVG(fullFig, `DataDistribution_${omic}`);
 }
 
 module.exports = downloadImage;

@@ -78,7 +78,17 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
             <Box sx={{ display: 'flex', height: '10vh' }}>
-                <Box sx={{ width: '40%', pt: 1 }}>
+                <Box sx={{ mt: 4, ml: 0 }}>
+                    <IconButton
+                        aria-label="download"
+                        size='small'
+                        onClick={e => downloadTable(filteredFeatures, columns)}
+                        sx={{ opacity: 0.5 }}
+                    >
+                        <DownloadIcon />
+                    </IconButton>
+                </Box>
+                <Box sx={{ width: '40%', pt: 1, ml: 3 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={
@@ -97,16 +107,6 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         />
                     </Box></MyMotion>
                 }
-                <Box sx={{ mt: 4, ml: 3 }}>
-                    <IconButton
-                        aria-label="download"
-                        size='small'
-                        onClick={e => downloadTable(filteredFeatures, columns)}
-                        sx={{ opacity: 0.5 }}
-                    >
-                        <DownloadIcon />
-                    </IconButton>
-                </Box>
             </Box>
             <Box sx={{ mt: 0 }}>
                 {true && <FilterTable data={filteredFeatures} columns={columns} />}

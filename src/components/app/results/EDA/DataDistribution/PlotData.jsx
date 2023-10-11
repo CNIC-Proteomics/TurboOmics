@@ -9,8 +9,6 @@ import MyBoxPlotPlotly from "./MyBoxPlotPlotly";
 import { myPalette } from '@/utils/myPalette';
 import { danfo2RowColJson } from "@/utils/jobDanfoJsonConverter";
 import MyMotion from '@/components/MyMotion';
-import PhotoIcon from '@mui/icons-material/Photo';
-import DownloadIcon from '@mui/icons-material/Download';
 
 export default function PlotData({ fileType, filteredID, groupby, showNorm, histRef, boxRef }) {
 
