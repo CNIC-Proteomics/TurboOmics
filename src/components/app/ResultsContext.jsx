@@ -30,22 +30,29 @@ function resultsReducer(draft, action) {
     console.log(action);
 
     switch (action.type) {
-        case 'set-eda-dd-groupby': {
-            draft.EDA.DD.groupby = action.groupby;
-            break;
-        };
-
         case 'set-eda-dd-norm': {
             draft.EDA.DD.showNorm = action.showNorm;
             break;
         }
 
+        case 'set-eda-dd-groupby': {
+            draft.EDA.DD.groupby = action.groupby;
+            break;
+        };
+
         case 'set-eda-dd-filter': {
-            draft.EDA.DD.filterCol[action.fileType] = action.filterCol
+            draft.EDA.DD.filterCol[action.fileType] = action.filterCol;
+            break;
         }
 
         case 'set-eda-dd-filter-text': {
-            draft.EDA.DD.filterText[action.fileType] = action.filterText
+            draft.EDA.DD.filterText[action.fileType] = action.filterText;
+            break;
+        }
+
+        case 'set-eda-pca-data': {
+            draft.EDA.PCA[action.omic].data = action.data;
+            break;
         }
     }
 }
@@ -55,7 +62,7 @@ const resultsTemplate = {
     'EDA': {
         'DD': { // Data distribution section
             'showNorm': true,
-            'groupby': 'All values',
+            'groupby': { label: 'All values', value: 'All values' },
             'filterCol': {
                 'q2i': 'All features',
                 'm2i': 'All features'
@@ -64,6 +71,15 @@ const resultsTemplate = {
                 'q2i': '',
                 'm2i': ''
             },
+        },
+
+        'PCA': {
+            'q': {
+                data: null // {projections, loadings, explained_variance, anova}
+            }, 
+            'm': {
+                data: null
+            }
         }
     }
 };

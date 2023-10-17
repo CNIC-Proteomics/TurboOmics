@@ -1,6 +1,7 @@
 import { useJob } from '@/components/app/JobContext';
 import { Box, IconButton, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import ImageIcon from '@mui/icons-material/Image';
 
 import React, { useRef } from 'react';
 
@@ -65,7 +66,7 @@ export default function MyScatter({ scatterData, mdataCol, PCA }) {
                         onClick={downloadScatter}
                         sx={{ opacity: 0.5 }}
                     >
-                        <DownloadIcon />
+                        <ImageIcon />
                     </IconButton>
                 </Box>
             </Box>

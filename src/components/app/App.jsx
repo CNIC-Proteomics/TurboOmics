@@ -22,33 +22,33 @@ export default function App() {
         <div>
             <JobProvider>
                 <ResultsProvider>
-                <Menu page={page} setPage={setPage} />
+                    <Menu page={page} setPage={setPage} />
 
-                {
-                    page == 'new-job' &&
-                    <MyMotion>
-                        <NewJob />
-                    </MyMotion>
-                }
+                    {
+                        page == 'new-job' &&
+                        <MyMotion>
+                            <NewJob />
+                        </MyMotion>
+                    }
 
-                {
-                    page == 'create-job' &&
-                    <CreateJobDialog page={page} setPage={setPage} />
-                }
+                    {
+                        page == 'create-job' &&
+                        <CreateJobDialog page={page} setPage={setPage} />
+                    }
 
-                {
-                    page == 'find-job' &&
-                    <MyMotion>
-                        <FindJob setPage={setPage} />
-                    </MyMotion>
-                }
+                    {
+                        page == 'find-job' &&
+                        <MyMotion>
+                            <FindJob setPage={setPage} />
+                        </MyMotion>
+                    }
 
-                {
-                    page == 'results' &&
-                    <MyMotion>
-                        <Results />
-                    </MyMotion>
-                }
+                    {
+                        page == 'results' &&
+                        <MyMotion>
+                            <Results />
+                        </MyMotion>
+                    }
                 </ResultsProvider>
             </JobProvider>
         </div>

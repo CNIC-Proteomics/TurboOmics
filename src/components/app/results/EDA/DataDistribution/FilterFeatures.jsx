@@ -4,11 +4,16 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { MySelect } from './MyFormComponents';
 import FilterTable from './FilterTable';
 import MyMotion from '@/components/MyMotion';
+import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 
 export default function FilterFeatures({ omic, fileType, setFilteredID, updatePlot }) {
 
-    const [filterText, setFilterText] = useState('');
-    const [filterCol, setFilterCol] = useState('All features');
+    const savedFilterText = useResults().EDA.DD.filterText[fileType];
+    const savedFilterCol = useResults().EDA.DD.filterCol[fileType];
+    const dispatchResults = useDispatchResults();
+
+    const [filterText, setFilterText] = useState(savedFilterText);
+    const [filterCol, setFilterCol] = useState(savedFilterCol);
 
     const f2i = useJob().user[fileType];
 
@@ -71,6 +76,12 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
 
         return () => clearTimeout(myTimeout);
     }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
+
+    // Save data
+    useEffect(() => {
+        dispatchResults({ type: 'set-eda-dd-filter', filterCol: filterCol, fileType: fileType });
+        dispatchResults({ type: 'set-eda-dd-filter-text', filterText: filterText, fileType: fileType });
+    }, [filterCol, filterText, fileType])
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>

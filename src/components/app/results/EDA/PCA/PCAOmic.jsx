@@ -1,16 +1,19 @@
 import { useVars } from '@/components/VarsContext'
 import { useJob } from '@/components/app/JobContext'
-import { Box, Typography } from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import TablePvalues from './TablePvalues';
 import MyScatter from './MyScatter';
 import TableLoadings from './TableLoadings';
 import { MaterialReactTable } from 'material-react-table';
+import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 
 
 export default function PCAOmic({ title, omic }) {
 
-    const [selectedPlot, setSelectedPlot] = useState(null);
+    // Data used for plots
+    const dispatchResults = useDispatchResults();
+    const savedData = useResults().EDA.PCA[omic].data;
 
     const [data, setData] = useState({
         projections: null,
@@ -25,17 +28,35 @@ export default function PCAOmic({ title, omic }) {
     const { jobID } = useJob();
     const { API_URL } = useVars();
 
+    const [selectedPlot, setSelectedPlot] = useState(null);
+
     useEffect(() => {
         console.log('Get PCA and ANOVA data');
 
         const fetchData = async () => {
             const res = await fetch(`${API_URL}/get_eda_pca/${jobID}/${omic}`);
-            const resJson = await res.json();
-            console.log(resJson);
-            setData(resJson);
+            const {status, dataPCA} = await res.json();
+            console.log(status);
+            if (dataPCA) {
+                setData(resJson);
+                dispatchResults({ type: 'set-eda-pca-data', data: resJson, omic: omic });
+            }
+            /* 
+            Cambiar para que se envíen consultas al servidor mientras el estado enviado sea
+            waiting. Para error paralizar. Para ok paralizar y mostrar
+            */
+
+            
         }
 
-        fetchData();
+        if (savedData) {
+            console.log('Use saved Data');
+            console.log(savedData);
+            setData(savedData);
+        } else {
+            console.log('Request data to server');
+            fetchData();
+        }
 
     }, [API_URL, jobID, omic]);
 
@@ -114,7 +135,7 @@ export default function PCAOmic({ title, omic }) {
             >
                 {title}
             </Typography>
-            {anova != null &&
+            {anova != null ?
                 <Box sx={{ padding: 1 }}>
                     <TablePvalues
                         data={pvTable}
@@ -131,12 +152,20 @@ export default function PCAOmic({ title, omic }) {
                                     mdataCol={selectedPlot.mdataCol}
                                     PCA={selectedPlot.PCA}
                                 />
-                                <TableLoadings omic={omic} selectedLoadings={selectedLoadings} selectedPCA={selectedPlot.PCA} />
+                                {true && <TableLoadings
+                                    omic={omic}
+                                    selectedLoadings={selectedLoadings}
+                                    selectedPCA={selectedPlot.PCA}
+                                />}
                             </Box>
                             :
                             <Box>Select a pvalue cell to plot values</Box>
                         }
                     </Box>
+                </Box>
+                :
+                <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
+                    <CircularProgress size={100} thickness={2} />
                 </Box>
             }
         </Box>

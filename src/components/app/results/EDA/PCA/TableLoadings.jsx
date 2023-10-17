@@ -7,7 +7,7 @@ import { MaterialReactTable } from 'material-react-table';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import DownloadIcon from '@mui/icons-material/Download';
-
+import GridOnIcon from '@mui/icons-material/GridOn';
 
 export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
@@ -70,7 +70,6 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
         }
 
         filteredFeatures = filteredFeatures.filter(e => e.PCA != undefined);
-        //console.log(filteredFeatures)
 
         return { filteredFeatures, columns }
     }, [selectedLoadings, filterText, filterCol, f2i, selectedPCA]);
@@ -83,9 +82,10 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         aria-label="download"
                         size='small'
                         onClick={e => downloadTable(filteredFeatures, columns)}
-                        sx={{ opacity: 0.5 }}
+                        sx={{ opacity: 0.5, color:'rgb(13,110,253)'}}
+                        variant='danger'
                     >
-                        <DownloadIcon />
+                        <GridOnIcon />
                     </IconButton>
                 </Box>
                 <Box sx={{ width: '40%', pt: 1, ml: 3 }}>
@@ -109,7 +109,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                 }
             </Box>
             <Box sx={{ mt: 0 }}>
-                {true && <FilterTable data={filteredFeatures} columns={columns} />}
+                <FilterTable data={filteredFeatures} columns={columns} />
             </Box>
         </Box>
     )
@@ -134,9 +134,6 @@ const downloadTable = (data, columns) => {
     const csv = generateCsv(csvConfig)(newData);
     download(csvConfig)(csv)
 }
-
-
-
 
 function FilterTable({ columns, data }) {
 

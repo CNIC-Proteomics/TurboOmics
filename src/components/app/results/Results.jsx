@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import { useJob } from '../JobContext';
 import DataDistribution from './EDA/DataDistribution/DataDistribution';
 import PCA from './EDA/PCA/PCA';
+import MyMotion from '@/components/MyMotion';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -42,7 +43,7 @@ function a11yProps(index) {
 }
 
 export default function Results() {
-    const [value, setValue] = useState(0.2);
+    const [value, setValue] = useState(0.1);
     const section = Math.floor(value);
 
     const { jobID } = useJob();
@@ -62,7 +63,7 @@ export default function Results() {
                     //variant="scrollable"
                     value={value}
                     onChange={handleChange}
-                    aria-label="Vertical tabs example"
+                    aria-label="Results Sections Tabs"
                     sx={{ borderRight: 1, borderColor: 'divider', width: '15%' }}
                 >
                     <Tab
@@ -71,8 +72,8 @@ export default function Results() {
                         {...a11yProps(0)}
                         sx={{ mt: 2, p: 0, color: section == 0 ? '#1976d2' : '#00000099' }}
                     />
-                    {section == 0 && <Tab label="DATA DISTRIBUTION" value={0.1} {...a11yProps(1)} sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }} />}
-                    {section == 0 && <Tab label="PCA" value={0.2} {...a11yProps(2)} sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }} />}
+                    {(true || section == 0) && <Tab label="DATA DISTRIBUTION" value={0.1} {...a11yProps(1)} sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }} />}
+                    {(true || section == 0) && <Tab label="PCA" value={0.2} {...a11yProps(2)} sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }} />}
 
                     <Tab label="MULTIOMICS FACTOR ANALYSIS" value={1.1} {...a11yProps(1)} sx={{ mt: 2 }} />
                     <Tab label="COMMUNITY ANALYSIS" value={2.1} {...a11yProps(3)} sx={{ mt: 2 }} />

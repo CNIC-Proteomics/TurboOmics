@@ -10,11 +10,14 @@ import {
     TableHead,
     TableRow,
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
+//import DownloadIcon from '@mui/icons-material/Download';
+import GridOnIcon from '@mui/icons-material/GridOn';
+import ImageIcon from '@mui/icons-material/Image';
 import { CSVLink } from 'react-csv';
+import downloadSVG from '@/utils/downloadSVG';
 
 
-
+const separator = ",";
 const myFontSize = 15;
 const myGridColor = 'rgba(200,200,200,0.5)'
 
@@ -65,6 +68,7 @@ const calculateBackgroundColorExpVar = (value) => {
 
 export default function TablePvalues({ data, rowNames, colNames, expVar, setSelectedPlot }) {
 
+    const pvTableRef = useRef();
     const classes = useStyles();
     const [selectedCell, setSelectedCell] = useState(null);
 
@@ -84,22 +88,22 @@ export default function TablePvalues({ data, rowNames, colNames, expVar, setSele
         csvData = [...csvData, ...outData];
 
         return csvData;
-    })
+    }, [colNames, expVar, data, rowNames])
 
     return (
         <>
-            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 5000 }}>
+            <Box sx={{ height: 0, width: 50, zIndex: 5000, display: 'flex', paddingLeft:0.5 }}>
                 <IconButton
                     aria-label="download"
                     size='small'
-                    onClick={downloadTable}
-                    sx={{ opacity: 0.5 }}
+                    sx={{ opacity: 0.5, position: 'relative', top: -21 }}
                 >
-                    <DownloadIcon />
-                    <CSVLink >Download Here</CSVLink>
+                    <CSVLink data={csvData} filename={"PCA_Anova_pvalues.csv"} separator={separator}>
+                        <GridOnIcon />
+                    </CSVLink>
                 </IconButton>
             </Box>
-            <Grid container>
+            <Grid container ref={pvTableRef}>
                 <Grid item xs={2}>
                     <TableContainer sx={{ margin: 'auto' }}>
                         <Table>

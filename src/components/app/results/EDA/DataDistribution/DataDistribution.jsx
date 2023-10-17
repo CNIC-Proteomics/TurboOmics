@@ -1,13 +1,16 @@
 import { Box, Button, CircularProgress, FormControlLabel, IconButton, Switch, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useJob } from '../../../JobContext';
 import PlotData from './PlotData';
 import { MySwitch, MySelectGroupby } from './MyFormComponents';
 import FilterFeatures from './FilterFeatures';
 import DownloadIcon from '@mui/icons-material/Download';
+import ImageIcon from '@mui/icons-material/Image';
+
 
 import downloadImage from './downloadImage';
+import { useResults, useDispatchResults } from '@/components/app/ResultsContext';
 
 export default function DataDistribution() {
 
@@ -16,15 +19,19 @@ export default function DataDistribution() {
     const mHistRef = useRef();
     const mBoxRef = useRef();
 
+    const savedShowNorm = useResults().EDA.DD.showNorm;
+    const savedGroupby = useResults().EDA.DD.groupby;
+    //const dispatchResults = useDispatchResults();
+
     const [showPlot, setShowPlot] = useState({ 'q': false, 'm': false });
 
     const [filteredID, setFilteredID] = useState({ 'q2i': [], 'm2i': [] });
-    const [showNorm, setShowNorm] = useState(true);
-    const [groupby, setGroupby] = useState({ label: 'All values', value: 'All values' });
+    const [showNorm, setShowNorm] = useState(savedShowNorm);
+    const [groupby, setGroupby] = useState(savedGroupby);
 
     const { mdataType } = useJob();
     let mdataCols = useJob().user.mdata.columns.map(e => ({ label: e, value: e }));
-    mdataCols = mdataCols.filter( e => mdataType[e.value].type == 'categorical' );
+    mdataCols = mdataCols.filter(e => mdataType[e.value].type == 'categorical');
     mdataCols = [{ label: 'All values', value: 'All values' }, ...mdataCols];
 
     const updatePlot = useCallback((omics = ['q', 'm']) => {
@@ -86,9 +93,9 @@ export default function DataDistribution() {
                                 aria-label="download"
                                 size='small'
                                 onClick={e => downloadImage(qHistRef.current, qBoxRef.current, 'Proteomics')}
-                                sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden' }}
+                                sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden', paddingBottom:1 }}
                             >
-                                <DownloadIcon />
+                                <ImageIcon />
                             </IconButton>
                         </Typography>
                         {showPlot['q'] ?
@@ -124,9 +131,9 @@ export default function DataDistribution() {
                                 aria-label="download"
                                 size='small'
                                 onClick={e => downloadImage(mHistRef.current, mBoxRef.current, 'Metabolomics')}
-                                sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden' }}
+                                sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden', paddingBottom:1 }}
                             >
-                                <DownloadIcon />
+                                <ImageIcon />
                             </IconButton>
                         </Typography>
                         {showPlot['m'] ?
