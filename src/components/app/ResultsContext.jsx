@@ -54,6 +54,11 @@ function resultsReducer(draft, action) {
             draft.EDA.PCA[action.omic].data = action.data;
             break;
         }
+
+        case 'set-eda-pca-status': {
+            draft.EDA.PCA[action.omic].status = action.status;
+            break;
+        }
     }
 }
 
@@ -75,10 +80,22 @@ const resultsTemplate = {
 
         'PCA': {
             'q': {
-                data: null // {projections, loadings, explained_variance, anova}
-            }, 
+                data: {
+                    projections: null,
+                    loadings: null,
+                    explained_variance: null,
+                    anova: null
+                }, // {projections, loadings, explained_variance, anova}
+                status: { status: 'waiting' } // status -> {ok, waiting, error}
+            },
             'm': {
-                data: null
+                data: {
+                    projections: null,
+                    loadings: null,
+                    explained_variance: null,
+                    anova: null
+                },
+                status: { status: 'waiting' }
             }
         }
     }

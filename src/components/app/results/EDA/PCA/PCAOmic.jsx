@@ -1,7 +1,7 @@
 import { useVars } from '@/components/VarsContext'
 import { useJob } from '@/components/app/JobContext'
 import { Box, CircularProgress, Typography } from '@mui/material'
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import TablePvalues from './TablePvalues';
 import MyScatter from './MyScatter';
 import TableLoadings from './TableLoadings';
@@ -11,9 +11,13 @@ import { useDispatchResults, useResults } from '@/components/app/ResultsContext'
 
 export default function PCAOmic({ title, omic }) {
 
+    // useRef to store an interval requsting to the server
+    const fetchRef = useRef(null);
+
     // Data used for plots
     const dispatchResults = useDispatchResults();
     const savedData = useResults().EDA.PCA[omic].data;
+    const savedStatus = useResults().EDA.PCA[omic].status;
 
     const [data, setData] = useState({
         projections: null,
@@ -21,6 +25,8 @@ export default function PCAOmic({ title, omic }) {
         explained_variance: null,
         anova: null
     });
+
+    const [status, setStatus] = useState({ status: 'waiting' });
 
     const { projections, loadings, explained_variance, anova } = data;
 
@@ -30,35 +36,43 @@ export default function PCAOmic({ title, omic }) {
 
     const [selectedPlot, setSelectedPlot] = useState(null);
 
+    const fetchData = useCallback(async () => {
+        console.log(`Fetching data`);
+        const res = await fetch(`${API_URL}/get_eda_pca/${jobID}/${omic}`);
+        const { resStatus, dataPCA } = await res.json();
+        console.log(resStatus);
+        if (resStatus.status != 'waiting') {
+            setData(dataPCA);
+            setStatus(resStatus);
+            dispatchResults({ type: 'set-eda-pca-data', data: dataPCA, omic: omic });
+            dispatchResults({ type: 'set-eda-pca-status', status: resStatus, omic: omic });
+        }
+    }, [API_URL, jobID, omic])
+
     useEffect(() => {
-        console.log('Get PCA and ANOVA data');
+        console.log('useEffect to get data');
 
-        const fetchData = async () => {
-            const res = await fetch(`${API_URL}/get_eda_pca/${jobID}/${omic}`);
-            const {status, dataPCA} = await res.json();
-            console.log(status);
-            if (dataPCA) {
-                setData(resJson);
-                dispatchResults({ type: 'set-eda-pca-data', data: resJson, omic: omic });
-            }
-            /* 
-            Cambiar para que se envíen consultas al servidor mientras el estado enviado sea
-            waiting. Para error paralizar. Para ok paralizar y mostrar
-            */
-
-            
-        }
-
-        if (savedData) {
-            console.log('Use saved Data');
-            console.log(savedData);
+        // check if it is saved
+        if (savedStatus.status == 'ok') {
+            console.log('Using saved data');
+            setStatus(savedStatus);
             setData(savedData);
-        } else {
-            console.log('Request data to server');
-            fetchData();
+            return;
+
+        } else { // get from server
+            console.log('Get data from server');
+            fetchRef.current = setInterval(fetchData, 2000);
+            return () => clearInterval(fetchRef.current);
         }
 
-    }, [API_URL, jobID, omic]);
+    }, [fetchRef, fetchData, savedStatus, savedData]);
+
+    useEffect(() => {
+        console.log(`Status changed: ${JSON.stringify(status)}`);
+        if (status.status != 'waiting') {
+            clearInterval(fetchRef.current);
+        }
+    }, [status])
 
     // Get array of arrays with pvalues
 
@@ -135,38 +149,51 @@ export default function PCAOmic({ title, omic }) {
             >
                 {title}
             </Typography>
-            {anova != null ?
-                <Box sx={{ padding: 1 }}>
-                    <TablePvalues
-                        data={pvTable}
-                        rowNames={pvRowNames}
-                        colNames={pvColNames}
-                        expVar={pvExpVar}
-                        setSelectedPlot={setSelectedPlot}
-                    />
-                    <Box sx={{ marginTop: 5, textAlign: 'center' }}>
-                        {scatterData ?
-                            <Box>
-                                <MyScatter
-                                    scatterData={scatterData}
-                                    mdataCol={selectedPlot.mdataCol}
-                                    PCA={selectedPlot.PCA}
-                                />
-                                {true && <TableLoadings
-                                    omic={omic}
-                                    selectedLoadings={selectedLoadings}
-                                    selectedPCA={selectedPlot.PCA}
-                                />}
+            {(() => {
+                if (status.status == 'ok') {
+                    return (
+                        <Box sx={{ padding: 1 }}>
+                            <TablePvalues
+                                data={pvTable}
+                                rowNames={pvRowNames}
+                                colNames={pvColNames}
+                                expVar={pvExpVar}
+                                setSelectedPlot={setSelectedPlot}
+                            />
+                            <Box sx={{ marginTop: 5, textAlign: 'center' }}>
+                                {scatterData ?
+                                    <Box>
+                                        <MyScatter
+                                            scatterData={scatterData}
+                                            mdataCol={selectedPlot.mdataCol}
+                                            PCA={selectedPlot.PCA}
+                                        />
+                                        {true && <TableLoadings
+                                            omic={omic}
+                                            selectedLoadings={selectedLoadings}
+                                            selectedPCA={selectedPlot.PCA}
+                                        />}
+                                    </Box>
+                                    :
+                                    <Box>Select a pvalue cell to plot values</Box>
+                                }
                             </Box>
-                            :
-                            <Box>Select a pvalue cell to plot values</Box>
-                        }
-                    </Box>
-                </Box>
-                :
-                <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
-                    <CircularProgress size={100} thickness={2} />
-                </Box>
+                        </Box>
+                    )
+                } else if (status.status == 'waiting') {
+                    return (
+                        <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
+                            <CircularProgress size={100} thickness={2} />
+                        </Box>
+                    )
+                } else if (status.status == 'error') {
+                    return (
+                        <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
+                            An error occurred
+                        </Box>
+                    )
+                }
+            })()
             }
         </Box>
     )
