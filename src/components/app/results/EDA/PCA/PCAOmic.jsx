@@ -47,7 +47,7 @@ export default function PCAOmic({ title, omic }) {
             dispatchResults({ type: 'set-eda-pca-data', data: dataPCA, omic: omic });
             dispatchResults({ type: 'set-eda-pca-status', status: resStatus, omic: omic });
         }
-    }, [API_URL, jobID, omic])
+    }, [API_URL, jobID, omic, dispatchResults])
 
     useEffect(() => {
         console.log('useEffect to get data');

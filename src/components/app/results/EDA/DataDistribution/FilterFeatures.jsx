@@ -81,7 +81,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
     useEffect(() => {
         dispatchResults({ type: 'set-eda-dd-filter', filterCol: filterCol, fileType: fileType });
         dispatchResults({ type: 'set-eda-dd-filter-text', filterText: filterText, fileType: fileType });
-    }, [filterCol, filterText, fileType])
+    }, [filterCol, filterText, fileType, dispatchResults])
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>

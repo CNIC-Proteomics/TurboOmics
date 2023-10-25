@@ -19,7 +19,7 @@ export function MySwitch({ handleSwitch, label }) {
     // Save showNorm state to be restored
     useEffect(() => {
         dispatchResults({ type: 'set-eda-dd-norm', showNorm: myChecked });
-    }, [myChecked])
+    }, [myChecked, dispatchResults])
 
     return (
         <FormControlLabel
@@ -49,7 +49,7 @@ export function MySelectGroupby({ options, handleSelect, label }) {
     // Save showNorm state to be restored
     useEffect(() => {
         dispatchResults({ type: 'set-eda-dd-groupby', groupby: groupby });
-    }, [groupby])
+    }, [groupby, dispatchResults])
 
 
     return (
