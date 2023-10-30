@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
 import { styled } from '@mui/material';
 
@@ -31,24 +31,24 @@ export default function MenuOption({ children, text, id, setPage, page }) {
             {resultsDisable ?
                 <Card
                     sx={style}>
-                    <div className='py-2'>
+                    <Box sx={{ py: 1 }}>
                         {children}
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                         <Typography gutterBottom variant="h7" component="div">{text}</Typography>
-                    </div>
+                    </Box>
                 </Card>
                 :
                 <StyledCard
                     sx={style}
                     onClick={() => setPage(id)}
                 >
-                    <div className='py-2'>
+                    <Box sx={{ py: 1 }}>
                         {children}
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                         <Typography gutterBottom variant="h7" component="div">{text}</Typography>
-                    </div>
+                    </Box>
                 </StyledCard>
             }
         </>

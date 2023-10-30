@@ -9,31 +9,50 @@ import Menu from './menu/Menu';
 import NewJob from './newJob/NewJob'
 import FindJob from './findJob/FindJob';
 import Results from './results/Results'
-import CreateJobDialog from './createJob/CreateJobDialog';
 import { ResultsProvider } from './ResultsContext';
+import AskAnnotationsDialog from './newJob/createJob/AskAnnotationsDialog';
+import CreateJobWaiting from './newJob/createJob/CreateJobWaiting';
+import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsDialog';
 
 
 
 export default function App() {
 
-    const [page, setPage] = useState('new-job'); // "new-job", "create-job", "find-job", "results"
+    const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
+    const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", 'annotations-params"
 
     return (
         <div>
             <JobProvider>
                 <ResultsProvider>
-                    <Menu page={page} setPage={setPage} />
+                    <Menu page={page} setPage={setPage} setCreatingJob={setCreatingJob} />
 
                     {
                         page == 'new-job' &&
                         <MyMotion>
                             <NewJob />
+                            {creatingJob == 'waiting' &&
+                                <CreateJobWaiting creatingJob={creatingJob} />
+                            }
+                            {creatingJob == 'ask-annotations' &&
+                                <AskAnnotationsDialog
+                                    creatingJob={creatingJob}
+                                    setCreatingJob={setCreatingJob}
+                                    setPage={setPage}
+                                />
+                            }
+                            {creatingJob == 'annotations-params' &&
+                                <AnnotationsParamsDialog
+                                    creatingJob={creatingJob}
+                                    setCreatingJob={setCreatingJob}
+                                />
+                            }
                         </MyMotion>
                     }
 
                     {
-                        page == 'create-job' &&
-                        <CreateJobDialog page={page} setPage={setPage} />
+                        //page == 'create-job' &&
+                        //<CreateJobDialog page={page} setPage={setPage} />
                     }
 
                     {

@@ -1,9 +1,11 @@
 import { useVars } from '@/components/VarsContext'
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import React from 'react'
 import { useDispatchJob } from '../JobContext'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
-export default function LoadSampleBtn({ children }) {
+
+export default function LoadSampleBtn() {
 
     const { API_URL } = useVars();
     const dispatchJob = useDispatchJob();
@@ -27,14 +29,14 @@ export default function LoadSampleBtn({ children }) {
     }
 
     return (
-        <div className='align-self-center' style={{ position: 'absolute', left: '10%' }}>
+        <Box sx={{ alignSelf: 'center', position: 'absolute', left: '10%' }}>
             <Button
                 variant='outlined'
-                startIcon={children}
+                startIcon={<CloudDownloadIcon />}
                 onClick={handleClick}
             >
                 Load Sample Data
             </Button>
-        </div>
+        </Box>
     )
 }

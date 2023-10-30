@@ -7,7 +7,11 @@ export function danfo2Json(job) {
             'mdata': dfd.toJSON(job.user.mdata),
             'q2i': dfd.toJSON(job.user.q2i),
             'm2i': dfd.toJSON(job.user.m2i)
-        }
+        },
+        "norm": {
+            "xq": null,
+            "xm": null
+        },
     }
 }
 

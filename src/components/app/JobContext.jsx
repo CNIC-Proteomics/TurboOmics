@@ -146,11 +146,11 @@ const jobTemplate = {
         "q2i": null,
         "m2i": null
     },
-    "norm": { // Feature-center and scaled Danfo dataframes
+    "norm": { // Feature-center, scaled and imputed Danfo dataframes
         "xq": null,
         "xm": null
     },
-    "mdataType": {}, // {mdata_columns} --> {Categorical, Numeric}
+    "mdataType": {}, // {mdata_columns} --> {categorical, numeric}
     "annotations": {
         "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)
         "column": null
