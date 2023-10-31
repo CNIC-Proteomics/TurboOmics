@@ -7,7 +7,7 @@ import { useJob } from '../../JobContext';
 
 export default function CreateJobWaiting({ creatingJob }) {
 
-    const [log, setLog] = useState([{}]);
+    const [log, setLog] = useState([{msg:'Sending data to server'}]);
     const logRef = useRef();
     const { API_URL } = useVars();
     const { jobID } = useJob();
