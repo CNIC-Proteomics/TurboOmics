@@ -29,10 +29,11 @@ export default function NewJob() {
                 <DragFile title="Metabolomic Quantifications" fileType="xm" />
             </div>
 
-            <div className='py-2 d-flex justify-content-between'>
+            <Box sx={{py:1, display:'flex', justifyContent:'space-around'}}>
                 <PlotMV fileType='xq' omic='Proteomic' />
+                <Box sx={{width:'33%'}}></Box>
                 <PlotMV fileType='xm' omic='Metabolomic' />
-            </div>
+            </Box>
         </Box>
     )
 }

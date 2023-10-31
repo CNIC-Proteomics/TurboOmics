@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Typography } from "@mui/material";
+import { Card, Typography, Box } from "@mui/material";
 import { FileUploader } from "react-drag-drop-files";
 
 import { useDispatchJob, useJob } from "../JobContext";
@@ -28,15 +28,17 @@ export default function DragFile({ title, fileType }) {
 
     return (
         <div className="DragFile mx-2 text-center" style={{ width: '30%' }}>
-            <Card variant='outlined' className={`px-4 ${fileName && "border-dark"}`} style={{transition: "all 1s ease"}} >
+            <Card sx={{ transition: "all 1s ease", backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)' }} >
                 <Typography variant="h6" className="pt-2">{title}</Typography>
                 <DialogHelp title={title} />
-                <FileUploader
-                    multiple={false}
-                    handleChange={handleChange}
-                    name={fileType}
-                    types={fileFormat}
-                />
+                <Box sx={{ width: 400, margin: 'auto' }}>
+                    <FileUploader
+                        multiple={false}
+                        handleChange={handleChange}
+                        name={fileType}
+                        types={fileFormat}
+                    />
+                </Box>
                 <p className="mt-3">{fileName ? `File name: ${fileName}` : "no files uploaded yet"}</p>
             </Card>
         </div>

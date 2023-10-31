@@ -29,7 +29,7 @@ export function JobProvider({ children }) {
 
 function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
-    //console.log(action);
+    console.log(action);
     switch (action.type) {
         case 'find-job': {
             console.log('findJob')
@@ -88,6 +88,16 @@ function jobReducer(draft, action) {
             draft.user[action.fileType] = df;
             draft.userFileNames[action.fileType] = action.userFileName;
             draft.index[action.fileType] = df.index;
+            break;
+        }
+
+        case 'set-log': {
+            draft.results.PRE.log[action.fileType] = action.checked;
+            break;
+        }
+
+        case 'set-scale': {
+            draft.results.PRE.scale[action.fileType] = action.checked;
             break;
         }
 
@@ -157,6 +167,14 @@ const jobTemplate = {
     },
     "results": {
         "PRE": { // Results computed when user upload the files
+            'log': { // log transformation
+                'xq': false,
+                'xm': false
+            },
+            'scale': { // center and scale
+                'xq': true,
+                'xm': true
+            },
             'MV': { // Missing values --> Array of objects used to plot graph
                 'xq': null, // [{thr: x, nFeatures: y}, ...]
                 'xm': null
