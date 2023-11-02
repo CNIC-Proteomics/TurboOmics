@@ -62,10 +62,10 @@ export default function DataDistribution() {
                 direction='row'
                 justifyContent='center'
                 alignItems='center'
-                sx={{ mb: 3, mt: 0 }}
+                sx={{ mb: 8, mt: 0 }}
             >
-                <Grid item xs={2}>
-                    <MySwitch handleSwitch={handleSwitch} label="Normalized" />
+                <Grid item xs={3} sx={{pt:3}}>
+                    <MySwitch handleSwitch={handleSwitch} label="Centered & Scaled" />
                 </Grid>
                 <Grid item xs={3}>
                     <MySelectGroupby

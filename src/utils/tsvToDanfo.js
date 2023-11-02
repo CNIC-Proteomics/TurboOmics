@@ -20,7 +20,7 @@ export function tsvToDanfo(tsvString, sep = '\t') {
             if (values.length === headers.length) {
                 const record = {};
                 for (let j = 0; j < headers.length; j++) {
-                    record[headers[j]] = NA_values.includes(values[j]) ? undefined : values[j];
+                    record[headers[j]] = NA_values.includes(values[j]) ? null : values[j];
                 }
                 data.push(record);
             } else {

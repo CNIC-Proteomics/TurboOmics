@@ -92,7 +92,11 @@ function jobReducer(draft, action) {
         }
 
         case 'set-log': {
-            draft.results.PRE.log[action.fileType] = action.checked;
+            if (draft.user[action.fileType].min().min() > 0) {
+                draft.results.PRE.log[action.fileType] = action.checked;
+            } else {
+                alert('Logarithm cannot be calculated due to the presence of invalid values (<=0)');
+            }
             break;
         }
 

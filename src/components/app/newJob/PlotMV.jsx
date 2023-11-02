@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, FormControlLabel, MenuItem, Switch, TextField, Typography } from "@mui/material";
 import Slider from '@mui/material/Slider';
 
@@ -16,10 +16,10 @@ const MVmethod = [
         value: 'Minimum',
         label: 'Minimum',
     },
-    {
+    /*{
         value: 'RF',
         label: 'RF'
-    },
+    },*/
     {
         value: 'Mean',
         label: 'Mean',
@@ -64,19 +64,19 @@ export default function PlotMV({ fileType, omic }) {
 
     return (
         <Box sx={{ width: "33%" }}>
-            <Typography variant='h6' sx={{ textAlign:'center'}}>Apply:</Typography>
+            <Typography variant='h6' sx={{ textAlign: 'center' }}>Apply:</Typography>
             <MySwitch actionType='set-log' fileType={fileType} myChecked={myLog} label={'Log Transformation'} />
             <MySwitch actionType='set-scale' fileType={fileType} myChecked={myScale} label={'Center & Scale'} />
 
             {xTable.isNa().sum({ axis: 0 }).sum() == 0 ?
                 <>
-                    <Box>
+                    <Box sx={{ mt: 3 }}>
                         <Typography variant='h6' sx={{ textAlign: 'center' }}>No missing value detected</Typography>
                     </Box>
                 </>
                 :
                 <>
-                    <Box sx={{ textAlign: 'center', overflow: 'auto' }}>
+                    <Box sx={{ mt: 3, textAlign: 'center', overflow: 'auto' }}>
                         <Typography variant='h6'>{omic} Features vs MV Threshold</Typography>
                         <Box sx={{ width: 550, margin: 'auto' }} >
                             <LineChart
@@ -148,16 +148,19 @@ function DiscreteSlider({ thr, setThr }) {
 }
 
 const MySwitch = ({ actionType, fileType, myChecked, label }) => {
-    const [checked, setChecked] = useState(myChecked)
+    //const [checked, setChecked] = useState(myChecked)
     const dispatchJob = useDispatchJob();
+
+    // 
+
     return (
-        <Box sx={{ margin: 'auto', width: 275, pl:5 }}>
+        <Box sx={{ margin: 'auto', width: 275, pl: 5 }}>
             <FormControlLabel
                 control={
                     <Switch
-                        checked={checked}
+                        checked={myChecked}
                         onChange={e => {
-                            setChecked(e.target.checked);
+                            //setChecked(e.target.checked);
                             dispatchJob({ type: actionType, fileType: fileType, checked: e.target.checked });
                         }}
                     />
