@@ -56,7 +56,7 @@ export default function Results() {
         <>
             <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
             <Box
-                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: "80vh" }}
+                sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper', height: "80vh" }}
             >
                 <Tabs
                     orientation="vertical"

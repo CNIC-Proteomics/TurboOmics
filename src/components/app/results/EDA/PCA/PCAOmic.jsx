@@ -13,26 +13,20 @@ export default function PCAOmic({ title, omic }) {
 
     // useRef to store an interval requsting to the server
     const fetchRef = useRef(null);
+    const { API_URL } = useVars();
 
     // Data used for plots
     const dispatchResults = useDispatchResults();
-    const savedData = useResults().EDA.PCA[omic].data;
     const savedStatus = useResults().EDA.PCA[omic].status;
+    const savedData = useResults().EDA.PCA[omic].data;
 
-    const [data, setData] = useState({
-        projections: null,
-        loadings: null,
-        explained_variance: null,
-        anova: null
-    });
-
-    const [status, setStatus] = useState({ status: 'waiting' });
+    const [status, setStatus] = useState(savedStatus);
+    const [data, setData] = useState(savedData);
 
     const { projections, loadings, explained_variance, anova } = data;
 
     const { mdata } = useJob().user;
     const { jobID } = useJob();
-    const { API_URL } = useVars();
 
     const [selectedPlot, setSelectedPlot] = useState(null);
 
@@ -42,37 +36,25 @@ export default function PCAOmic({ title, omic }) {
         const { resStatus, dataPCA } = await res.json();
         console.log(resStatus);
         if (resStatus.status != 'waiting') {
+            console.log(`Status changed: ${JSON.stringify(status)}`);
             setData(dataPCA);
             setStatus(resStatus);
             dispatchResults({ type: 'set-eda-pca-data', data: dataPCA, omic: omic });
             dispatchResults({ type: 'set-eda-pca-status', status: resStatus, omic: omic });
+            clearInterval(fetchRef.current);
         }
     }, [API_URL, jobID, omic, dispatchResults])
 
     useEffect(() => {
         console.log('useEffect to get data');
 
-        // check if it is saved
-        if (savedStatus.status == 'ok') {
-            console.log('Using saved data');
-            setStatus(savedStatus);
-            setData(savedData);
-            return;
-
-        } else { // get from server
+        if (status.status == 'waiting') {
             console.log('Get data from server');
             fetchRef.current = setInterval(fetchData, 2000);
-            return () => clearInterval(fetchRef.current);
+            return () => clearInterval(fetchRef.current)
         }
 
-    }, [fetchRef, fetchData, savedStatus, savedData]);
-
-    useEffect(() => {
-        console.log(`Status changed: ${JSON.stringify(status)}`);
-        if (status.status != 'waiting') {
-            clearInterval(fetchRef.current);
-        }
-    }, [status])
+    }, [fetchRef, fetchData]);//, savedStatus, savedData]);
 
     // Get array of arrays with pvalues
 
@@ -168,11 +150,11 @@ export default function PCAOmic({ title, omic }) {
                                             mdataCol={selectedPlot.mdataCol}
                                             PCA={selectedPlot.PCA}
                                         />
-                                        {true && <TableLoadings
+                                        <TableLoadings
                                             omic={omic}
                                             selectedLoadings={selectedLoadings}
                                             selectedPCA={selectedPlot.PCA}
-                                        />}
+                                        />
                                     </Box>
                                     :
                                     <Box>Select a pvalue cell to plot values</Box>

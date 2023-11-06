@@ -58,7 +58,6 @@ export default function MyScatter({ scatterData, mdataCol, PCA }) {
     return (
         <Box>
             <Box sx={{ height: 0 }}>
-
                 <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 5000 }}>
                     <IconButton
                         aria-label="download"

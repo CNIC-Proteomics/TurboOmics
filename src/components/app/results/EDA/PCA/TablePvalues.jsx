@@ -56,7 +56,7 @@ const calculateBackgroundColor = (value) => {
     let red = value * 10 * 255;
     let green = 200 + value * 550;
     let blue = value * 10 * 255;
-    return { backgroundColor: `rgba(${red},${green},${blue}, 0.5)` };
+    return { backgroundColor: value < 0.1 ? `rgba(${red},${green},${blue}, 0.5)` : `rgba(255,255,255,0.5)` };
 };
 
 const calculateBackgroundColorExpVar = (value) => {
@@ -68,7 +68,6 @@ const calculateBackgroundColorExpVar = (value) => {
 
 export default function TablePvalues({ data, rowNames, colNames, expVar, setSelectedPlot }) {
 
-    const pvTableRef = useRef();
     const classes = useStyles();
     const [selectedCell, setSelectedCell] = useState(null);
 
@@ -92,7 +91,7 @@ export default function TablePvalues({ data, rowNames, colNames, expVar, setSele
 
     return (
         <>
-            <Box sx={{ height: 0, width: 50, zIndex: 5000, display: 'flex', paddingLeft:0.5 }}>
+            <Box sx={{ height: 0, width: 50, zIndex: 5000, display: 'flex', paddingLeft: 0.5 }}>
                 <IconButton
                     aria-label="download"
                     size='small'
@@ -103,7 +102,7 @@ export default function TablePvalues({ data, rowNames, colNames, expVar, setSele
                     </CSVLink>
                 </IconButton>
             </Box>
-            <Grid container ref={pvTableRef}>
+            <Grid container>
                 <Grid item xs={2}>
                     <TableContainer sx={{ margin: 'auto' }}>
                         <Table>
