@@ -31,23 +31,29 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                 header: '',
                 size: 100,
             },
-            {
-                accessorKey: 'PCA',
-                header: `Loadings PCA${selectedPCA}`,
+            ...selectedPCA.map((e, i) => ({
+                accessorKey: `PCA${i}`,
+                header: `Loadings PCA${e}`,
                 size: 100
-            }
+            }))
         ]
 
         if (f2i.columns.includes(filterCol)) {
 
             filteredFeatures = f2i.column(filterCol);
             filteredFeatures = filteredFeatures.values.map(
-                (value, i) => ({
-                    ID: filteredFeatures.index[i],
-                    mdataValue: value,
-                    PCA: selectedLoadings[filteredFeatures.index[i]]
-                })
-            )
+                (value, i) => {
+                    if (selectedLoadings[filteredFeatures.index[i]] == undefined) return null
+                    return {
+                        ID: filteredFeatures.index[i],
+                        mdataValue: value,
+                        ...selectedLoadings[filteredFeatures.index[i]].reduce(
+                            (prev, curr, i) => ({ ...prev, [`PCA${i}`]: curr }),
+                            { 'PCA0': selectedLoadings[filteredFeatures.index[i]][0] })
+                        //PCA: selectedLoadings[filteredFeatures.index[i]]
+                    }
+                }
+            ).filter(e => e != null)
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
@@ -59,18 +65,20 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
             columns[1].header = filterCol
         } else {
-            filteredFeatures = f2i.index
-            filteredFeatures = filteredFeatures.map(
+            filteredFeatures = Object.keys(selectedLoadings).map(
                 (value, i) => ({
                     ID: value,
                     mdataValue: '',
-                    PCA: selectedLoadings[value]
+                    ...selectedLoadings[value].reduce(
+                        (prev, curr, i) => ({ ...prev, [`PCA${i}`]: curr }),
+                        { 'PCA0': selectedLoadings[value][0] }
+                    )
+                    //PCA: selectedLoadings[value]
                 })
             )
         }
 
-        filteredFeatures = filteredFeatures.filter(e => e.PCA != undefined);
-
+        //filteredFeatures = filteredFeatures.filter(e => e.PCA != undefined);
         return { filteredFeatures, columns }
     }, [selectedLoadings, filterText, filterCol, f2i, selectedPCA]);
 
@@ -82,7 +90,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         aria-label="download"
                         size='small'
                         onClick={e => downloadTable(filteredFeatures, columns)}
-                        sx={{ opacity: 0.5, color:'rgb(13,110,253)'}}
+                        sx={{ opacity: 0.5, color: 'rgb(13,110,253)' }}
                         variant='danger'
                     >
                         <GridOnIcon />
@@ -162,7 +170,7 @@ function FilterTable({ columns, data }) {
     return (
         <MyMotion>
             <div style={{ opacity: 0.9, width: "100%", margin: 'auto' }}>
-                {true && <MaterialReactTable
+                <MaterialReactTable
                     columns={columns}
                     data={data} //10,000 rows
                     enableBottomToolbar={false}
@@ -184,7 +192,7 @@ function FilterTable({ columns, data }) {
                     rowVirtualizerInstanceRef={rowVirtualizerInstanceRef} //optional
                     rowVirtualizerProps={{ overscan: 1 }} //optionally customize the row virtualizer
                     columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
-                />}
+                />
             </div>
         </MyMotion>
     );

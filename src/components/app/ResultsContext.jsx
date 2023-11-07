@@ -86,7 +86,9 @@ const resultsTemplate = {
                     explained_variance: null,
                     anova: null
                 }, // {projections, loadings, explained_variance, anova}
-                status: { status: 'waiting' } // status -> {ok, waiting, error}
+                status: { status: 'waiting' }, // status -> {ok, waiting, error}
+                //selectedPlot: null,
+                //selectedCell: null
             },
             'm': {
                 data: {
