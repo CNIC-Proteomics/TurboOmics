@@ -15,30 +15,31 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import ImageIcon from '@mui/icons-material/Image';
 import { CSVLink } from 'react-csv';
 import downloadSVG from '@/utils/downloadSVG';
+import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 
 
 const separator = ",";
 const myFontSize = 15;
 const myGridColor = 'rgba(200,200,200,0.5)'
 
-const useStyles = () => ({
+const useStyles = (scatterMode) => ({
     cell: {
         transition: 'background-color 0.3s, border-color 0.3s',
         border: `1px solid ${myGridColor}`,
-        cursor: 'pointer',
+        cursor: scatterMode == '1D' ? 'pointer' : '',
         //width: 10,
         padding: 0.5,
         fontSize: myFontSize,
         textAlign: 'center',
         userSelect: 'none',
         '&:hover': {
-            border: '1px solid rgba(50,50,50,1)',
+            border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
         },
     },
     selectedCell: {
-        border: '1px solid rgba(20,20,20,1)', // Aumenta el ancho del borde al seleccionar
+        border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
         '&:hover': {
-            border: '1px solid rgba(20,20,20,1)',
+            border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
         },
     },
 })
@@ -66,14 +67,26 @@ const calculateBackgroundColorExpVar = (value) => {
     return { backgroundColor: `rgba(${red},${green},${blue}, 0.8)` };
 };
 
-export default function TablePvalues({ data, rowNames, colNames, expVar, setSelectedPlot }) {
+export default function TablePvalues({ omic, data, rowNames, colNames, expVar, setSelectedPlot, scatterMode }) {
 
-    const classes = useStyles();
-    const [selectedCell, setSelectedCell] = useState(null);
+    const savedSelectedCell = useResults().EDA.PCA[omic].displayOpts.selectedCell;
+    const dispatchResults = useDispatchResults();
+    const classes = useStyles(scatterMode);
+    const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
 
     const handleCellClick = (rowIndex, colIndex) => {
+        if (scatterMode == '2D') return
         setSelectedCell({ rowIndex, colIndex });
         setSelectedPlot({ mdataCol: rowNames[rowIndex], PCA: colNames[colIndex] });
+        dispatchResults({
+            omic: omic,
+            type: 'set-selected-plot-cell',
+            rowIndex: rowIndex,
+            colIndex: colIndex,
+            mdataCol: rowNames[rowIndex],
+            PCA: colNames[colIndex]
+        })
+
         console.log(`Plot scatter: PCA ${colNames[colIndex]} vs ${rowNames[rowIndex]}`)
     };
 

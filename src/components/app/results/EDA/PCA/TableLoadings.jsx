@@ -8,11 +8,14 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import DownloadIcon from '@mui/icons-material/Download';
 import GridOnIcon from '@mui/icons-material/GridOn';
+import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 
 export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
+    const dispatchResults = useDispatchResults();
+    const { displayOpts } = useResults().EDA.PCA[omic];
     const [filterText, setFilterText] = useState('');
-    const [filterCol, setFilterCol] = useState('All features');
+    const [filterCol, setFilterCol] = useState(displayOpts.filterCol);
 
     const f2i = useJob().user[`${omic}2i`];
 
@@ -29,7 +32,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
             {
                 accessorKey: 'mdataValue',
                 header: '',
-                size: 100,
+                size: 10,
             },
             ...selectedPCA.map((e, i) => ({
                 accessorKey: `PCA${i}`,
@@ -50,7 +53,6 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         ...selectedLoadings[filteredFeatures.index[i]].reduce(
                             (prev, curr, i) => ({ ...prev, [`PCA${i}`]: curr }),
                             { 'PCA0': selectedLoadings[filteredFeatures.index[i]][0] })
-                        //PCA: selectedLoadings[filteredFeatures.index[i]]
                     }
                 }
             ).filter(e => e != null)
@@ -63,7 +65,8 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                 }
             );
 
-            columns[1].header = filterCol
+            columns[1].header = filterCol;
+            columns[1].size = 100;
         } else {
             filteredFeatures = Object.keys(selectedLoadings).map(
                 (value, i) => ({
@@ -99,9 +102,10 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                 <Box sx={{ width: '40%', pt: 1, ml: 3 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
-                        onChange={
-                            e => setFilterCol(e.value)
-                        }
+                        onChange={e => {
+                            setFilterCol(e.value);
+                            dispatchResults({type: 'set-filter-col', value:e.value, omic})
+                        }}
                         value={{ label: filterCol, value: filterCol }}
                     />
                 </Box>
@@ -111,7 +115,11 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                             id="standard-name"
                             placeholder='Filter text'
                             value={filterText}
-                            onChange={e => setFilterText(e.target.value)}
+                            onChange={e => {
+                                setFilterText(e.target.value);
+                                //dispatchResults({type: 'set-filter-text', value:e.target.value, omic})
+
+                            }}
                         />
                     </Box></MyMotion>
                 }

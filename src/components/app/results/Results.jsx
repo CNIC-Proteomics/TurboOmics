@@ -7,7 +7,7 @@ import Box from '@mui/material/Box';
 import { useJob } from '../JobContext';
 import DataDistribution from './EDA/DataDistribution/DataDistribution';
 import PCA from './EDA/PCA/PCA';
-import MyMotion from '@/components/MyMotion';
+import { useDispatchResults, useResults } from '../ResultsContext';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -43,13 +43,18 @@ function a11yProps(index) {
 }
 
 export default function Results() {
-    const [value, setValue] = useState(0.1);
+
+    const { tabValue } = useResults()
+    const dispatchResults = useDispatchResults();
+
+    const [value, setValue] = useState(tabValue);
     const section = Math.floor(value);
 
     const { jobID } = useJob();
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        dispatchResults({type: 'set-tab-value', value: newValue});
     };
 
     return (

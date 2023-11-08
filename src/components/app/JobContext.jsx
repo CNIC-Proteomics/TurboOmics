@@ -81,6 +81,16 @@ function jobReducer(draft, action) {
                         levels = levels.filter(e => e != null);
                         draft.mdataType[columnName].nlevels = levels.length;
                         draft.mdataType[columnName].levels = levels;
+
+                        draft.mdataType[columnName].level2id = {}
+                        levels.map(e => {draft.mdataType[columnName].level2id[e] = []})
+                        
+                        let myCol = df.column(columnName);
+                        myCol.index.map((myID, i) => {
+                            if (levels.includes(myCol.values[i])) {
+                                draft.mdataType[columnName].level2id[myCol.values[i]].push(myID);
+                            }
+                        });
                     }
                 })
             }

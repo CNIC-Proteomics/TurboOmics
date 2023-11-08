@@ -6,6 +6,7 @@ import generateIdentifier from '@/utils/generateIdentifier';
 import { json2Danfo, danfo2Json } from '@/utils/jobDanfoJsonConverter';
 import { useDispatchJob, useJob } from '../JobContext';
 import { useVars } from '@/components/VarsContext';
+import { useDispatchResults } from '../ResultsContext';
 
 const StyledCard = styled(Card)(({ theme }) => ({
     transition: "transform 0.15s ease-in-out, background 0.15s",
@@ -16,6 +17,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 export default function CreateJobBtn({ setCreatingJob }) {
 
     const dispatchJob = useDispatchJob();
+    const dispatchResults = useDispatchResults();
     const job = useJob();
     const { DEV_MODE, API_URL } = useVars();
 
@@ -48,6 +50,8 @@ export default function CreateJobBtn({ setCreatingJob }) {
             type: 'set-job-context',
             jobContext: newJob
         });
+
+        dispatchResults({type:'reset-results'});
 
         // Finish loading state
         setCreatingJob('ask-annotations');

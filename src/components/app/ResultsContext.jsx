@@ -30,6 +30,13 @@ function resultsReducer(draft, action) {
     console.log(action);
 
     switch (action.type) {
+        case 'reset-results': {
+            return resultsTemplate;
+        }
+        case 'set-tab-value': {
+            draft.tabValue = action.value;
+            break;
+        }
         case 'set-eda-dd-norm': {
             draft.EDA.DD.showNorm = action.showNorm;
             break;
@@ -59,11 +66,39 @@ function resultsReducer(draft, action) {
             draft.EDA.PCA[action.omic].status = action.status;
             break;
         }
+
+        case 'set-scatter-mode': {
+            draft.EDA.PCA[action.omic].displayOpts.scatterMode = action.mode;
+            break;
+        }
+
+        case 'set-selected-plot-cell': {
+            draft.EDA.PCA[action.omic].displayOpts.selectedCell = {
+                rowIndex: action.rowIndex,
+                colIndex: action.colIndex
+            }
+            draft.EDA.PCA[action.omic].displayOpts.selectedPlot = {
+                mdataCol: action.mdataCol,
+                PCA: action.PCA
+            }
+            break;
+        }
+
+        case 'set-selected-plot-2d': {
+            draft.EDA.PCA[action.omic].displayOpts.selectedPlot2D[action.option] = action.value;
+            break;
+        }
+
+        case 'set-filter-col': {
+            draft.EDA.PCA[action.omic].displayOpts.filterCol = action.value;
+            break;
+        }
     }
 }
 
 
 const resultsTemplate = {
+    'tabValue': 0.1,
     'EDA': {
         'DD': { // Data distribution section
             'showNorm': true,
@@ -87,8 +122,13 @@ const resultsTemplate = {
                     anova: null
                 }, // {projections, loadings, explained_variance, anova}
                 status: { status: 'waiting' }, // status -> {ok, waiting, error}
-                //selectedPlot: null,
-                //selectedCell: null
+                displayOpts: {
+                    scatterMode: '1D',
+                    selectedPlot: null,
+                    selectedCell: null,
+                    selectedPlot2D: { x: 1, y: 2, g: 'No color' },
+                    filterCol: 'All features',
+                }
             },
             'm': {
                 data: {
@@ -97,7 +137,14 @@ const resultsTemplate = {
                     explained_variance: null,
                     anova: null
                 },
-                status: { status: 'waiting' }
+                status: { status: 'waiting' },
+                displayOpts: {
+                    scatterMode: '1D',
+                    selectedPlot: null,
+                    selectedCell: null,
+                    selectedPlot2D: { x: 1, y: 2, g: 'No color' },
+                    filterCol: 'All features',
+                }
             }
         }
     }

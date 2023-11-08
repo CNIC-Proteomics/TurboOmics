@@ -3,11 +3,10 @@ import { useJob } from '@/components/app/JobContext'
 import { Box, CircularProgress, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import TablePvalues from './TablePvalues';
-import MyScatter from './MyScatter';
+import { MyScatter, MyScatter2D } from './MyScatter';
 import TableLoadings from './TableLoadings';
-import { MaterialReactTable } from 'material-react-table';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
-import { MySelect } from '../DataDistribution/MyFormComponents';
+import SelectorPCA2D from './SelectorPCA2D';
 
 
 export default function PCAOmic({ title, omic }) {
@@ -30,9 +29,10 @@ export default function PCAOmic({ title, omic }) {
     const { mdataType } = useJob()
     const { jobID } = useJob();
 
-    const [scatterMode, setScatterMode] = useState('1D'); // 1D or 2D
-    const [selectedPlot, setSelectedPlot] = useState(null);
-    const [selectedPlot2D, setSelectedPlot2D] = useState({ x: 1, y: 2, g: 'No color' });
+    const { displayOpts } = useResults().EDA.PCA[omic]
+    const [scatterMode, setScatterMode] = useState(displayOpts.scatterMode); // 1D or 2D
+    const [selectedPlot, setSelectedPlot] = useState(displayOpts.selectedPlot);
+    const [selectedPlot2D, setSelectedPlot2D] = useState(displayOpts.selectedPlot2D);
 
     const fetchData = useCallback(async () => {
         console.log(`Fetching data`);
@@ -70,9 +70,9 @@ export default function PCAOmic({ title, omic }) {
     );
 
     const scatterData = useMemo(
-        () => getScatterData(selectedPlot, mdata, projections, status),
-        [selectedPlot, mdata, projections, status]
-    )
+        () => getScatterData(projections, mdata, mdataType, selectedPlot, selectedPlot2D, status, scatterMode),
+        [projections, mdata, mdataType, selectedPlot, selectedPlot2D, status, scatterMode]
+    );
 
     const selectedLoadings = useMemo(
         () => getSelectedLoadings(loadings, selectedPlot, selectedPlot2D, status, scatterMode),
@@ -92,11 +92,13 @@ export default function PCAOmic({ title, omic }) {
                     return (
                         <Box sx={{ padding: 1 }}>
                             <TablePvalues
+                                omic={omic}
                                 data={pvTable}
                                 rowNames={pvRowNames}
                                 colNames={pvColNames}
                                 expVar={pvExpVar}
                                 setSelectedPlot={setSelectedPlot}
+                                scatterMode={scatterMode}
                             />
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
                                 <Box sx={{ mb: 2 }}>
@@ -104,7 +106,10 @@ export default function PCAOmic({ title, omic }) {
                                         color="primary"
                                         value={scatterMode}
                                         exclusive
-                                        onChange={(e, mode) => setScatterMode(e.target.value)}
+                                        onChange={(e, mode) => {
+                                            setScatterMode(e.target.value);
+                                            dispatchResults({type:'set-scatter-mode', mode: e.target.value, omic:omic});
+                                        }}
                                         aria-label="Platform"
                                     >
                                         <ToggleButton value="1D">1D</ToggleButton>
@@ -114,46 +119,17 @@ export default function PCAOmic({ title, omic }) {
                             </Box>
                             <Box sx={{ textAlign: 'center' }}>
                                 {scatterMode == '1D' ?
-                                    <Box>
-                                        Select a pvalue cell to plot PCA
+                                    <Box sx={{ height: 75, pt: 3 }}>
+                                        <Typography variant='body1'>Select a pvalue cell to plot PCA</Typography>
                                     </Box>
                                     :
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Box sx={{ width: '25%' }}>
-                                            <MySelect
-                                                options={pvColNames.map(e => ({ label: `PCA ${e}`, value: e }))}
-                                                onChange={
-                                                    e => setSelectedPlot2D(prev => ({ ...prev, x: e.value }))
-                                                }
-                                                value={{ label: `PCA ${selectedPlot2D.x}`, value: selectedPlot2D.x }}
-                                                label='X axis'
-                                            />
-                                        </Box>
-                                        <Box sx={{ width: '25%' }}>
-                                            <MySelect
-                                                options={pvColNames.map(e => ({ label: `PCA ${e}`, value: e }))}
-                                                onChange={
-                                                    e => setSelectedPlot2D(prev => ({ ...prev, y: e.value }))
-                                                }
-                                                value={{ label: `PCA ${selectedPlot2D.y}`, value: selectedPlot2D.y }}
-                                                label='Y axis'
-                                            />
-                                        </Box>
-                                        <Box sx={{ width: '40%' }}>
-                                            <MySelect
-                                                options={[
-                                                    { label: 'No color', value: 'No color' },
-                                                    ...pvRowNames.filter(
-                                                        e => mdataType[e].type == 'categorical'
-                                                    ).map(e => ({ label: e, value: e }))]}
-                                                onChange={
-                                                    e => setSelectedPlot2D(prev => ({ ...prev, g: e.value }))
-                                                }
-                                                value={{ label: selectedPlot2D.g, value: selectedPlot2D.g }}
-                                                label='Color by'
-                                            />
-                                        </Box>
-                                    </Box>
+                                    <SelectorPCA2D
+                                        pvColNames={pvColNames}
+                                        pvRowNames={pvRowNames}
+                                        selectedPlot2D={selectedPlot2D}
+                                        setSelectedPlot2D={setSelectedPlot2D}
+                                        omic={omic}
+                                    />
                                 }
                             </Box>
                             {scatterData &&
@@ -165,7 +141,10 @@ export default function PCAOmic({ title, omic }) {
                                             PCA={selectedPlot.PCA}
                                         />
                                         :
-                                        <Box>2D scatter</Box>
+                                        <MyScatter2D
+                                            scatterData={scatterData}
+                                            selectedPlot2D={selectedPlot2D}
+                                        />
                                     }
                                 </Box>
                             }
@@ -174,7 +153,7 @@ export default function PCAOmic({ title, omic }) {
                                     <TableLoadings
                                         omic={omic}
                                         selectedLoadings={selectedLoadings}
-                                        selectedPCA={scatterMode=='1D'?[selectedPlot.PCA,] : [selectedPlot2D.x, selectedPlot2D.y]}
+                                        selectedPCA={scatterMode == '1D' ? [selectedPlot.PCA,] : [selectedPlot2D.x, selectedPlot2D.y]}
                                     />
                                 </Box>
                             }
@@ -235,18 +214,41 @@ const getMainData = (anova, explained_variance, mdata, status) => {
     return { pvTable, pvRowNames, pvColNames, pvExpVar };
 }
 
-const getScatterData = (selectedPlot, mdata, projections, status) => {
+const getScatterData = (projections, mdata, mdataType, selectedPlot, selectedPlot2D, status, scatterMode) => {
     let scatterData = null;
-    if (status.status == 'ok' && selectedPlot) {
-        scatterData = [];
+    if (status.status == 'ok' && scatterMode == '1D' && selectedPlot) {
         let mdataColSerie = mdata.column(selectedPlot.mdataCol)
-        Object.keys(projections).forEach(element => {
-            scatterData.push({
-                element: element,
-                projection: projections[element][selectedPlot.PCA],
-                mdataValue: mdataColSerie.values[mdataColSerie.index.indexOf(element)]
+
+        scatterData = Object.keys(projections).map(element => ({
+            element: element,
+            projection: projections[element][selectedPlot.PCA],
+            mdataValue: mdataColSerie.values[mdataColSerie.index.indexOf(element)]
+        }))
+    } else if (status.status == 'ok' && scatterMode == '2D' && selectedPlot2D) {
+        if (Object.keys(mdataType).includes(selectedPlot2D.g)) {
+            scatterData = {}
+            mdataType[selectedPlot2D.g].levels.map(level => {
+                scatterData[level] = [];
+                mdataType[selectedPlot2D.g].level2id[level].map(
+                    element => {
+                        if (Object.keys(projections).includes(element)) {
+                            scatterData[level].push({
+                                element: element,
+                                x: projections[element][selectedPlot2D.x],
+                                y: projections[element][selectedPlot2D.y]
+                            })
+                        }
+                    })
             })
-        })
+        } else {
+            scatterData = {
+                [selectedPlot2D.g]: Object.keys(projections).map(element => ({
+                    element: element,
+                    x: projections[element][selectedPlot2D.x],
+                    y: projections[element][selectedPlot2D.y],
+                }))
+            }
+        }
     }
     return scatterData
 }
@@ -258,7 +260,7 @@ const getSelectedLoadings = (loadings, selectedPlot, selectedPlot2D, status, sca
     if (status.status == 'ok' && scatterMode == '1D' && selectedPlot) {
         selectedLoadings = {};
         Object.keys(loadings).map(fid => {
-            selectedLoadings[fid] = [parseFloat(loadings[fid][selectedPlot.PCA].toFixed(5)), ];
+            selectedLoadings[fid] = [parseFloat(loadings[fid][selectedPlot.PCA].toFixed(5)),];
         })
     } else if (status.status == 'ok' && scatterMode == '2D') {
         selectedLoadings = {};
@@ -270,5 +272,4 @@ const getSelectedLoadings = (loadings, selectedPlot, selectedPlot2D, status, sca
         })
     }
     return selectedLoadings;
-
 }
