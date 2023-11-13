@@ -186,7 +186,7 @@ const jobTemplate = {
                 'xm': false
             },
             'scale': { // center and scale
-                'xq': true,
+                'xq': false,
                 'xm': true
             },
             'MV': { // Missing values --> Array of objects used to plot graph

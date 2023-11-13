@@ -4,9 +4,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { MySelect } from '@/components/app/results/EDA/DataDistribution/MyFormComponents';
 import MyMotion from '@/components/MyMotion';
 import { MaterialReactTable } from 'material-react-table';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
-import DownloadIcon from '@mui/icons-material/Download';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 
