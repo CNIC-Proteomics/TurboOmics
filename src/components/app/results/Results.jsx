@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -8,29 +8,23 @@ import { useJob } from '../JobContext';
 import DataDistribution from './EDA/DataDistribution/DataDistribution';
 import PCA from './EDA/PCA/PCA';
 import { useDispatchResults, useResults } from '../ResultsContext';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Grid } from '@mui/material';
 import { useVars } from '@/components/VarsContext';
-
-const statusTemplate = {
-    'EDA_PCA': 'waiting', // waiting, ok, error
-    'MOFA': 'waiting',
-    //'LEIDEN': 'waiting',
-    //'rCCA': 'waiting',
-    //'DCA': 'waiting',
-    //'ENET': 'waiting'
-}
 
 export default function Results() {
 
-    const { tabValue } = useResults()
     const dispatchResults = useDispatchResults();
 
     const { API_URL } = useVars();
 
     const fetchRef = useRef();
-    const [status, setStatus] = useState(statusTemplate);
 
-    const [value, setValue] = useState(tabValue);
+    const savedStatus = useResults().status;
+    const [status, setStatus] = useState(savedStatus);
+
+    const savedValue = useResults().value;
+    const [value, setValue] = useState(savedValue);
+
     const section = Math.floor(value);
 
     const { jobID } = useJob();
@@ -40,18 +34,41 @@ export default function Results() {
         dispatchResults({ type: 'set-tab-value', value: newValue });
     };
 
-    const fetchStatus = async () => {
+    const fetchStatus = useCallback(async () => {
         const res = await fetch(`${API_URL}/get_status/${jobID}`);
         const resJson = await res.json();
-        
-        setStatus(resJson);
-        
-        if(
-            Object.keys(resJson).map(e => resJson[e] != 'waiting').every(e => e)
+
+        console.log(resJson);
+
+        // If there is any change set it
+        if (
+            Object.keys(status).some(e => status[e].status != resJson[e].status)
+        ) {
+            console.log(`Set status: ${resJson}`);
+            setStatus(resJson);
+            dispatchResults({ type: 'set-status', status: resJson });
+        }
+
+        // If there is no waiting status, clear interval
+        if (
+            Object.keys(resJson).map(e => resJson[e].status != 'waiting').every(e => e)
         ) {
             clearInterval(fetchRef.current);
         }
-    }
+    }, [API_URL, jobID, fetchRef]);
+
+    // Initialize fetchStatus
+    useEffect(() => {
+        console.log(`useEffect: Check status`);
+        if (
+            Object.keys(savedStatus).some(e => savedStatus[e].status == 'waiting')
+        ) {
+            console.log(`useEffect: Initialize status fetching`);
+            fetchRef.current = setInterval(fetchStatus, 2500);
+            return () => clearInterval(fetchRef.current);
+        }
+
+    }, [fetchRef, fetchStatus]);
 
     return (
         <>
@@ -68,18 +85,59 @@ export default function Results() {
                     sx={{ borderRight: 1, borderColor: 'divider', width: '15%' }}
                 >
                     <Tab
-                        label="EXPLORATORY DATA ANALYSIS"
+                        label={<TabComponent text='EXPLORATORY DATA ANALYSIS' status='' />}
                         value={0.1}
                         sx={{ mt: 2, p: 0, color: section == 0 ? '#1976d2' : '#00000099' }}
                     />
-                    {(true || section == 0) && <Tab label="DATA DISTRIBUTION" value={0.1} sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }} />}
-                    {(true || section == 0) && <Tab label="PCA" value={0.2} sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }} />}
 
-                    <Tab label={<Typography><CircularProgress size={12} thickness={2} /> MULTIOMICS FACTOR ANALYIS</Typography>} value={1.1} sx={{ mt: 2 }} disabled={true} />
-                    <Tab label="COMMUNITY ANALYSIS" value={2.1} sx={{ mt: 2 }} disabled />
-                    <Tab label="REGULARIZED CANONICAL CORRELATION ANALYSIS" value={3.1} sx={{ mt: 2 }} disabled />
-                    <Tab label="DIFFERENTIAL CORRELATION ANALYSIS" value={4.1} sx={{ mt: 2 }} disabled />
-                    <Tab label="ELASTIC NET" value={5.1} sx={{ mt: 2 }} disabled />
+                    <Tab
+                        label={<TabComponent text='DATA DISTRIBUTION' status='' />}
+                        value={0.1}
+                        sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='PCA' status={status.EDA_PCA.status} />}
+                        value={0.2}
+                        sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }}
+                        disabled={status.EDA_PCA.status!='ok'}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
+                        value={1.1}
+                        sx={{ fontSize: 12, mt: 2, p: 0 }}
+                        disabled={status.MOFA.status!='ok'}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='COMMUNITY ANALYSIS' status='' />}
+                        value={2.1}
+                        sx={{ fontSize: 12, mt: 2, p: 0 }}
+                        disabled={true}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
+                        value={3.1}
+                        sx={{ fontSize: 12, mt: 2, p: 0 }}
+                        disabled={true}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='DIFFERENTIAL CORRELATION ANALYSIS' status='' />}
+                        value={4.1}
+                        sx={{ fontSize: 12, mt: 2, p: 0 }}
+                        disabled={true}
+                    />
+
+                    <Tab
+                        label={<TabComponent text='ELASTIC NET' status='' />}
+                        value={5.1}
+                        sx={{ fontSize: 12, mt: 2, p: 0 }}
+                        disabled={true}
+                    />
+
                 </Tabs>
 
                 <Box sx={{ width: '85%', borderTop: '1px solid #cccccc' }}>
@@ -94,4 +152,21 @@ export default function Results() {
             </Box>
         </>
     );
+}
+
+const TabComponent = ({ text, status }) => {
+    return (
+        <Grid container sx={{ border: '0px solid green', m:'auto', height: 55 }}>
+            {status=='waiting' &&
+                <Box sx={{ border: '0px solid red', position: 'absolute', height: '100%' }}>
+                    <Box sx={{ border: '0px solid blue', height: 20, position: 'relative', top: '35%', left: 7 }}>
+                        <CircularProgress sx={{ verticalAlign: 'middle', border: '0px solid red' }} size={15} thickness={5} />
+                    </Box>
+                </Box>
+            }
+            <Typography sx={{ border: '0px solid red', m: 'auto', width: "85%", fontSize:13, position:'relative', right:-12 }}>
+                {text}
+            </Typography>
+        </Grid>
+    )
 }

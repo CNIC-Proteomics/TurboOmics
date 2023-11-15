@@ -30,13 +30,21 @@ function resultsReducer(draft, action) {
     console.log(action);
 
     switch (action.type) {
+        
         case 'reset-results': {
             return resultsTemplate;
         }
-        case 'set-tab-value': {
-            draft.tabValue = action.value;
+
+        case 'set-status': {
+            draft.status = action.status;
             break;
         }
+
+        case 'set-tab-value': {
+            draft.value = action.value;
+            break;
+        }
+
         case 'set-eda-dd-norm': {
             draft.EDA.DD.showNorm = action.showNorm;
             break;
@@ -98,7 +106,15 @@ function resultsReducer(draft, action) {
 
 
 const resultsTemplate = {
-    'tabValue': 0.1,
+    'value': 0.1,
+    'status': {
+        EDA_PCA: { status: 'waiting' }, // waiting, ok, error
+        MOFA: { status: 'waiting' },
+        //LEIDEN: 'waiting',
+        //rCCA: 'waiting',
+        //DCA: 'waiting',
+        //ENET: 'waiting'
+    },
     'EDA': {
         'DD': { // Data distribution section
             'showNorm': true,
