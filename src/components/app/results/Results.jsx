@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
@@ -10,6 +9,7 @@ import PCA from './EDA/PCA/PCA';
 import { useDispatchResults, useResults } from '../ResultsContext';
 import { CircularProgress, Grid } from '@mui/material';
 import { useVars } from '@/components/VarsContext';
+import MOFA from './MOFA/MOFA';
 
 export default function Results() {
 
@@ -22,7 +22,7 @@ export default function Results() {
     const savedStatus = useResults().status;
     const [status, setStatus] = useState(savedStatus);
 
-    const savedValue = useResults().value;
+    const savedValue = useResults().value; // TabValue
     const [value, setValue] = useState(savedValue);
 
     const section = Math.floor(value);
@@ -68,7 +68,7 @@ export default function Results() {
             return () => clearInterval(fetchRef.current);
         }
 
-    }, [fetchRef, fetchStatus]);
+    }, [fetchRef, fetchStatus, savedStatus]);
 
     return (
         <>
@@ -100,14 +100,14 @@ export default function Results() {
                         label={<TabComponent text='PCA' status={status.EDA_PCA.status} />}
                         value={0.2}
                         sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }}
-                        disabled={status.EDA_PCA.status!='ok'}
+                        disabled={status.EDA_PCA.status != 'ok'}
                     />
 
                     <Tab
                         label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
                         value={1.1}
                         sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={status.MOFA.status!='ok'}
+                        disabled={status.MOFA.status != 'ok'}
                     />
 
                     <Tab
@@ -143,7 +143,7 @@ export default function Results() {
                 <Box sx={{ width: '85%', borderTop: '1px solid #cccccc' }}>
                     {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
                     {value == 0.2 && <Box sx={{ p: 1 }}><PCA /></Box>}
-                    {value == 1.1 && <Box sx={{ p: 1 }}>MOFA</Box>}
+                    {value == 1.1 && <Box sx={{ p: 1 }}><MOFA /></Box>}
                     {value == 2.1 && <Box sx={{ p: 1 }}>Community Analysis</Box>}
                     {value == 3.1 && <Box sx={{ p: 1 }}>rCCA</Box>}
                     {value == 4.1 && <Box sx={{ p: 1 }}>Differential Correlation Analysis</Box>}
@@ -156,15 +156,18 @@ export default function Results() {
 
 const TabComponent = ({ text, status }) => {
     return (
-        <Grid container sx={{ border: '0px solid green', m:'auto', height: 55 }}>
-            {status=='waiting' &&
-                <Box sx={{ border: '0px solid red', position: 'absolute', height: '100%' }}>
-                    <Box sx={{ border: '0px solid blue', height: 20, position: 'relative', top: '35%', left: 7 }}>
-                        <CircularProgress sx={{ verticalAlign: 'middle', border: '0px solid red' }} size={15} thickness={5} />
+        <Grid container sx={{ m: 'auto', height: 55 }}>
+            {status == 'waiting' &&
+                <Box sx={{ position: 'absolute', height: '100%' }}>
+                    <Box sx={{ height: 20, position: 'relative', top: '35%', left: 7 }}>
+                        <CircularProgress
+                            sx={{ verticalAlign: 'middle', border: '0px solid red' }}
+                            size={15}
+                            thickness={5} />
                     </Box>
                 </Box>
             }
-            <Typography sx={{ border: '0px solid red', m: 'auto', width: "85%", fontSize:13, position:'relative', right:-12 }}>
+            <Typography sx={{ m: 'auto', width: "85%", fontSize: 13, position: 'relative', right: -12 }}>
                 {text}
             </Typography>
         </Grid>

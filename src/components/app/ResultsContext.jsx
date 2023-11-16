@@ -30,7 +30,11 @@ function resultsReducer(draft, action) {
     console.log(action);
 
     switch (action.type) {
-        
+
+        /*
+        Results Component
+        */
+
         case 'reset-results': {
             return resultsTemplate;
         }
@@ -44,6 +48,10 @@ function resultsReducer(draft, action) {
             draft.value = action.value;
             break;
         }
+
+        /*
+        EDA - Data Distribution
+        */
 
         case 'set-eda-dd-norm': {
             draft.EDA.DD.showNorm = action.showNorm;
@@ -64,6 +72,10 @@ function resultsReducer(draft, action) {
             draft.EDA.DD.filterText[action.fileType] = action.filterText;
             break;
         }
+
+        /*
+        EDA - PCA
+        */
 
         case 'set-eda-pca-data': {
             draft.EDA.PCA[action.omic].data = action.data;
@@ -101,6 +113,39 @@ function resultsReducer(draft, action) {
             draft.EDA.PCA[action.omic].displayOpts.filterCol = action.value;
             break;
         }
+
+        /* 
+        MOFA
+        */
+
+        case 'set-mofa-data': {
+            draft.MOFA.data = action.data;
+            break;
+        }
+
+        case 'set-selected-plot-cell-mofa': {
+            draft.MOFA.displayOpts.selectedCell = {
+                rowIndex: action.rowIndex,
+                colIndex: action.colIndex
+            };
+
+            draft.MOFA.displayOpts.selectedPlot = {
+                mdataCol: action.mdataCol,
+                Factor: action.Factor
+            };
+            break;
+        }
+
+        case 'set-scatter-mode-mofa': {
+            draft.MOFA.displayOpts.scatterMode = action.mode;
+            break;
+        }
+
+        case 'set-selected-plot-2d-mofa': {
+            draft.MOFA.displayOpts.selectedPlot2D[action.option] = action.value;
+            break;
+        }
+
     }
 }
 
@@ -163,5 +208,14 @@ const resultsTemplate = {
                 }
             }
         }
+    },
+    'MOFA': {
+        data: null, // {projections, loadings, explained_variance, anova}
+        displayOpts: {
+            selectedCell: null,
+            selectedPlot: null,
+            scatterMode: '1D',
+            selectedPlot2D: { x: 'Factor1', y: 'Factor2', g: 'No color' }
+        }
     }
-};
+}
