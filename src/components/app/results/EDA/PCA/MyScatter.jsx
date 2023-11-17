@@ -141,7 +141,7 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                     >
                         <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
                     </YAxis>
-                    {true && <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />}
+                    <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                     {Object.keys(scatterData).length>1 && <Legend verticalAlign="top" />}
                     {
                         Object.keys(scatterData).map((level, i) => {

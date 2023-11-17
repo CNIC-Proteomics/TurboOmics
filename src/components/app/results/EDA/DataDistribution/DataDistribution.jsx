@@ -11,6 +11,7 @@ import ImageIcon from '@mui/icons-material/Image';
 
 import downloadImage from './downloadImage';
 import { useResults, useDispatchResults } from '@/components/app/ResultsContext';
+import { MySection, MySectionContainer } from '@/components/MySection';
 
 export default function DataDistribution() {
 
@@ -64,7 +65,7 @@ export default function DataDistribution() {
                 alignItems='center'
                 sx={{ mb: 8, mt: 0 }}
             >
-                <Grid item xs={3} sx={{pt:3}}>
+                <Grid item xs={3} sx={{ pt: 3 }}>
                     <MySwitch handleSwitch={handleSwitch} label="Centered & Scaled" />
                 </Grid>
                 <Grid item xs={3}>
@@ -75,92 +76,102 @@ export default function DataDistribution() {
                     />
                 </Grid>
             </Grid>
-            <Box sx={{ flexGrow: 1, p: 0, mt: 0 }}>
-                <Grid
-                    container
-                    direction='row'
-                    justifyContent='center'
-                    spacing={2}
-                    sx={{ p: 0 }}
-                >
-                    <Grid item sx={{ borderRight: '1px solid #cccccc' }} xs={6}>
-                        <Typography
-                            variant='h6'
-                            sx={{ textAlign: 'center', color: '#555555' }}
-                        >
-                            Proteomics
-                            <IconButton
-                                aria-label="download"
-                                size='small'
-                                onClick={e => downloadImage(qHistRef.current, qBoxRef.current, 'Proteomics')}
-                                sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden', paddingBottom:1 }}
-                            >
-                                <ImageIcon />
-                            </IconButton>
-                        </Typography>
-                        {showPlot['q'] ?
-                            <Box sx={{ height: 550, overflowX: 'auto' }}>
-                                <PlotData
-                                    fileType='xq'
-                                    filteredID={filteredID.q2i}
-                                    groupby={groupby.value}
-                                    showNorm={showNorm}
-                                    histRef={qHistRef}
-                                    boxRef={qBoxRef}
+            <MySectionContainer height="65vh">
+                <Box sx={{ flexGrow: 1, p: 0, mt: 0 }}>
+                    <Grid
+                        container
+                        direction='row'
+                        justifyContent='center'
+                        spacing={2}
+                        sx={{ p: 0 }}
+                    >
+                        <Grid item sx={{ borderRight: '1px solid #cccccc' }} xs={6}>
+                            <MySection>
+                                <Typography
+                                    variant='h6'
+                                    sx={{ textAlign: 'center', color: '#555555' }}
+                                >
+                                    Proteomics
+                                    <IconButton
+                                        aria-label="download"
+                                        size='small'
+                                        onClick={e => downloadImage(qHistRef.current, qBoxRef.current, 'Proteomics')}
+                                        sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden', paddingBottom: 1 }}
+                                    >
+                                        <ImageIcon />
+                                    </IconButton>
+                                </Typography>
+                                {showPlot['q'] ?
+                                    <Box sx={{ height: 550, overflowX: 'auto' }}>
+                                        <PlotData
+                                            fileType='xq'
+                                            filteredID={filteredID.q2i}
+                                            groupby={groupby.value}
+                                            showNorm={showNorm}
+                                            histRef={qHistRef}
+                                            boxRef={qBoxRef}
+                                        />
+                                    </Box>
+                                    :
+                                    <Box sx={{ textAlign: 'center', pt: 20, height: '52vh' }}>
+                                        <CircularProgress size={100} thickness={2} />
+                                    </Box>
+                                }
+                            </MySection>
+                            <MySection>
+                                <FilterFeatures
+                                    omic='q'
+                                    fileType='q2i'
+                                    setFilteredID={setFilteredID}
+                                    updatePlot={updatePlot}
                                 />
-                            </Box>
-                            :
-                            <Box sx={{ textAlign: 'center', pt: 20, height: '52vh' }}>
-                                <CircularProgress size={100} thickness={2} />
-                            </Box>
-                        }
-                        <FilterFeatures
-                            omic='q'
-                            fileType='q2i'
-                            setFilteredID={setFilteredID}
-                            updatePlot={updatePlot}
-                        />
-                    </Grid>
-                    <Grid item xs={6} sx={{ borderLeft: '1px solid #cccccc' }}>
-                        <Typography
-                            variant='h6'
-                            sx={{ textAlign: 'center', color: '#555555' }}
-                        >
-                            Metabolomics
-                            <IconButton
-                                aria-label="download"
-                                size='small'
-                                onClick={e => downloadImage(mHistRef.current, mBoxRef.current, 'Metabolomics')}
-                                sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden', paddingBottom:1 }}
-                            >
-                                <ImageIcon />
-                            </IconButton>
-                        </Typography>
-                        {showPlot['m'] ?
-                            <Box sx={{ height: 550, overflowX: 'auto' }}>
-                                <PlotData
-                                    fileType='xm'
-                                    filteredID={filteredID.m2i}
-                                    groupby={groupby.value}
-                                    showNorm={showNorm}
-                                    histRef={mHistRef}
-                                    boxRef={mBoxRef}
+                            </MySection>
+                        </Grid>
+                        <Grid item xs={6} sx={{ borderLeft: '1px solid #cccccc' }}>
+                            <MySection>
+                                <Typography
+                                    variant='h6'
+                                    sx={{ textAlign: 'center', color: '#555555' }}
+                                >
+                                    Metabolomics
+                                    <IconButton
+                                        aria-label="download"
+                                        size='small'
+                                        onClick={e => downloadImage(mHistRef.current, mBoxRef.current, 'Metabolomics')}
+                                        sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden', paddingBottom: 1 }}
+                                    >
+                                        <ImageIcon />
+                                    </IconButton>
+                                </Typography>
+                                {showPlot['m'] ?
+                                    <Box sx={{ height: 550, overflowX: 'auto' }}>
+                                        <PlotData
+                                            fileType='xm'
+                                            filteredID={filteredID.m2i}
+                                            groupby={groupby.value}
+                                            showNorm={showNorm}
+                                            histRef={mHistRef}
+                                            boxRef={mBoxRef}
+                                        />
+                                    </Box>
+                                    :
+                                    <Box sx={{ textAlign: 'center', pt: 20, height: '52vh' }}>
+                                        <CircularProgress size={100} thickness={2} />
+                                    </Box>
+                                }
+                            </MySection>
+                            <MySection>
+                                <FilterFeatures
+                                    omic='m'
+                                    fileType='m2i'
+                                    setFilteredID={setFilteredID}
+                                    updatePlot={updatePlot}
                                 />
-                            </Box>
-                            :
-                            <Box sx={{ textAlign: 'center', pt: 20, height: '52vh' }}>
-                                <CircularProgress size={100} thickness={2} />
-                            </Box>
-                        }
-                        <FilterFeatures
-                            omic='m'
-                            fileType='m2i'
-                            setFilteredID={setFilteredID}
-                            updatePlot={updatePlot}
-                        />
+                            </MySection>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Box>
+                </Box>
+            </MySectionContainer>
         </Box>
     )
 }

@@ -1,10 +1,12 @@
 import { Box, Grid } from '@mui/material'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '@/components/VarsContext';
 import { useJob } from '../../JobContext';
 import TablePvalues from './TablePvalues';
 import ScatterPlotContainer from './ScatterPlot/ScatterPlotContainer';
+import { MySection, MySectionContainer } from '@/components/MySection';
+
 
 function MOFA() {
 
@@ -18,7 +20,7 @@ function MOFA() {
     const savedScatterMode = useResults().MOFA.displayOpts.scatterMode;
     const [scatterMode, setScatterMode] = useState(savedScatterMode);
 
-    const savedSelectedPlot = useResults().MOFA.selectedPlot;
+    const savedSelectedPlot = useResults().MOFA.displayOpts.selectedPlot;
     const [selectedPlot, setSelectedPlot] = useState(savedSelectedPlot);
 
     const savedSelectedPlot2D = useResults().MOFA.displayOpts.selectedPlot2D;
@@ -53,35 +55,44 @@ function MOFA() {
     /**/
 
     return (
-        <Box sx={{ pt: 4, border: '0px solid red' }}>
+        <Box>
             {dataMOFA != null &&
-                <Box>
-                    <Box sx={{px:2}}>
-                        <TablePvalues
-                            anova={dataMOFA.anova}
-                            explained_variance={dataMOFA.explained_variance}
-                            setSelectedPlot={setSelectedPlot}
-                            scatterMode={scatterMode}
-                            rowNames={rowNames}
-                            colNames={colNames}
-                            factorNames={factorNames}
-                        />
-                    </Box>
-                    <Box sx={{mt:2}}>
-                        <ScatterPlotContainer
-                            scatterMode={scatterMode}
-                            setScatterMode={setScatterMode}
-                            selectedPlot={selectedPlot}
-                            selectedPlot2D={selectedPlot2D}
-                            setSelectedPlot2D={setSelectedPlot2D}
-                            rowNames={rowNames}
-                            factorNames={factorNames}
-                            projections={dataMOFA.projections}
-                        />
-                    </Box>
-                </Box>
+                <MySectionContainer height="80vh">
+                    <MySection>
+                        <Box sx={{ p: 5 }}>
+                            <TablePvalues
+                                anova={dataMOFA.anova}
+                                explained_variance={dataMOFA.explained_variance}
+                                setSelectedPlot={setSelectedPlot}
+                                scatterMode={scatterMode}
+                                rowNames={rowNames}
+                                colNames={colNames}
+                                factorNames={factorNames}
+                            />
+                        </Box>
+                    </MySection>
+                    <MySection>
+                        <Box sx={{ mt: 2 }}>
+                            <ScatterPlotContainer
+                                scatterMode={scatterMode}
+                                setScatterMode={setScatterMode}
+                                selectedPlot={selectedPlot}
+                                selectedPlot2D={selectedPlot2D}
+                                setSelectedPlot2D={setSelectedPlot2D}
+                                rowNames={rowNames}
+                                factorNames={factorNames}
+                                projections={dataMOFA.projections}
+                            />
+                        </Box>
+                    </MySection>
+                    <MySection>
+                        <Box sx={{ height: '50vh' }}>
+                            Second Section
+                        </Box>
+                    </MySection>
+                </MySectionContainer>
             }
-        </Box>
+        </Box >
     )
 }
 

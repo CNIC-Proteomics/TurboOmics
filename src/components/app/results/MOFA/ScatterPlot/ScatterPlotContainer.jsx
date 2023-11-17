@@ -1,7 +1,9 @@
 import { Box, Grid, Typography } from '@mui/material'
-import React from 'react'
+import React, { useMemo } from 'react'
 import SelectorFactor2D from './SelectorFactor2D'
 import ScatterModeSelector from './ScatterModeSelector'
+import { useJob } from '@/components/app/JobContext'
+import { MyScatter, MyScatter2D } from './MyScatter'
 
 function ScatterPlotContainer({
     scatterMode,
@@ -13,16 +15,32 @@ function ScatterPlotContainer({
     rowNames,
     projections
 }) {
+
+    const { mdata } = useJob().user;
+    const { mdataType } = useJob();
+
+    const scatterData = useMemo(
+        () => getScatterData(
+            projections,
+            scatterMode,
+            selectedPlot,
+            selectedPlot2D,
+            mdata,
+            mdataType
+        ),
+        [projections, scatterMode, selectedPlot, selectedPlot2D, mdata, mdataType]
+    );
+
     return (
-        <Grid container sx={{ border: '1px solid red' }}>
-            <Grid sx={{pt:2}} item xs={6}>
+        <Grid container>
+            <Grid sx={{ pt: 2 }} item xs={6}>
                 <ScatterModeSelector
                     scatterMode={scatterMode}
                     setScatterMode={setScatterMode}
-                    disable2D={Object.keys(Object.values(projections)[0]).length<2}
+                    disable2D={Object.keys(Object.values(projections)[0]).length < 2}
                 />
 
-                <Box sx={{ px:3, pt:7, textAlign: 'center' }}>
+                <Box sx={{ px: 3, pt: 7, textAlign: 'center' }}>
                     {scatterMode == '1D' ?
                         <Box sx={{ height: 75, pt: 3 }}>
                             <Typography variant='body1'>Select a pvalue cell to plot Factor</Typography>
@@ -39,17 +57,90 @@ function ScatterPlotContainer({
             </Grid>
 
             <Grid item xs={6}>
+                {scatterData &&
+                    <Box sx={{ height: 400 }}>
+                        {scatterMode == '1D' ?
+                            <MyScatter
+                                scatterData={scatterData}
+                                mdataCol={selectedPlot.mdataCol}
+                                Factor={selectedPlot.Factor}
+                            /> :
+                            <MyScatter2D
+                                scatterData={scatterData}
+                                selectedPlot2D={selectedPlot2D}
+                            />
+                        }
 
-                <Box sx={{ height: 400, border: '1px solid blue' }}>
-                    {scatterMode == '1D' ?
-                        <Box>1D scatter</Box> :
-                        <Box>2D scatter</Box>
-                    }
-                </Box>
+                    </Box>
+                }
             </Grid>
 
         </Grid>
     )
 }
+
+/*
+Functions
+*/
+
+const getScatterData = (
+    projections,
+    scatterMode,
+    selectedPlot,
+    selectedPlot2D,
+    mdata,
+    mdataType
+) => {
+    let scatterData = null;
+
+    if (selectedPlot && scatterMode == '1D') {
+        scatterData = [];
+
+        let mdataColSerie = mdata.column(selectedPlot.mdataCol);
+        let mdataColJson = {};
+        mdataColSerie.index.map((index, i) => { mdataColJson[index] = mdataColSerie.values[i] });
+
+        Object.keys(projections).map(element => {
+            scatterData.push({
+                element,
+                mdataValue: mdataColJson[element],
+                projection: projections[element][selectedPlot.Factor],
+            })
+        })
+    } else if (scatterMode == '2D') {
+        scatterData = {};
+        if (Object.keys(mdataType).includes(selectedPlot2D.g)) {
+            mdataType[selectedPlot2D.g].levels.map(lv => {
+                scatterData[lv] = [
+                    ...mdataType[selectedPlot2D.g].level2id[lv].map(element => {
+                        if (Object.keys(projections).includes(element)) {
+                            return {
+                                element,
+                                x: projections[element][selectedPlot2D.x],
+                                y: projections[element][selectedPlot2D.y]
+                            }
+                        } else {
+                            return null
+                        }
+                    }).filter(e => e != null)
+                ]
+            })
+        } else {
+            scatterData[selectedPlot2D.g] = Object.keys(projections).map(element => ({
+                element,
+                x: projections[element][selectedPlot2D.x],
+                y: projections[element][selectedPlot2D.y]
+            }))
+        }
+
+    }
+
+    return scatterData
+
+}
+
+/*
+Export
+*/
 
 export default ScatterPlotContainer

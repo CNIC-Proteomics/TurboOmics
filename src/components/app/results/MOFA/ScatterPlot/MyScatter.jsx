@@ -1,6 +1,5 @@
 import { useJob } from '@/components/app/JobContext';
 import { Box, IconButton, Typography } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
 import ImageIcon from '@mui/icons-material/Image';
 import { myPalette } from "@/utils/myPalette";
 
@@ -129,19 +128,18 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                     <XAxis
                         type="number"
                         dataKey="x"
-                        name={`PCA ${selectedPlot2D.x}`}
-                    //allowDuplicatedCategory={false}
+                        name={`${selectedPlot2D.x}`}
                     >
-                        <Label value={`PCA ${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
+                        <Label value={`${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
                     </XAxis>
                     <YAxis
                         type="number"
                         dataKey="y"
-                        name={`PCA ${selectedPlot2D.y}`}
+                        name={`${selectedPlot2D.y}`}
                     >
-                        <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
+                        <Label value={`${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
                     </YAxis>
-                    {true && <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />}
+                    <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                     {Object.keys(scatterData).length>1 && <Legend verticalAlign="top" />}
                     {
                         Object.keys(scatterData).map((level, i) => {

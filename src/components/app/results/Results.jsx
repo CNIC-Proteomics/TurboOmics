@@ -74,71 +74,73 @@ export default function Results() {
         <>
             <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
             <Box
-                sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper', height: "80vh" }}
+                sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}
             >
-                <Tabs
-                    orientation="vertical"
-                    //variant="scrollable"
-                    value={value}
-                    onChange={handleChange}
-                    aria-label="Results Sections Tabs"
-                    sx={{ borderRight: 1, borderColor: 'divider', width: '15%' }}
-                >
-                    <Tab
-                        label={<TabComponent text='EXPLORATORY DATA ANALYSIS' status='' />}
-                        value={0.1}
-                        sx={{ mt: 2, p: 0, color: section == 0 ? '#1976d2' : '#00000099' }}
-                    />
+                <Box sx={{width:'15%', borderRight: 1, borderColor: 'divider'}}>
+                    <Tabs
+                        orientation="vertical"
+                        variant="scrollable"
+                        value={value}
+                        onChange={handleChange}
+                        aria-label="Results Sections Tabs"
+                        sx={{ width: '15%', position: 'fixed' }}
+                    >
+                        <Tab
+                            label={<TabComponent text='EXPLORATORY DATA ANALYSIS' status='' />}
+                            value={0.1}
+                            sx={{ mt: 2, p: 0, color: section == 0 ? '#1976d2' : '#00000099' }}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='DATA DISTRIBUTION' status='' />}
-                        value={0.1}
-                        sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }}
-                    />
+                        <Tab
+                            label={<TabComponent text='DATA DISTRIBUTION' status='' />}
+                            value={0.1}
+                            sx={{ fontSize: 12, m: 0, p: 0, borderTop: '1px solid #cccccc' }}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='PCA' status={status.EDA_PCA.status} />}
-                        value={0.2}
-                        sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }}
-                        disabled={status.EDA_PCA.status != 'ok'}
-                    />
+                        <Tab
+                            label={<TabComponent text='PCA' status={status.EDA_PCA.status} />}
+                            value={0.2}
+                            sx={{ fontSize: 12, m: 0, p: 0, borderBottom: '1px solid #cccccc' }}
+                            disabled={status.EDA_PCA.status != 'ok'}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
-                        value={1.1}
-                        sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={status.MOFA.status != 'ok'}
-                    />
+                        <Tab
+                            label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
+                            value={1.1}
+                            sx={{ fontSize: 12, mt: 2, p: 0 }}
+                            disabled={status.MOFA.status != 'ok'}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='COMMUNITY ANALYSIS' status='' />}
-                        value={2.1}
-                        sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={true}
-                    />
+                        <Tab
+                            label={<TabComponent text='COMMUNITY ANALYSIS' status='' />}
+                            value={2.1}
+                            sx={{ fontSize: 12, mt: 2, p: 0 }}
+                            disabled={true}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
-                        value={3.1}
-                        sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={true}
-                    />
+                        <Tab
+                            label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
+                            value={3.1}
+                            sx={{ fontSize: 12, mt: 2, p: 0 }}
+                            disabled={true}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='DIFFERENTIAL CORRELATION ANALYSIS' status='' />}
-                        value={4.1}
-                        sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={true}
-                    />
+                        <Tab
+                            label={<TabComponent text='DIFFERENTIAL CORRELATION ANALYSIS' status='' />}
+                            value={4.1}
+                            sx={{ fontSize: 12, mt: 2, p: 0 }}
+                            disabled={true}
+                        />
 
-                    <Tab
-                        label={<TabComponent text='ELASTIC NET' status='' />}
-                        value={5.1}
-                        sx={{ fontSize: 12, mt: 2, p: 0 }}
-                        disabled={true}
-                    />
+                        <Tab
+                            label={<TabComponent text='ELASTIC NET' status='' />}
+                            value={5.1}
+                            sx={{ fontSize: 12, mt: 2, p: 0 }}
+                            disabled={true}
+                        />
 
-                </Tabs>
+                    </Tabs>
+                </Box>
 
                 <Box sx={{ width: '85%', borderTop: '1px solid #cccccc' }}>
                     {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
