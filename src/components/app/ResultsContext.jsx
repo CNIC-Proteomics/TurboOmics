@@ -215,7 +215,7 @@ const resultsTemplate = {
             selectedCell: null,
             selectedPlot: null,
             scatterMode: '1D',
-            selectedPlot2D: { x: 'Factor1', y: 'Factor2', g: 'No color' }
+            selectedPlot2D: { x: 'Factor1', y: 'Factor2', g: 'No color' },
         }
     }
 }

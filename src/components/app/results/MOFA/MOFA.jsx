@@ -1,11 +1,12 @@
-import { Box, Grid } from '@mui/material'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Box, Grid, Typography } from '@mui/material'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '@/components/VarsContext';
 import { useJob } from '../../JobContext';
 import TablePvalues from './TablePvalues';
 import ScatterPlotContainer from './ScatterPlot/ScatterPlotContainer';
 import { MySection, MySectionContainer } from '@/components/MySection';
+import LoadingPlotContainer from './LoadingPlot/LoadingPlotContainer';
 
 
 function MOFA() {
@@ -30,7 +31,7 @@ function MOFA() {
     Fetch MOFA data
     */
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         console.log('Fetching MOFA data');
         if (savedDataMOFA == null) {
             const res = await fetch(`${API_URL}/get_mofa/${jobID}`);
@@ -38,11 +39,11 @@ function MOFA() {
             setDataMOFA(resJson.dataMOFA);
             dispatchResults({ type: 'set-mofa-data', data: resJson.dataMOFA });
         }
-    }
+    });
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     /**/
 
@@ -50,8 +51,12 @@ function MOFA() {
     /* 
     Get arrays for pvalue table
     */
-    const [colNames, factorNames] = useMemo(() => getFactorNames(dataMOFA), [dataMOFA]);
-    const rowNames = useMemo(() => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]);
+    const [colNames, factorNames] = useMemo(
+        () => getFactorNames(dataMOFA), [dataMOFA]
+    );
+    const rowNames = useMemo(
+        () => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]
+    );
     /**/
 
     return (
@@ -85,11 +90,26 @@ function MOFA() {
                             />
                         </Box>
                     </MySection>
-                    <MySection>
-                        <Box sx={{ height: '50vh' }}>
-                            Second Section
-                        </Box>
-                    </MySection>
+                    {scatterMode == '1D' && selectedPlot &&
+                        <MySection sx={{ mt: 1 }}>
+                            <Typography variant='h6' sx={{ textAlign: 'center' }}>
+                                Feature Loading Analysis: {selectedPlot.Factor}
+                            </Typography>
+                            <Grid sx={{ mt: 2 }} container>
+                                {
+                                    ['q', 'm'].map(e => (
+                                        <Grid key={e} item xs={6}>
+                                            <LoadingPlotContainer
+                                                omic={e}
+                                                loadings={dataMOFA.loadings[e][selectedPlot.Factor]}
+                                                factorName={selectedPlot.Factor}
+                                            />
+                                        </Grid>
+                                    ))
+                                }
+                            </Grid>
+                        </MySection>
+                    }
                 </MySectionContainer>
             }
         </Box >

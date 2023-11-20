@@ -43,7 +43,9 @@ function ScatterPlotContainer({
                 <Box sx={{ px: 3, pt: 7, textAlign: 'center' }}>
                     {scatterMode == '1D' ?
                         <Box sx={{ height: 75, pt: 3 }}>
-                            <Typography variant='body1'>Select a pvalue cell to plot Factor</Typography>
+                            <Typography variant='body1'>
+                                Select a pvalue cell to plot Factor
+                            </Typography>
                         </Box>
                         :
                         <SelectorFactor2D

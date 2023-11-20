@@ -38,8 +38,6 @@ export default function Results() {
         const res = await fetch(`${API_URL}/get_status/${jobID}`);
         const resJson = await res.json();
 
-        console.log(resJson);
-
         // If there is any change set it
         if (
             Object.keys(status).some(e => status[e].status != resJson[e].status)

@@ -1,9 +1,9 @@
 import { Box } from '@mui/material'
 import React from 'react'
 
-export function MySection({ children }) {
+export function MySection({ children, sx }) {
     return (
-        <Box style={{ scrollSnapAlign: 'center', border: '1px solid yellow' }}>
+        <Box sx={{...sx}} style={{ scrollSnapAlign: 'center', border: '1px solid yellow' }}>
             {children}
         </Box>
     )
@@ -11,7 +11,7 @@ export function MySection({ children }) {
 
 export function MySectionContainer({ children, height }) {
     return (
-        <Box sx={{ height: {height}, scrollSnapType: 'y mandatory', overflow: 'auto' }}>
+        <Box sx={{ height: {height}, scrollSnapType: 'y mandatory', overflow: 'auto', border:'1px solid red' }}>
             {children}
         </Box>
 
