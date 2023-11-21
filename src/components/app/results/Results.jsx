@@ -53,7 +53,7 @@ export default function Results() {
         ) {
             clearInterval(fetchRef.current);
         }
-    }, [API_URL, jobID, fetchRef]);
+    }, [API_URL, jobID, fetchRef, dispatchResults, status]);
 
     // Initialize fetchStatus
     useEffect(() => {

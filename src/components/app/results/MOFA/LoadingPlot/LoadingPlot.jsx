@@ -1,16 +1,12 @@
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import { Box, Slider, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react'
+import TextField from '@mui/material/TextField';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-    ScatterChart,
     CartesianGrid,
     XAxis,
     YAxis,
-    Tooltip,
-    Scatter,
     ReferenceArea,
-    ResponsiveContainer,
-    ZAxis,
     LineChart,
     Line,
     ReferenceLine
@@ -18,8 +14,34 @@ import {
 import { calculateXTicks } from '../../EDA/DataDistribution/utils';
 
 
-function LoadingPlot({ fLVec, omic, thrL, setThrL }) {
+function LoadingPlot({ omic, fLVec, nFeatRef }) {
 
+    const [thrL, setThrL] = useState({ down: 0, up: 0 });
+    const [nFeat, setNFeat] = useState({ down: 0, up: 0 });
+
+    /*
+    Initialize loading threshold and number of features
+    */
+    useEffect(() => {
+        const myNFeat = {
+            down: Math.floor(fLVec.length * 0.01),
+            up: Math.floor(fLVec.length * 0.01)
+        };
+        
+        setNFeat(myNFeat);
+        nFeatRef.current[omic] = myNFeat;
+
+        setThrL({
+            down: fLVec[myNFeat.down][1],
+            up: fLVec[fLVec.length - myNFeat.up - 1][1]
+        });
+
+    }, [fLVec, nFeatRef]);
+    /**/
+
+    /*
+    Get data to plot
+    */
     const scatterData = useMemo(() => {
 
         const nPoints = Math.min(200, fLVec.length);
@@ -43,19 +65,85 @@ function LoadingPlot({ fLVec, omic, thrL, setThrL }) {
         return scatterData
 
     }, [fLVec, thrL]);
+    /**/
 
-
+    /*
+    Handle user modifications in thresholds
+    */
     const handleSlider = ([down, up]) => {
-        setThrL({ down: Math.min(down, 0), up: Math.max(up, 0) });
+        const myThrL = { down: Math.min(down, 0), up: Math.max(up, 0) }
+        setThrL(myThrL);
+        const myNFeat = {
+            down: fLVec.filter(e => e[1] < myThrL.down).length,
+            up: fLVec.filter(e => e[1] > myThrL.up).length
+        }
+
+        setNFeat(myNFeat);
+        nFeatRef.current[omic] = myNFeat;
     };
+    
 
     const handleClick = (value) => {
         if (value < 0) {
-            setThrL(prevState => ({...prevState, down: value}))
+            setThrL(prevState => ({ ...prevState, down: value }));
+
+            const myValue = fLVec.filter(e => e[1] < value).length
+            setNFeat(prevState => ({ ...prevState, down: myValue }));
+            nFeatRef.current[omic].down = myValue
         } else {
-            setThrL(prevState => ({...prevState, up: value}))
+            setThrL(prevState => ({ ...prevState, up: value }));
+
+            const myValue = fLVec.filter(e => e[1] > value).length
+            setNFeat(prevState => ({ ...prevState, up: myValue }));
+            nFeatRef.current[omic].up = myValue
         }
     }
+
+    const handleNumber = (value, type) => {
+
+        const number = parseInt(value);
+        if (isNaN(number)) {
+            setNFeat(prevState => ({ ...prevState, [type]: 0 }));
+            return
+        };
+
+        if (type == 'down') {
+            const fLVecDown = fLVec.filter(e => e[1] < 0);
+
+            if (number >= 0 && number < fLVecDown.length) {
+                nFeatRef.current[omic].down = number
+                setNFeat(prevState => ({ ...prevState, down: number }));
+                setThrL(prevState => ({ ...prevState, down: fLVecDown[number][1] }));
+            } else if (number < 0) {
+                nFeatRef.current[omic].down = 0
+                setNFeat(prevState => ({ ...prevState, down: 0 }));
+                setThrL(prevState => ({ ...prevState, down: fLVecDown[0][1] }));
+            } else if (number >= fLVecDown.length) {
+                nFeatRef.current[omic].down = fLVecDown.length
+                setNFeat(prevState => ({ ...prevState, down: fLVecDown.length }));
+                setThrL(prevState => ({ ...prevState, down: 0 }));
+            }
+        }
+
+        if (type == 'up') {
+            const fLVecUp = fLVec.filter(e => e[1] > 0);
+
+            if (number > 0 && number < fLVecUp.length) {
+                nFeatRef.current[omic].up = number;
+                setNFeat(prevState => ({ ...prevState, up: number }));
+                setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - number][1] }));
+            } else if (number <= 0) {
+                nFeatRef.current[omic].up = 0;
+                setNFeat(prevState => ({ ...prevState, up: 0 }));
+                setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - 1][1] }));
+            } else if (number >= fLVecUp.length) {
+                nFeatRef.current[omic].up = fLVecUp.length;
+                setNFeat(prevState => ({ ...prevState, up: fLVecUp.length }));
+                setThrL(prevState => ({ ...prevState, up: 0 }));
+            }
+        }
+    }
+    /**/
 
     let myInterval = Math.ceil(
         Math.max(
@@ -141,13 +229,25 @@ function LoadingPlot({ fLVec, omic, thrL, setThrL }) {
                 }}>
                     <Box sx={{ width: '33%' }}>
                         <Typography variant='body1'>
-                            Negatively Associated Features: {fLVec.filter(e => e[1] <= thrL.down).length}
+                            Negatively Associated Features
                         </Typography>
+                        <TextField
+                            size='small'
+                            value={nFeat.down}
+                            inputProps={{ min: 0, style: { textAlign: 'center', width: 45, height: 12 } }}
+                            onChange={e => handleNumber(e.target.value, 'down')}
+                        />
                     </Box>
                     <Box sx={{ width: '33%' }}>
                         <Typography variant='body1'>
-                            Positively Associated Features: {fLVec.filter(e => e[1] >= thrL.up).length}
+                            Positively Associated Features
                         </Typography>
+                        <TextField
+                            size='small'
+                            value={nFeat.up}
+                            inputProps={{ min: 0, style: { textAlign: 'center', width: 45, height: 12 } }}
+                            onChange={e => handleNumber(e.target.value, 'up')}
+                        />
                     </Box>
                 </Box>
             </Box >

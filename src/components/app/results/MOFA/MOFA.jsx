@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material'
+import { Box, Divider, Grid, Typography } from '@mui/material'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '@/components/VarsContext';
@@ -7,6 +7,7 @@ import TablePvalues from './TablePvalues';
 import ScatterPlotContainer from './ScatterPlot/ScatterPlotContainer';
 import { MySection, MySectionContainer } from '@/components/MySection';
 import LoadingPlotContainer from './LoadingPlot/LoadingPlotContainer';
+import HeatMapContainer from './HeatMap/HeatMapContainer';
 
 
 function MOFA() {
@@ -27,6 +28,7 @@ function MOFA() {
     const savedSelectedPlot2D = useResults().MOFA.displayOpts.selectedPlot2D;
     const [selectedPlot2D, setSelectedPlot2D] = useState(savedSelectedPlot2D);
 
+
     /*
     Fetch MOFA data
     */
@@ -39,7 +41,7 @@ function MOFA() {
             setDataMOFA(resJson.dataMOFA);
             dispatchResults({ type: 'set-mofa-data', data: resJson.dataMOFA });
         }
-    });
+    }, [savedDataMOFA, API_URL, dispatchResults, jobID]);
 
     useEffect(() => {
         fetchData();
@@ -52,11 +54,32 @@ function MOFA() {
     Get arrays for pvalue table
     */
     const [colNames, factorNames] = useMemo(
-        () => getFactorNames(dataMOFA), [dataMOFA]
+        () => getFactorNames(dataMOFA), [dataMOFA],
     );
     const rowNames = useMemo(
         () => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]
     );
+    /**/
+
+
+    /*
+    Get vector with sorted proteins and metabolites
+    */
+    const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
+
+    const fLVec = useMemo(() => {
+        if (dataMOFA == null || selectedPlot == null) return null;
+
+        let fLVec = { 'q': [], 'm': [] };
+        Object.keys(fLVec).map(e => {
+            fLVec[e] = Object.keys(dataMOFA.loadings[e][selectedPlot.Factor]).map(
+                f => [f, dataMOFA.loadings[e][selectedPlot.Factor][f]]
+            );
+            fLVec[e].sort((a, b) => a[1] - b[1]);
+            fLVec[e] = fLVec[e].map((elem, i) => [...elem, (i + 1) / fLVec[e].length]);
+        })
+        return fLVec
+    }, [dataMOFA, selectedPlot]);
     /**/
 
     return (
@@ -77,6 +100,7 @@ function MOFA() {
                         </Box>
                     </MySection>
                     <MySection>
+                        <Divider>Projections</Divider>
                         <Box sx={{ mt: 2 }}>
                             <ScatterPlotContainer
                                 scatterMode={scatterMode}
@@ -91,24 +115,36 @@ function MOFA() {
                         </Box>
                     </MySection>
                     {scatterMode == '1D' && selectedPlot &&
-                        <MySection sx={{ mt: 1 }}>
-                            <Typography variant='h6' sx={{ textAlign: 'center' }}>
-                                Feature Loading Analysis: {selectedPlot.Factor}
-                            </Typography>
-                            <Grid sx={{ mt: 2 }} container>
-                                {
-                                    ['q', 'm'].map(e => (
-                                        <Grid key={e} item xs={6}>
-                                            <LoadingPlotContainer
-                                                omic={e}
-                                                loadings={dataMOFA.loadings[e][selectedPlot.Factor]}
-                                                factorName={selectedPlot.Factor}
-                                            />
-                                        </Grid>
-                                    ))
-                                }
-                            </Grid>
-                        </MySection>
+                        <>
+                            <MySection sx={{ mt: 1 }}>
+                                <Divider variant='h6' sx={{ textAlign: 'center' }}>
+                                    Feature Loading Analysis: {selectedPlot.Factor}
+                                </Divider>
+                                <Grid sx={{ mt: 2 }} container>
+                                    {
+                                        ['q', 'm'].map(e => (
+                                            <Grid key={e} item xs={6}>
+                                                <LoadingPlotContainer
+                                                    omic={e}
+                                                    fLVec={fLVec[e]}
+                                                    //loadings={dataMOFA.loadings[e][selectedPlot.Factor]}
+                                                    //factorName={selectedPlot.Factor}
+                                                    nFeatRef={nFeatRef}
+                                                />
+                                            </Grid>
+                                        ))
+                                    }
+                                </Grid>
+                            </MySection>
+                            <MySection>
+                                <Divider>HeatMap</Divider>
+                                <HeatMapContainer
+                                    nFeatRef={nFeatRef}
+                                    fLVec={fLVec}
+                                    mdataCol={selectedPlot.mdataCol}
+                                />
+                            </MySection>
+                        </>
                     }
                 </MySectionContainer>
             }

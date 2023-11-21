@@ -63,11 +63,11 @@ export default function DataDistribution() {
                 direction='row'
                 justifyContent='center'
                 alignItems='center'
-                sx={{ mb: 8, mt: 0 }}
+                sx={{ mb: 3, mt: 0 }}
             >
-                <Grid item xs={3} sx={{ pt: 3 }}>
+                {false && <Grid item xs={3} sx={{ pt: 3 }}>
                     <MySwitch handleSwitch={handleSwitch} label="Centered & Scaled" />
-                </Grid>
+                </Grid>}
                 <Grid item xs={3}>
                     <MySelectGroupby
                         options={mdataCols}
@@ -76,7 +76,7 @@ export default function DataDistribution() {
                     />
                 </Grid>
             </Grid>
-            <MySectionContainer height="65vh">
+            <MySectionContainer height="70vh">
                 <Box sx={{ flexGrow: 1, p: 0, mt: 0 }}>
                     <Grid
                         container
