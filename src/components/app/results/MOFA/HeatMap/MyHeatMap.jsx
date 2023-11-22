@@ -1,19 +1,113 @@
 import { useJob } from '@/components/app/JobContext'
-import React from 'react'
-import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas  } from '@nivo/heatmap'
+import React, { useEffect, useMemo } from 'react'
+import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas } from '@nivo/heatmap'
 import { Box } from '@mui/material';
 
-function MyHeatMap({ omic, myIndex, myFeat, mdataCol, showYAxis }) {
+export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLegend }) {
 
     const xi = useJob().norm[`x${omic}`];
     const mdataColInfo = useJob().mdataType[mdataCol];
 
-    console.log(mdataColInfo)
-
     /*
     Get data to plot heatmap
     */
+    const hmData = useMemo(
+        () => getHmData(myIndex, myFeat, xi, mdataColInfo),
+        [myIndex, myFeat, xi, mdataColInfo]
+    )
+    /**/
 
+    /*
+    Set Legend values
+    */
+    useEffect(() => {
+
+        const Zarr = Object.keys(hmData).map(idx => (
+            hmData[idx].data.map(e => e.y)
+        )).flat();
+
+        Zarr.sort((a, b) => a - b);
+
+        updateZLegend(draft => {
+            draft[omic].min = Math.floor(Math.min(
+                draft[omic].min,
+                Zarr[Math.floor(0.1 * Zarr.length)]
+            ));
+            draft[omic].max = Math.ceil(Math.max(
+                draft[omic].max,
+                Zarr[Math.floor(0.9 * Zarr.length)]
+            ));
+        });
+    }, [hmData, omic, updateZLegend])
+    /**/
+
+    return (
+        <Box sx={{ height: 500, mx: 0.5, width: 260 }}>
+            <ResponsiveHeatMapCanvas
+                data={hmData}
+                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                axisTop={{
+                    tickSize: 0,
+                    tickPadding: 0,
+                    tickRotation: 0,
+                    legend: '',
+                    legendOffset: 0
+                }}
+
+                colors={{
+                    type: 'diverging',
+                    scheme: 'red_blue',
+                    minValue: zLegend.min,
+                    maxValue: zLegend.max,
+                    //divergeAt: 0
+                }}
+                emptyColor="#555555"
+                isInteractive={false}
+                animate={false}
+                enableLabels={false}
+            />
+        </Box>
+    )
+}
+
+export const MyHeatMapIndex = ({ myIndex, mdataCol }) => {
+
+    const mdataColInfo = useJob().mdataType[mdataCol];
+
+    const hmData = useMemo(
+        () => getHmData(myIndex, [], null, mdataColInfo),
+        [myIndex, mdataColInfo]
+    )
+
+    return (
+        <Box sx={{ height: 500, mx: 0.5, width: '100%' }}>
+            <ResponsiveHeatMapCanvas
+                data={hmData}
+                margin={{ top: 0, right: 0, bottom: 0, left: 100 }}
+                height={500}
+
+                axisLeft={{
+                    tickSize: 0,
+                    tickPadding: 0,
+                    tickRotation: 0,
+                    legend: 'Samples',
+                    legendPosition: 'middle',
+                    legendOffset: -80
+                }}
+                isInteractive={false}
+                animate={false}
+                enableLabels={false}
+            />
+        </Box>
+    )
+}
+
+
+/*
+
+*/
+
+const getHmData = (myIndex, myFeat, xi, mdataColInfo) => {
     let hmData = {};
     myIndex.map(e => { hmData[e] = [] });
     myFeat.map(f => {
@@ -23,15 +117,17 @@ function MyHeatMap({ omic, myIndex, myFeat, mdataCol, showYAxis }) {
         ).filter(
             e => myIndex.includes(e[0])
         ).map(e => {
-            hmData[e[0]].push({ x: f, y: e[1] })
+            hmData[e[0]].push({ x: f, y: -e[1] })
         });
     });
 
     if (mdataColInfo.type == 'categorical') {
 
         hmData = mdataColInfo.levels.map(lv => (
-            mdataColInfo.level2id[lv].filter(idx => myIndex.includes(idx)).map(idx => ({
-                id: `${idx}-${lv}`,
+            mdataColInfo.level2id[lv].filter(
+                idx => myIndex.includes(idx)
+            ).map(idx => ({
+                id: `${idx} | ${lv}`,
                 data: hmData[idx]
             }))
         )).flat();
@@ -42,78 +138,6 @@ function MyHeatMap({ omic, myIndex, myFeat, mdataCol, showYAxis }) {
             data: hmData[idx]
         }));
     }
-    console.log(hmData);
 
-    /**/
-
-
-    //xi.loc({rows:[myIndex[0]]}).print()
-
-    //xi.print()
-
-    return (
-        <Box sx={{height:500, width: showYAxis ? '10%' : '20%', border:'1px solid red'}}>
-            <ResponsiveHeatMapCanvas 
-                data={hmData}
-                margin={{ top: 0, right: 0, bottom: 0, left: showYAxis ? 100 : 0 }}
-                height={500}
-                //width={500}
-                //valueFormat=">-.2s"
-                axisTop={{
-                    tickSize: 0,
-                    tickPadding: 0,
-                    tickRotation: 0,
-                    legend: '',
-                    legendOffset: 0
-                }}
-                /*axisRight={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: 'country',
-                    legendPosition: 'middle',
-                    legendOffset: 70
-                }}*/
-                axisLeft={{
-                    tickSize: 0,
-                    tickPadding: 0,
-                    tickRotation: 0,
-                    //legend: 'country',
-                    legendPosition: 'middle',
-                    legendOffset: 0
-                }}
-                colors={{
-                    type: 'diverging',
-                    scheme: 'red_blue',
-                    minValue: -2,
-                    maxValue: 2,
-                    divergeAt: 0.5
-                }}
-                emptyColor="#555555"
-                /*legends={[
-                    {
-                        anchor: 'bottom',
-                        translateX: 0,
-                        translateY: 30,
-                        length: 400,
-                        thickness: 8,
-                        direction: 'row',
-                        tickPosition: 'after',
-                        tickSize: 3,
-                        tickSpacing: 4,
-                        tickOverlap: false,
-                        tickFormat: '>-.2s',
-                        title: 'Value →',
-                        titleAlign: 'start',
-                        titleOffset: 4
-                    }
-                ]}*/
-                isInteractive={false}
-                animate={false}
-                enableLabels={false}
-            />
-        </Box>
-    )
+    return hmData
 }
-
-export default MyHeatMap

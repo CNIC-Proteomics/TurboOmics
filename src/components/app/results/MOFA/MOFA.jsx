@@ -63,29 +63,27 @@ function MOFA() {
 
 
     /*
-    Get vector with sorted proteins and metabolites
+    Get arrays with sorted proteins and metabolites (loading and heatmap)
     */
+    const [plotHM, setPlotHM] = useState(false);
+    const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
+    useEffect(() => {
+        const myTimeOut = setTimeout(plotHeatMap, 100);
+        return () => clearInterval(myTimeOut)
+    }, [selectedPlot, plotHeatMap]);
+
     const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
 
-    const fLVec = useMemo(() => {
-        if (dataMOFA == null || selectedPlot == null) return null;
-
-        let fLVec = { 'q': [], 'm': [] };
-        Object.keys(fLVec).map(e => {
-            fLVec[e] = Object.keys(dataMOFA.loadings[e][selectedPlot.Factor]).map(
-                f => [f, dataMOFA.loadings[e][selectedPlot.Factor][f]]
-            );
-            fLVec[e].sort((a, b) => a[1] - b[1]);
-            fLVec[e] = fLVec[e].map((elem, i) => [...elem, (i + 1) / fLVec[e].length]);
-        })
-        return fLVec
-    }, [dataMOFA, selectedPlot]);
+    const fLVec = useMemo(
+        () => getFLVec(dataMOFA, selectedPlot), [dataMOFA, selectedPlot]
+    );
     /**/
 
     return (
         <Box>
-            {dataMOFA != null &&
-                <MySectionContainer height="80vh">
+            <MySectionContainer height="80vh">
+                {dataMOFA != null && <>
+
                     <MySection>
                         <Box sx={{ p: 5 }}>
                             <TablePvalues
@@ -114,40 +112,31 @@ function MOFA() {
                             />
                         </Box>
                     </MySection>
-                    {scatterMode == '1D' && selectedPlot &&
-                        <>
-                            <MySection sx={{ mt: 1 }}>
-                                <Divider variant='h6' sx={{ textAlign: 'center' }}>
-                                    Feature Loading Analysis: {selectedPlot.Factor}
-                                </Divider>
-                                <Grid sx={{ mt: 2 }} container>
-                                    {
-                                        ['q', 'm'].map(e => (
-                                            <Grid key={e} item xs={6}>
-                                                <LoadingPlotContainer
-                                                    omic={e}
-                                                    fLVec={fLVec[e]}
-                                                    //loadings={dataMOFA.loadings[e][selectedPlot.Factor]}
-                                                    //factorName={selectedPlot.Factor}
-                                                    nFeatRef={nFeatRef}
-                                                />
-                                            </Grid>
-                                        ))
-                                    }
-                                </Grid>
-                            </MySection>
-                            <MySection>
-                                <Divider>HeatMap</Divider>
-                                <HeatMapContainer
-                                    nFeatRef={nFeatRef}
-                                    fLVec={fLVec}
-                                    mdataCol={selectedPlot.mdataCol}
-                                />
-                            </MySection>
-                        </>
-                    }
-                </MySectionContainer>
-            }
+                    {scatterMode == '1D' && selectedPlot && <>
+                        <MySection sx={{ mt: 1 }}>
+                            <Divider variant='h6' sx={{ textAlign: 'center' }}>
+                                Feature Loading Analysis: {selectedPlot.Factor}
+                            </Divider>
+                            <LoadingPlotContainer
+                                fLVec={fLVec}
+                                nFeatRef={nFeatRef}
+                                plotHeatMap={plotHeatMap}
+                            />
+
+                        </MySection>
+                        <MySection>
+                            <Divider>HeatMap</Divider>
+                            <HeatMapContainer
+                                nFeatRef={nFeatRef}
+                                fLVec={fLVec}
+                                mdataCol={selectedPlot.mdataCol}
+                                plotHM={plotHM}
+                            />
+                        </MySection>
+                    </>}
+
+                </>}
+            </MySectionContainer>
         </Box >
     )
 }
@@ -177,6 +166,20 @@ const getRowNames = (dataMOFA, factorNames) => {
     }).filter(e => !e[1]).map(e => e[0]);
 
     return rowNames;
+}
+
+const getFLVec = (dataMOFA, selectedPlot) => {
+    if (dataMOFA == null || selectedPlot == null) return null;
+
+    let fLVec = { 'q': [], 'm': [] };
+    Object.keys(fLVec).map(e => {
+        fLVec[e] = Object.keys(dataMOFA.loadings[e][selectedPlot.Factor]).map(
+            f => [f, dataMOFA.loadings[e][selectedPlot.Factor][f]]
+        );
+        fLVec[e].sort((a, b) => a[1] - b[1]);
+        fLVec[e] = fLVec[e].map((elem, i) => [...elem, (i + 1) / fLVec[e].length]);
+    })
+    return fLVec
 }
 
 export default MOFA

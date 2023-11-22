@@ -14,7 +14,7 @@ import {
 import { calculateXTicks } from '../../EDA/DataDistribution/utils';
 
 
-function LoadingPlot({ omic, fLVec, nFeatRef }) {
+function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
 
     const [thrL, setThrL] = useState({ down: 0, up: 0 });
     const [nFeat, setNFeat] = useState({ down: 0, up: 0 });
@@ -36,8 +36,16 @@ function LoadingPlot({ omic, fLVec, nFeatRef }) {
             up: fLVec[fLVec.length - myNFeat.up - 1][1]
         });
 
-    }, [fLVec, nFeatRef]);
+    }, [fLVec, nFeatRef, omic]);
     /**/
+
+    /*
+    Synchronize with heatmap
+    */
+    useEffect(() => {
+        const myTimeOut = setTimeout(plotHeatMap, 100);
+        return () => clearInterval(myTimeOut)
+    }, [nFeat, plotHeatMap])
 
     /*
     Get data to plot
@@ -149,8 +157,8 @@ function LoadingPlot({ omic, fLVec, nFeatRef }) {
         Math.max(
             Math.abs(fLVec[0][1]),
             Math.abs(fLVec[fLVec.length - 1][1])
-        ) * 10
-    ) / 10;
+        ) * 1000
+    ) / 1000;
 
 
     return (
