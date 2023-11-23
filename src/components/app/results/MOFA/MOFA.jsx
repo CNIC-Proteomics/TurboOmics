@@ -22,12 +22,14 @@ function MOFA() {
     const savedScatterMode = useResults().MOFA.displayOpts.scatterMode;
     const [scatterMode, setScatterMode] = useState(savedScatterMode);
 
-    const savedSelectedPlot = useResults().MOFA.displayOpts.selectedPlot;
+    const savedSelectedPlot = useResults().MOFA.displayOpts.selectedPlot
     const [selectedPlot, setSelectedPlot] = useState(savedSelectedPlot);
+
+    const savedSelectedCell = useResults().MOFA.displayOpts.selectedCell;
+    const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
 
     const savedSelectedPlot2D = useResults().MOFA.displayOpts.selectedPlot2D;
     const [selectedPlot2D, setSelectedPlot2D] = useState(savedSelectedPlot2D);
-
 
     /*
     Fetch MOFA data
@@ -54,26 +56,49 @@ function MOFA() {
     Get arrays for pvalue table
     */
     const [colNames, factorNames] = useMemo(
-        () => getFactorNames(dataMOFA), [dataMOFA],
+        () => getFactorNames(dataMOFA, setSelectedPlot), [dataMOFA],
     );
     const rowNames = useMemo(
-        () => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]
+        () => getRowNames(dataMOFA, factorNames, setSelectedPlot), [dataMOFA, factorNames]
     );
     /**/
 
+    /*
+    */
+    useEffect(() => {
+        if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
+            setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] })
+            setSelectedCell({ rowIndex: 0, colIndex: 0 })
+        }
+    }, [factorNames, rowNames]);
+
+    useEffect(() => {
+        if (selectedPlot != null && selectedCell != null) {
+            dispatchResults({
+                type: 'set-selected-plot-cell-mofa',
+                rowIndex: selectedCell.rowIndex,
+                colIndex: selectedCell.colIndex,
+                mdataCol: selectedPlot.mdataCol,
+                Factor: selectedPlot.Factor
+            });
+        }
+    }, [selectedPlot, selectedCell])
 
     /*
-    Get arrays with sorted proteins and metabolites (loading and heatmap)
+    Function to update this component when changing nFeatRef
     */
+    const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
     const [plotHM, setPlotHM] = useState(false);
     const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
     useEffect(() => {
         const myTimeOut = setTimeout(plotHeatMap, 100);
         return () => clearInterval(myTimeOut)
     }, [selectedPlot, plotHeatMap]);
+    /**/
 
-    const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
-
+    /*
+    Get arrays with sorted proteins and metabolites (loading and heatmap)
+    */
     const fLVec = useMemo(
         () => getFLVec(dataMOFA, selectedPlot), [dataMOFA, selectedPlot]
     );
@@ -82,14 +107,15 @@ function MOFA() {
     return (
         <Box>
             <MySectionContainer height="80vh">
-                {dataMOFA != null && <>
-
+                {dataMOFA != null && selectedPlot != null && <>
                     <MySection>
                         <Box sx={{ p: 5 }}>
                             <TablePvalues
                                 anova={dataMOFA.anova}
                                 explained_variance={dataMOFA.explained_variance}
                                 setSelectedPlot={setSelectedPlot}
+                                selectedCell={selectedCell}
+                                setSelectedCell={setSelectedCell}
                                 scatterMode={scatterMode}
                                 rowNames={rowNames}
                                 colNames={colNames}
@@ -104,6 +130,8 @@ function MOFA() {
                                 scatterMode={scatterMode}
                                 setScatterMode={setScatterMode}
                                 selectedPlot={selectedPlot}
+                                setSelectedPlot={setSelectedPlot}
+                                setSelectedCell={setSelectedCell}
                                 selectedPlot2D={selectedPlot2D}
                                 setSelectedPlot2D={setSelectedPlot2D}
                                 rowNames={rowNames}
@@ -122,7 +150,6 @@ function MOFA() {
                                 nFeatRef={nFeatRef}
                                 plotHeatMap={plotHeatMap}
                             />
-
                         </MySection>
                         <MySection>
                             <Divider>HeatMap</Divider>
@@ -146,7 +173,7 @@ Define functions
 */
 
 const getFactorNames = (dataMOFA) => {
-    if (dataMOFA == null) return [undefined, undefined];
+    if (dataMOFA == null) return [null, null];
 
     const factorNames = Object.keys(dataMOFA.anova);
     const colNames = factorNames.map((e, i) => i + 1);
@@ -154,7 +181,7 @@ const getFactorNames = (dataMOFA) => {
 }
 
 const getRowNames = (dataMOFA, factorNames) => {
-    if (dataMOFA == null) return;
+    if (dataMOFA == null) return null;
 
     let rowNames = Object.keys(dataMOFA.anova[factorNames[0]]);
 

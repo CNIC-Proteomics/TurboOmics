@@ -4,18 +4,18 @@ import React from 'react';
 const HeatMapLegend = ({ nFeatRef, zLegend }) => {
     return (
         <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
-            <Box sx={{ width: '10%' }}></Box>
-            <Box sx={{mx:1}}>
+            <Box sx={{ width: '5%' }}></Box>
+            <Box sx={{mr:0.5}}>
                 {(nFeatRef.current.q.up > 0 || nFeatRef.current.q.down > 0) &&
                     <Box>
                         <Legend a={zLegend.q.min} b={zLegend.q.max} />
                         <Box><Typography variant='h6'></Typography></Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
                             {nFeatRef.current.q.down > 0 &&
-                                <Box sx={{ width: 260 }}></Box>
+                                <Box sx={{ width: 290 }}></Box>
                             }
                             {nFeatRef.current.q.up > 0 &&
-                                <Box sx={{ width: 260 }}></Box>
+                                <Box sx={{ width: 290 }}></Box>
                             }
                         </Box>
                     </Box>
@@ -28,10 +28,10 @@ const HeatMapLegend = ({ nFeatRef, zLegend }) => {
                         <Box><Typography variant='h6'></Typography></Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
                             {nFeatRef.current.m.down > 0 &&
-                                <Box sx={{ width: 260 }}></Box>
+                                <Box sx={{ width: 290 }}></Box>
                             }
                             {nFeatRef.current.m.up > 0 &&
-                                <Box sx={{ width: 260 }}></Box>
+                                <Box sx={{ width: 290 }}></Box>
                             }
                         </Box>
                     </Box>

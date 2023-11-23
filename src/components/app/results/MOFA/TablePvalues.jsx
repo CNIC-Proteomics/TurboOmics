@@ -69,6 +69,8 @@ export default function TablePvalues({
     anova,
     explained_variance,
     setSelectedPlot,
+    selectedCell,
+    setSelectedCell,
     scatterMode,
     factorNames,
     colNames,
@@ -78,8 +80,8 @@ export default function TablePvalues({
     const dispatchResults = useDispatchResults();
     const classes = useStyles(scatterMode);
 
-    const savedSelectedCell = useResults().MOFA.displayOpts.selectedCell;
-    const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
+    //const savedSelectedCell = useResults().MOFA.displayOpts.selectedCell;
+    //const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
 
     // get pvalues
     const pvalues = useMemo(() => {
@@ -98,13 +100,13 @@ export default function TablePvalues({
         if (scatterMode == '2D') return
         setSelectedCell({ rowIndex, colIndex });
         setSelectedPlot({ mdataCol: rowNames[rowIndex], Factor: factorNames[colIndex] });
-        dispatchResults({
+        /*dispatchResults({
             type: 'set-selected-plot-cell-mofa',
             rowIndex: rowIndex,
             colIndex: colIndex,
             mdataCol: rowNames[rowIndex],
             Factor: factorNames[colIndex]
-        })
+        })*/
 
         console.log(`Plot scatter: MOFA ${factorNames[colIndex]} vs ${rowNames[rowIndex]}`)
     };

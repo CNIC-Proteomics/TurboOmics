@@ -1,7 +1,7 @@
 import { useJob } from '@/components/app/JobContext'
 import React, { useEffect, useMemo } from 'react'
 import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas } from '@nivo/heatmap'
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLegend }) {
 
@@ -42,7 +42,7 @@ export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLeg
     /**/
 
     return (
-        <Box sx={{ height: 500, mx: 0.5, width: 260 }}>
+        <Box sx={{ height: 510, width: 290, marginRight:0.5, border: '2px solid #444444' }}>
             <ResponsiveHeatMapCanvas
                 data={hmData}
                 margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -70,7 +70,7 @@ export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLeg
     )
 }
 
-export const MyHeatMapIndex = ({ myIndex, mdataCol }) => {
+export const HeatMapIndex = ({ myIndex, mdataCol }) => {
 
     const mdataColInfo = useJob().mdataType[mdataCol];
 
@@ -79,29 +79,36 @@ export const MyHeatMapIndex = ({ myIndex, mdataCol }) => {
         [myIndex, mdataColInfo]
     )
 
+    const arrayA = hmData.map(e => e.id.split('##')).map(e => e[e.length - 1]);
+
+    // Crear un objeto para realizar el conteo de frecuencias
+    const frequencyCount = {};
+    arrayA.forEach((value) => {
+        frequencyCount[value] = (frequencyCount[value] || 0) + 1;
+    });
+
+    // Obtener valores únicos del array y ordenarlos
+    const uniqueValues = [...new Set(arrayA)];
+
     return (
-        <Box sx={{ height: 500, mx: 0.5, width: '100%' }}>
-            <ResponsiveHeatMapCanvas
-                data={hmData}
-                margin={{ top: 0, right: 0, bottom: 0, left: 100 }}
-                height={500}
-
-                axisLeft={{
-                    tickSize: 0,
-                    tickPadding: 0,
-                    tickRotation: 0,
-                    legend: 'Samples',
-                    legendPosition: 'middle',
-                    legendOffset: -80
-                }}
-                isInteractive={false}
-                animate={false}
-                enableLabels={false}
-            />
-        </Box>
-    )
-}
-
+        <table>
+            <tbody>
+                {uniqueValues.map((value, index) => (
+                    <tr
+                        key={index}
+                        style={{
+                            height: frequencyCount[value] * 500 / arrayA.length,
+                            borderTop: '2px solid #444444',
+                            borderBottom: '2px solid #444444',
+                        }}
+                    >
+                        <td style={{paddingRight:5}}><Typography variant='h7'>{value}</Typography></td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+};
 
 /*
 
@@ -127,7 +134,7 @@ const getHmData = (myIndex, myFeat, xi, mdataColInfo) => {
             mdataColInfo.level2id[lv].filter(
                 idx => myIndex.includes(idx)
             ).map(idx => ({
-                id: `${idx} | ${lv}`,
+                id: `${idx}##${lv}`,
                 data: hmData[idx]
             }))
         )).flat();

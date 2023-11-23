@@ -1,7 +1,7 @@
 import { useJob } from '@/components/app/JobContext';
 import { Box, Button, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { MyHeatMap, MyHeatMapIndex } from './MyHeatMap';
+import { MyHeatMap, HeatMapIndex } from './MyHeatMap';
 import HeatMapHeader from './HeatMapHeader';
 import HeatMapLegend from './HeatMapLegend';
 import { useImmer } from 'use-immer';
@@ -13,9 +13,6 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
         updateZLegend({'q':{min:0, max:0}, 'm':{min:0, max:0}});
     }, [plotHM, updateZLegend]);
 
-    console.log(zLegend.q);
-    console.log(zLegend.m);
-
     const { xq, xm } = useJob().user;
     const myIndex = xq.index.filter(e => xm.index.includes(e));
 
@@ -23,8 +20,8 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
         <Box>
             <HeatMapHeader nFeatRef={nFeatRef} />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ width: '10%' }}>
-                    <MyHeatMapIndex myIndex={myIndex} mdataCol={mdataCol} />
+                <Box sx={{ width: '5%', display:'flex', justifyContent:'flex-end' }}>
+                    <HeatMapIndex myIndex={myIndex} mdataCol={mdataCol} />
                 </Box>
                 {['q', 'm'].map(omic => (
                     <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>

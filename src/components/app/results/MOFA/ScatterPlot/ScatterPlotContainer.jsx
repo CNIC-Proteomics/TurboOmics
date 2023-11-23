@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
-import SelectorFactor2D from './SelectorFactor2D'
+import {SelectorFactor2D, SelectorFactor} from './SelectorFactor'
 import ScatterModeSelector from './ScatterModeSelector'
 import { useJob } from '@/components/app/JobContext'
 import { MyScatter, MyScatter2D } from './MyScatter'
@@ -9,6 +9,8 @@ function ScatterPlotContainer({
     scatterMode,
     setScatterMode,
     selectedPlot,
+    setSelectedPlot,
+    setSelectedCell,
     selectedPlot2D,
     setSelectedPlot2D,
     factorNames,
@@ -42,11 +44,13 @@ function ScatterPlotContainer({
 
                 <Box sx={{ px: 3, pt: 7, textAlign: 'center' }}>
                     {scatterMode == '1D' ?
-                        <Box sx={{ height: 75, pt: 3 }}>
-                            <Typography variant='body1'>
-                                Select a pvalue cell to plot Factor
-                            </Typography>
-                        </Box>
+                        <SelectorFactor
+                            factorNames={factorNames}
+                            rowNames={rowNames}
+                            selectedPlot={selectedPlot}
+                            setSelectedPlot={setSelectedPlot}
+                            setSelectedCell={setSelectedCell}
+                        />
                         :
                         <SelectorFactor2D
                             factorNames={factorNames}
