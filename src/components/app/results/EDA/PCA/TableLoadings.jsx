@@ -3,7 +3,7 @@ import { Box, TextField, Button, IconButton } from '@mui/material'
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { MySelect } from '@/components/app/results/EDA/DataDistribution/MyFormComponents';
 import MyMotion from '@/components/MyMotion';
-import { MaterialReactTable } from 'material-react-table';
+import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
@@ -35,7 +35,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
             ...selectedPCA.map((e, i) => ({
                 accessorKey: `PCA${i}`,
                 header: `Loadings PCA${e}`,
-                size: 100
+                //size: 100
             }))
         ]
 
@@ -102,7 +102,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={e => {
                             setFilterCol(e.value);
-                            dispatchResults({type: 'set-filter-col', value:e.value, omic})
+                            dispatchResults({ type: 'set-filter-col', value: e.value, omic })
                         }}
                         value={{ label: filterCol, value: filterCol }}
                     />
@@ -173,9 +173,40 @@ function FilterTable({ columns, data }) {
         }
     }, [sorting]);
 
+    const table = useMaterialReactTable({
+        columns,
+        data, //10,000 rows
+        defaultDisplayColumn: { enableResizing: true },
+        layoutMode: 'grid',
+        enableBottomToolbar: false,
+        enableTopToolbar: false,
+        enableColumnResizing: true,
+        enableColumnVirtualization: true,
+        enableGlobalFilterModes: false,
+        enablePagination: false,
+        enableColumnPinning: false,
+        enableRowNumbers: false,
+        enableColumnFilters: false,
+        enableRowVirtualization: true,
+        muiTableContainerProps: { sx: { maxHeight: '560px' } },
+        onSortingChange: setSorting,
+        state: { isLoading, sorting },
+        rowVirtualizerInstanceRef, //optional
+        rowVirtualizerOptions: { overscan: 5 }, //optionally customize the row virtualizer
+        columnVirtualizerOptions: { overscan: 2 }, //optionally customize the column virtualizer
+    });
+
     return (
         <MyMotion>
             <div style={{ opacity: 0.9, width: "100%", margin: 'auto' }}>
+                {true && <MaterialReactTable table={table} />}
+            </div>
+        </MyMotion>
+    );
+};
+
+/*
+
                 <MaterialReactTable
                     columns={columns}
                     data={data} //10,000 rows
@@ -199,7 +230,4 @@ function FilterTable({ columns, data }) {
                     rowVirtualizerProps={{ overscan: 1 }} //optionally customize the row virtualizer
                     columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
                 />
-            </div>
-        </MyMotion>
-    );
-};
+                */

@@ -113,7 +113,7 @@ export default function DataDistribution() {
                                         />
                                     </Box>
                                     :
-                                    <Box sx={{ textAlign: 'center', pt: 20, height: '52vh' }}>
+                                    <Box sx={{ textAlign: 'center', pt: 20, height: 550 }}>
                                         <CircularProgress size={100} thickness={2} />
                                     </Box>
                                 }

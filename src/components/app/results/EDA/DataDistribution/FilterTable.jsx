@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { MaterialReactTable } from 'material-react-table';
+import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import MyMotion from '@/components/MyMotion';
 
 export default function FilterTable({ columns, data }) {
+
+    //console.log(data)
 
     //optionally access the underlying virtualizer instance
     const rowVirtualizerInstanceRef = useRef(null);
@@ -26,32 +28,33 @@ export default function FilterTable({ columns, data }) {
         }
     }, [sorting]);
 
+    const table = useMaterialReactTable({
+        columns, 
+        data, //10,000 rows
+        defaultDisplayColumn: { enableResizing: true },
+        layoutMode: 'grid',
+        enableBottomToolbar: false,
+        enableTopToolbar: false,
+        enableColumnResizing: false,
+        enableColumnVirtualization: true,
+        enableGlobalFilterModes: false,
+        enablePagination: false,
+        enableColumnPinning: false,
+        enableRowNumbers: false,
+        enableRowVirtualization: true,
+        enableColumnFilters: false,
+        muiTableContainerProps: { sx: { maxHeight: '560px' } },
+        onSortingChange: setSorting,
+        state: { isLoading, sorting },
+        rowVirtualizerInstanceRef, //optional
+        rowVirtualizerOptions: { overscan: 5 }, //optionally customize the row virtualizer
+        columnVirtualizerOptions: { overscan: 2 }, //optionally customize the column virtualizer
+    });
+
     return (
         <MyMotion>
             <div style={{ opacity: 0.9, width: "100%", margin: 'auto' }}>
-                <MaterialReactTable
-                    columns={columns}
-                    data={data} //10,000 rows
-                    enableBottomToolbar={false}
-                    enableTopToolbar={false}
-                    enableColumnResizing
-                    enableColumnVirtualization
-                    enableColumnActions={false}
-                    enableColumnFilters={false}
-                    enableGlobalFilterModes={false}
-                    enableFullScreenToggle={false}
-                    enablePinning={false}
-                    enablePagination={false}
-                    enableRowNumbers={false}
-                    enableDensityToggle={false}
-                    enableRowVirtualization
-                    muiTableContainerProps={{ sx: { maxHeight: '500px' } }}
-                    onSortingChange={setSorting}
-                    state={{ isLoading, sorting }}
-                    rowVirtualizerInstanceRef={rowVirtualizerInstanceRef} //optional
-                    rowVirtualizerProps={{ overscan: 1 }} //optionally customize the row virtualizer
-                    columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
-                />
+                <MaterialReactTable table={table} />
             </div>
         </MyMotion>
     );

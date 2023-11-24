@@ -24,7 +24,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
         let columns = [{
             accessorKey: 'ID',
             header: 'ID',
-            size: 50,
+            size: 60,
         }]
 
         if (f2i.columns.includes(filterCol)) {
@@ -48,7 +48,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
             columns.push({
                 accessorKey: filterCol,
                 header: filterCol,
-                size: 170,
+                //size: 170,
             })
 
         } else {
@@ -107,7 +107,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
                 }
             </Box>
             <Box sx={{ mt: 0 }}>
-                <FilterTable data={filteredFeatures} columns={columns} />
+                {true && <FilterTable data={filteredFeatures} columns={columns} />}
             </Box>
         </Box>
     )

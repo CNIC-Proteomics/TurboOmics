@@ -1,5 +1,6 @@
-import { Box, Divider, Grid, Typography } from '@mui/material'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '@/components/VarsContext';
 import { useJob } from '../../JobContext';
@@ -8,6 +9,7 @@ import ScatterPlotContainer from './ScatterPlot/ScatterPlotContainer';
 import { MySection, MySectionContainer } from '@/components/MySection';
 import LoadingPlotContainer from './LoadingPlot/LoadingPlotContainer';
 import HeatMapContainer from './HeatMap/HeatMapContainer';
+import ExploreFeaturesContainer from './ExploreFeatures/ExploreFeaturesContainer';
 
 
 function MOFA() {
@@ -30,6 +32,8 @@ function MOFA() {
 
     const savedSelectedPlot2D = useResults().MOFA.displayOpts.selectedPlot2D;
     const [selectedPlot2D, setSelectedPlot2D] = useState(savedSelectedPlot2D);
+
+    const [exploreF, setExploreF] = useState(false);
 
     /*
     Fetch MOFA data
@@ -70,7 +74,7 @@ function MOFA() {
             setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] })
             setSelectedCell({ rowIndex: 0, colIndex: 0 })
         }
-    }, [factorNames, rowNames]);
+    }, [factorNames, rowNames, savedSelectedPlot]);
 
     useEffect(() => {
         if (selectedPlot != null && selectedCell != null) {
@@ -82,7 +86,7 @@ function MOFA() {
                 Factor: selectedPlot.Factor
             });
         }
-    }, [selectedPlot, selectedCell])
+    }, [selectedPlot, selectedCell, dispatchResults])
 
     /*
     Function to update this component when changing nFeatRef
@@ -160,8 +164,24 @@ function MOFA() {
                                 plotHM={plotHM}
                             />
                         </MySection>
+                        <MySection>
+                            <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                <Button
+                                    color='primary'
+                                    variant='outlined'
+                                    endIcon={<ArrowOutwardIcon />}
+                                    onClick={() => setExploreF(true)}
+                                >
+                                    Explore Features
+                                </Button>
+                            </Box>
+                            <ExploreFeaturesContainer
+                                exploreF={exploreF}
+                                setExploreF={setExploreF}
+                                Factor={selectedPlot.Factor}
+                            />
+                        </MySection>
                     </>}
-
                 </>}
             </MySectionContainer>
         </Box >
