@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, Typography } from '@mui/material';
+import { Backdrop, Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material';
 import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatchResults, useResults } from '../../ResultsContext';
@@ -68,6 +68,7 @@ function MOFA() {
     /**/
 
     /*
+    Initialize selectedPlot columns and index
     */
     useEffect(() => {
         if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
@@ -92,6 +93,7 @@ function MOFA() {
     Function to update this component when changing nFeatRef
     */
     const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
+    const thrLRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
     const [plotHM, setPlotHM] = useState(false);
     const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
     useEffect(() => {
@@ -106,6 +108,12 @@ function MOFA() {
     const fLVec = useMemo(
         () => getFLVec(dataMOFA, selectedPlot), [dataMOFA, selectedPlot]
     );
+    /**/
+
+    /*
+    Explore Features
+    */
+    const [EFLoading, setEFLoading] = useState(false);
     /**/
 
     return (
@@ -144,7 +152,7 @@ function MOFA() {
                             />
                         </Box>
                     </MySection>
-                    {scatterMode == '1D' && selectedPlot && <>
+                    {scatterMode == '1D' && <>
                         <MySection sx={{ mt: 1 }}>
                             <Divider variant='h6' sx={{ textAlign: 'center' }}>
                                 Feature Loading Analysis: {selectedPlot.Factor}
@@ -152,6 +160,7 @@ function MOFA() {
                             <LoadingPlotContainer
                                 fLVec={fLVec}
                                 nFeatRef={nFeatRef}
+                                thrLRef={thrLRef}
                                 plotHeatMap={plotHeatMap}
                             />
                         </MySection>
@@ -170,15 +179,27 @@ function MOFA() {
                                     color='primary'
                                     variant='outlined'
                                     endIcon={<ArrowOutwardIcon />}
-                                    onClick={() => setExploreF(true)}
+                                    onClick={() => {
+                                        setExploreF(true);
+                                        //setEFLoading(true);
+                                        //setTimeout(() => setEFLoading(false), 5000);
+                                    }}
                                 >
                                     Explore Features
                                 </Button>
                             </Box>
+                            <Backdrop
+                                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                                open={EFLoading}
+                                //onClick={handleClose}
+                            >
+                                <CircularProgress color="inherit" />
+                            </Backdrop>
                             <ExploreFeaturesContainer
                                 exploreF={exploreF}
                                 setExploreF={setExploreF}
                                 Factor={selectedPlot.Factor}
+                                thrLRef={thrLRef.current}
                             />
                         </MySection>
                     </>}

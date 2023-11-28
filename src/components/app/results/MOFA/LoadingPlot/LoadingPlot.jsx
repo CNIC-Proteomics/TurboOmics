@@ -14,7 +14,7 @@ import {
 import { calculateXTicks } from '../../EDA/DataDistribution/utils';
 
 
-function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
+function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
 
     const [thrL, setThrL] = useState({ down: 0, up: 0 });
     const [nFeat, setNFeat] = useState({ down: 0, up: 0 });
@@ -27,14 +27,17 @@ function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
             down: Math.floor(fLVec.length * 0.01),
             up: Math.floor(fLVec.length * 0.01)
         };
-        
+
         setNFeat(myNFeat);
         nFeatRef.current[omic] = myNFeat;
 
-        setThrL({
+        const myThrL = {
             down: fLVec[myNFeat.down][1],
             up: fLVec[fLVec.length - myNFeat.up - 1][1]
-        });
+        }
+
+        setThrL(myThrL);
+        thrLRef.current[omic] = myThrL;
 
     }, [fLVec, nFeatRef, omic]);
     /**/
@@ -81,6 +84,8 @@ function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
     const handleSlider = ([down, up]) => {
         const myThrL = { down: Math.min(down, 0), up: Math.max(up, 0) }
         setThrL(myThrL);
+        thrLRef.current[omic] = myThrL;
+
         const myNFeat = {
             down: fLVec.filter(e => e[1] < myThrL.down).length,
             up: fLVec.filter(e => e[1] > myThrL.up).length
@@ -89,17 +94,19 @@ function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
         setNFeat(myNFeat);
         nFeatRef.current[omic] = myNFeat;
     };
-    
+
 
     const handleClick = (value) => {
         if (value < 0) {
             setThrL(prevState => ({ ...prevState, down: value }));
+            thrLRef.current[omic].down = value;
 
             const myValue = fLVec.filter(e => e[1] < value).length
             setNFeat(prevState => ({ ...prevState, down: myValue }));
             nFeatRef.current[omic].down = myValue
         } else {
             setThrL(prevState => ({ ...prevState, up: value }));
+            thrLRef.current[omic].up = value;
 
             const myValue = fLVec.filter(e => e[1] > value).length
             setNFeat(prevState => ({ ...prevState, up: myValue }));
@@ -119,17 +126,20 @@ function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
             const fLVecDown = fLVec.filter(e => e[1] < 0);
 
             if (number >= 0 && number < fLVecDown.length) {
-                nFeatRef.current[omic].down = number
                 setNFeat(prevState => ({ ...prevState, down: number }));
+                nFeatRef.current[omic].down = number
                 setThrL(prevState => ({ ...prevState, down: fLVecDown[number][1] }));
+                thrLRef.current[omic].down = fLVecDown[number][1]
             } else if (number < 0) {
-                nFeatRef.current[omic].down = 0
                 setNFeat(prevState => ({ ...prevState, down: 0 }));
+                nFeatRef.current[omic].down = 0
                 setThrL(prevState => ({ ...prevState, down: fLVecDown[0][1] }));
+                thrLRef.current[omic].down = fLVecDown[0][1]
             } else if (number >= fLVecDown.length) {
-                nFeatRef.current[omic].down = fLVecDown.length
                 setNFeat(prevState => ({ ...prevState, down: fLVecDown.length }));
+                nFeatRef.current[omic].down = fLVecDown.length
                 setThrL(prevState => ({ ...prevState, down: 0 }));
+                thrLRef.current[omic].down = 0
             }
         }
 
@@ -137,17 +147,20 @@ function LoadingPlot({ omic, fLVec, nFeatRef, plotHeatMap }) {
             const fLVecUp = fLVec.filter(e => e[1] > 0);
 
             if (number > 0 && number < fLVecUp.length) {
-                nFeatRef.current[omic].up = number;
                 setNFeat(prevState => ({ ...prevState, up: number }));
+                nFeatRef.current[omic].up = number;
                 setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - number][1] }));
+                thrLRef.current[omic].up = fLVecUp[fLVecUp.length - number][1]
             } else if (number <= 0) {
-                nFeatRef.current[omic].up = 0;
                 setNFeat(prevState => ({ ...prevState, up: 0 }));
+                nFeatRef.current[omic].up = 0;
                 setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - 1][1] }));
+                thrLRef.current[omic].up = fLVecUp[fLVecUp.length - 1][1]
             } else if (number >= fLVecUp.length) {
-                nFeatRef.current[omic].up = fLVecUp.length;
                 setNFeat(prevState => ({ ...prevState, up: fLVecUp.length }));
+                nFeatRef.current[omic].up = fLVecUp.length;
                 setThrL(prevState => ({ ...prevState, up: 0 }));
+                thrLRef.current[omic].up = 0;
             }
         }
     }

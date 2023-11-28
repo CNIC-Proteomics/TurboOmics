@@ -2,7 +2,6 @@ import { Box, Paper, Typography } from '@mui/material';
 import React, { useState } from 'react'
 
 function OmicSelector({ selectedOmic, setSelectedOmic }) {
-
     return (
         <Box display='flex'>
             <MyButton
@@ -42,8 +41,9 @@ const MyButton = ({ selectedOmic, setSelectedOmic, buttonOmic, title }) => {
                 height: 70,
                 transition: 'all 0.3s ease',
                 cursor: 'pointer',
-                display:'flex',
-                alignItems: 'center',justifyContent: 'center'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
             }}
             onClick={() => setSelectedOmic(buttonOmic)}
         >

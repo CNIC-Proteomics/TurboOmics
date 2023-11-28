@@ -2,7 +2,7 @@ import { Box, Grid, Typography } from '@mui/material'
 import React, { useMemo, useState } from 'react'
 import LoadingPlot from './LoadingPlot';
 
-function LoadingPlotContainer({ fLVec, nFeatRef, plotHeatMap }) {
+function LoadingPlotContainer({ fLVec, nFeatRef, thrLRef, plotHeatMap }) {
     return (
         <Grid sx={{ mt: 2 }} container>
             {['q', 'm'].map(omic => (
@@ -14,6 +14,7 @@ function LoadingPlotContainer({ fLVec, nFeatRef, plotHeatMap }) {
                         omic={omic}
                         fLVec={fLVec[omic]}
                         nFeatRef={nFeatRef}
+                        thrLRef={thrLRef}
                         plotHeatMap={plotHeatMap}
                     />
                 </Grid>

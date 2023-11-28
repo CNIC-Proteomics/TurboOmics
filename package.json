@@ -17,6 +17,8 @@
     "@nivo/boxplot": "^0.83.0",
     "@nivo/core": "^0.83.0",
     "@nivo/heatmap": "^0.84.0",
+    "@splidejs/react-splide": "^0.7.12",
+    "autoprefixer": "^10.4.16",
     "bootstrap": "^5.3.1",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
