@@ -55,7 +55,6 @@ function MOFA() {
 
     /**/
 
-
     /* 
     Get arrays for pvalue table
     */
@@ -63,7 +62,7 @@ function MOFA() {
         () => getFactorNames(dataMOFA, setSelectedPlot), [dataMOFA],
     );
     const rowNames = useMemo(
-        () => getRowNames(dataMOFA, factorNames, setSelectedPlot), [dataMOFA, factorNames]
+        () => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]
     );
     /**/
 
@@ -96,10 +95,10 @@ function MOFA() {
     const thrLRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
     const [plotHM, setPlotHM] = useState(false);
     const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
-    useEffect(() => {
+    /*useEffect(() => {
         const myTimeOut = setTimeout(plotHeatMap, 100);
         return () => clearInterval(myTimeOut)
-    }, [selectedPlot, plotHeatMap]);
+    }, [selectedPlot, plotHeatMap]);*/
     /**/
 
     /*

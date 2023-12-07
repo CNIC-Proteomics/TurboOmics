@@ -19,32 +19,30 @@ export default function AnnotationsParamsDialog({ creatingJob, setCreatingJob })
     //const [loading, setLoading] = useState(false);
 
     return (
-        <div>
-            <Dialog
-                fullScreen
-                open={creatingJob == 'annotations-params'}
-                TransitionComponent={Transition}
-            >
-                <AppBar sx={{ position: 'relative', backgroundColor: 'rgba(160, 0, 0, 1)' }}>
-                    <Toolbar>
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            onClick={() => setCreatingJob('ask-annotations')}
-                            aria-label="close"
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                            Metabolomic Putative Annotations
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
-                <Box className="m-2">
-                    <AnnotationsParamsContent />
-                </Box>
-            </Dialog>
-        </div>
+        <Dialog
+            fullScreen
+            open={creatingJob == 'annotations-params'}
+            TransitionComponent={Transition}
+        >
+            <AppBar sx={{ position: 'relative', backgroundColor: 'rgba(160, 0, 0, 1)' }}>
+                <Toolbar>
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={() => setCreatingJob('ask-annotations')}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                        Metabolomic Putative Annotations
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <Box className="m-2">
+                <AnnotationsParamsContent />
+            </Box>
+        </Dialog>
     )
 }
 

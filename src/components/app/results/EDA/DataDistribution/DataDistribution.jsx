@@ -82,7 +82,7 @@ export default function DataDistribution() {
                         container
                         direction='row'
                         justifyContent='center'
-                        spacing={2}
+                        spacing={0}
                         sx={{ p: 0 }}
                     >
                         <Grid item sx={{ borderRight: '1px solid #cccccc' }} xs={6}>

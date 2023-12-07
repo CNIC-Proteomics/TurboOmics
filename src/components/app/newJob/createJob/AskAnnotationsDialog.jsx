@@ -18,7 +18,7 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    {"Obtain Putative Annotations from CMM & TurboPutative?"}
+                    Obtain Putative Annotations from CMM & TurboPutative?
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
@@ -36,7 +36,6 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                         <Button 
                         style={{ color: 'rgb(150,150,150)' }}
                         onClick={() => {setCreatingJob('annotations-params')}}
-                        
                         >
                             Yes
                         </Button>

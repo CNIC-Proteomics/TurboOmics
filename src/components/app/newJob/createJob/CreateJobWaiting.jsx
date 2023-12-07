@@ -22,7 +22,7 @@ export default function CreateJobWaiting({ creatingJob }) {
 
         return () => clearInterval(logRef.current);
 
-    }, [logRef, jobID, API_URL])
+    }, [logRef, jobID, API_URL]);
 
     return (
         <Box>

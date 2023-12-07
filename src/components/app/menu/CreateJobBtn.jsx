@@ -44,7 +44,7 @@ export default function CreateJobBtn({ setCreatingJob }) {
         });
 
         // Set jobContext received by back-end
-        const resJson = await res.json()
+        const resJson = await res.json();
         const newJob = json2Danfo(resJson);
         dispatchJob({
             type: 'set-job-context',

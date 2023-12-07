@@ -161,7 +161,7 @@ const TabComponent = ({ text, status }) => {
                 <Box sx={{ position: 'absolute', height: '100%' }}>
                     <Box sx={{ height: 20, position: 'relative', top: '35%', left: 7 }}>
                         <CircularProgress
-                            sx={{ verticalAlign: 'middle', border: '0px solid red' }}
+                            sx={{ verticalAlign: 'middle' }}
                             size={15}
                             thickness={5} />
                     </Box>
