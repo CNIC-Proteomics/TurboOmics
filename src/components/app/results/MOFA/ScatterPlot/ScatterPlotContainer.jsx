@@ -113,6 +113,7 @@ const getScatterData = (
                 projection: projections[element][selectedPlot.Factor],
             })
         })
+
     } else if (scatterMode == '2D') {
         scatterData = {};
         if (Object.keys(mdataType).includes(selectedPlot2D.g)) {

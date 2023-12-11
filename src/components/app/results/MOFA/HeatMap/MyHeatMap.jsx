@@ -29,10 +29,10 @@ export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLeg
         Zarr.sort((a, b) => a - b);
 
         updateZLegend(draft => {
-            draft[omic].min = Math.floor(Math.min(
+            draft[omic].min = Math.floor(Zarr[Math.floor(0.1 * Zarr.length)]/*Math.min(
                 draft[omic].min,
                 Zarr[Math.floor(0.1 * Zarr.length)]
-            ));
+            )*/);
             draft[omic].max = Math.ceil(Math.max(
                 draft[omic].max,
                 Zarr[Math.floor(0.9 * Zarr.length)]

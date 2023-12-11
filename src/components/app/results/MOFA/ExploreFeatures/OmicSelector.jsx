@@ -1,33 +1,47 @@
 import { Box, Paper, Typography } from '@mui/material';
 import React, { useState } from 'react'
 
-function OmicSelector({ selectedOmic, setSelectedOmic }) {
+function OmicSelector({ selectedOmic, setSelectedOmic, scrollOmic }) {
+
+    const [selfSelectedOmic, setSelfSelectedOmic] = useState(selectedOmic);
+
     return (
         <Box display='flex'>
             <MyButton
-                selectedOmic={selectedOmic}
                 setSelectedOmic={setSelectedOmic}
+                selfSelectedOmic={selfSelectedOmic}
+                setSelfSelectedOmic={setSelfSelectedOmic}
                 buttonOmic='q'
                 title='Proteomics'
+                scroll={()=>scrollOmic('left')}
             />
             <MyButton
-                selectedOmic={selectedOmic}
                 setSelectedOmic={setSelectedOmic}
+                selfSelectedOmic={selfSelectedOmic}
+                setSelfSelectedOmic={setSelfSelectedOmic}
                 buttonOmic='m'
                 title='Metabolomics'
+                scroll={()=>scrollOmic('right')}
             />
         </Box>
     )
 }
 
-const MyButton = ({ selectedOmic, setSelectedOmic, buttonOmic, title }) => {
+const MyButton = ({ 
+    setSelectedOmic,
+    selfSelectedOmic,
+    setSelfSelectedOmic,
+    buttonOmic, 
+    title, 
+    scroll 
+}) => {
 
     const bgColor = { act: '#424242', noAct: '#FFFFFF' };
     const txColor = { act: '#FFFFFF', noAct: '#424242' };
 
     const [isHover, setIsHover] = useState(false);
 
-    const isActive = selectedOmic == buttonOmic || isHover;
+    const isActive = selfSelectedOmic == buttonOmic || isHover;
 
     return (
         <Paper
@@ -45,7 +59,12 @@ const MyButton = ({ selectedOmic, setSelectedOmic, buttonOmic, title }) => {
                 alignItems: 'center',
                 justifyContent: 'center'
             }}
-            onClick={() => setSelectedOmic(buttonOmic)}
+            onClick={() => {
+                if (selfSelectedOmic == buttonOmic) return
+                setSelfSelectedOmic(buttonOmic);
+                setTimeout(() => setSelectedOmic(buttonOmic), 500); 
+                scroll()
+            }}
         >
             <Typography variant='h5'>{title}</Typography>
         </Paper>

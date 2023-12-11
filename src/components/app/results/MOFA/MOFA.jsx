@@ -33,7 +33,6 @@ function MOFA() {
     const savedSelectedPlot2D = useResults().MOFA.displayOpts.selectedPlot2D;
     const [selectedPlot2D, setSelectedPlot2D] = useState(savedSelectedPlot2D);
 
-    const [exploreF, setExploreF] = useState(false);
 
     /*
     Fetch MOFA data
@@ -50,7 +49,8 @@ function MOFA() {
     }, [savedDataMOFA, API_URL, dispatchResults, jobID]);
 
     useEffect(() => {
-        fetchData();
+        const myTimeOut = setTimeout(fetchData, 100);
+        return () => clearTimeout(myTimeOut);
     }, [fetchData]);
 
     /**/
@@ -71,8 +71,8 @@ function MOFA() {
     */
     useEffect(() => {
         if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
-            setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] })
-            setSelectedCell({ rowIndex: 0, colIndex: 0 })
+            setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] });
+            setSelectedCell({ rowIndex: 0, colIndex: 0 });
         }
     }, [factorNames, rowNames, savedSelectedPlot]);
 
@@ -112,6 +112,7 @@ function MOFA() {
     /*
     Explore Features
     */
+    const [exploreF, setExploreF] = useState(false);
     const [EFLoading, setEFLoading] = useState(false);
     /**/
 
@@ -179,9 +180,11 @@ function MOFA() {
                                     variant='outlined'
                                     endIcon={<ArrowOutwardIcon />}
                                     onClick={() => {
-                                        setExploreF(true);
-                                        //setEFLoading(true);
-                                        //setTimeout(() => setEFLoading(false), 5000);
+                                        setEFLoading(true);
+                                        setTimeout(() => {
+                                            setEFLoading(false);
+                                            setExploreF(true)
+                                        }, 500);
                                     }}
                                 >
                                     Explore Features
@@ -190,16 +193,20 @@ function MOFA() {
                             <Backdrop
                                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                                 open={EFLoading}
-                                //onClick={handleClose}
+                            //onClick={handleClose}
                             >
-                                <CircularProgress color="inherit" />
+                                <Box sx={{textAlign:'center'}}>
+                                    <CircularProgress color="inherit" />
+                                    <Box sx={{pt:2}}><Typography>Loading features...</Typography></Box>
+                                </Box>
                             </Backdrop>
-                            <ExploreFeaturesContainer
+                            {exploreF && <ExploreFeaturesContainer
                                 exploreF={exploreF}
                                 setExploreF={setExploreF}
                                 Factor={selectedPlot.Factor}
+                                mdataCol={selectedPlot.mdataCol}
                                 thrLRef={thrLRef.current}
-                            />
+                            />}
                         </MySection>
                     </>}
                 </>}

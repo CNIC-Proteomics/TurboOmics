@@ -1,6 +1,6 @@
 import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import OmicSelector from './OmicSelector';
 import TopBarDialog from './TopBarDialog';
 import { MySection, MySectionContainer } from '@/components/MySection';
@@ -18,18 +18,23 @@ function ExploreFeaturesContainer({
     exploreF,
     setExploreF,
     Factor,
+    mdataCol,
     thrLRef
 }) {
 
     const [selectedOmic, setSelectedOmic] = useState('q');
-    const [showContent, setShowContent] = useState(false);
+    const boxOmicRef = useRef(null);
 
-    /*useEffect(() => {
-        //setShowContent(false);
-        const myTimeOut = setTimeout(() => setShowContent(true), 2500);
-        return () => clearTimeout(myTimeOut);
-    }, [exploreF]);*/
+    const scrollOmic = direction => {
+        const container = boxOmicRef.current;
+        const containerWidth = container.clientWidth
 
+        if (direction == 'right')
+            container.scrollLeft = container.scrollLeft + containerWidth;
+
+        if (direction == 'left')
+            container.scrollLeft = container.scrollLeft - containerWidth;
+    }
 
     return (
         <Dialog
@@ -37,24 +42,43 @@ function ExploreFeaturesContainer({
             open={exploreF}
             TransitionComponent={Transition}
         >
-            <TopBarDialog setExploreF={setExploreF} setShowContent={setShowContent} Factor={Factor} />
-            <OmicSelector selectedOmic={selectedOmic} setSelectedOmic={setSelectedOmic} />
-            {true && <MySectionContainer height='85vh'>
+            <TopBarDialog
+                setExploreF={setExploreF}
+                title={`Explore Features: ${Factor} vs ${mdataCol}`}
+            />
+            <OmicSelector
+                selectedOmic={selectedOmic}
+                setSelectedOmic={setSelectedOmic}
+                scrollOmic={scrollOmic}
+            />
+            <MySectionContainer height='85vh'>
                 <MySection>
-                    <Splide>
-                        <SplideSlide>
-                            <div /*hidden={selectedOmic == 'q' ? true : false}*/ >
+                    <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
+                        <Box
+                            sx={{ display: 'flex', overflow: 'hidden', width: '200%' }}
+                        >
+                            <Box
+                                sx={{
+                                    width: '50%',
+                                    opacity: selectedOmic == 'q' ? 1 : 0,
+                                    transition: 'all ease 0.5s'
+                                }}
+                            >
                                 <FeatureTable omic='q' thrLRef={thrLRef} />
-                            </div>
-                        </SplideSlide>
-                        <SplideSlide>
-                            <div /*hidden={selectedOmic == 'm' ? true : false}*/ >
+                            </Box>
+                            <Box
+                                sx={{
+                                    width: '50%',
+                                    opacity: selectedOmic == 'm' ? 1 : 0,
+                                    transition: 'all ease 0.5s'
+                                }}
+                            >
                                 <FeatureTable omic='m' thrLRef={thrLRef} />
-                            </div>
-                        </SplideSlide>
-                    </Splide>
+                            </Box>
+                        </Box>
+                    </Box>
                 </MySection>
-            </MySectionContainer>}
+            </MySectionContainer>
         </Dialog >
     )
 }

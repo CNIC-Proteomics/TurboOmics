@@ -2,7 +2,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import React, { useState } from 'react';
 import { Box, Typography, IconButton, Toolbar, AppBar } from '@mui/material';
 
-function TopBarDialog({ setExploreF, setShowContent, Factor }) {
+function TopBarDialog({ setExploreF, title }) {
     return (
         <AppBar sx={{ position: 'relative', backgroundColor: '#666666' }}>
             <Toolbar>
@@ -11,7 +11,7 @@ function TopBarDialog({ setExploreF, setShowContent, Factor }) {
                         <IconButton
                             edge="start"
                             color="inherit"
-                            onClick={() => {setExploreF(false); setShowContent(false)}}
+                            onClick={() => {setExploreF(false)}}
                             aria-label="close" 
                         >
                             <CloseIcon />
@@ -19,7 +19,7 @@ function TopBarDialog({ setExploreF, setShowContent, Factor }) {
                     </Box>
                     <Box sx={{ pt: 0.5, textAlign: 'center', width: '90%' }}>
                         <Typography sx={{ ml: 2 }} variant="h6" component="div">
-                            Explore Features: {Factor}
+                            {title}
                         </Typography>
                     </Box>
                     <Box sx={{ width: '5%' }}></Box>

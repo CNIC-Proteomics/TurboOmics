@@ -83,7 +83,10 @@ export function calculateXTicks(valueMin, valueMax, desiredNumTicks) {
         ticks.push(0);
     }
     ticks.sort((a, b) => a - b);
-    ticks = ticks.map(x => Math.floor(100 * x) / 100)
+    ticks = ticks.map(x => {
+        if (x<=0) return Math.floor(100 * x) / 100;
+        if (x>0) return Math.ceil(100 * x) / 100;
+    })
 
     return ticks;
 }

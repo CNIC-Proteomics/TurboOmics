@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 //MRT Imports
 import {
@@ -49,9 +49,34 @@ function FeatureTable({ omic, thrLRef }) {
 };
 
 const MyMRTable = ({ omic, sign, thr }) => {
+
+    const xi = useJob().norm[`x${omic}`]
     const f2i = useJob().user[`${omic}2i`];
     const factor = useResults().MOFA.displayOpts.selectedPlot.Factor;
+    const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
+    const mdataColInfo = useJob().mdataType[mdataCol];
     const myLoadings = useResults().MOFA.data.loadings[omic][factor];
+
+    const xiJson = danfo2RowColJson(xi);
+
+    const f2MeanL = useMemo(() => {
+        const f2MeanL = {};
+        xi.columns.map(i => { f2MeanL[i] = {} });
+
+        mdataColInfo.levels.map(l => {
+            let xiL = new dfd.DataFrame(
+                mdataColInfo.level2id[l].map(element => xiJson[element]).filter(i => i != undefined)
+            );
+
+            const fMeanSerie = xiL.mean({ axis: 0 }).round(4);
+
+            fMeanSerie.index.map((f, i) => {
+                f2MeanL[f][l] = fMeanSerie.values[i];
+            });
+        }, [xi, mdataColInfo]);
+
+        return f2MeanL
+    })
 
     /*
     Get columns
@@ -72,6 +97,21 @@ const MyMRTable = ({ omic, sign, thr }) => {
             }))
         );
 
+        if (mdataColInfo.type == 'categorical')
+            columns.push(
+                ...mdataColInfo.levels.map(l => ({
+                    header: `Z̄(${l})`,
+                    accessorKey: l,
+                    muiTableHeadCellProps: {
+                        align: 'left',
+                    },
+                    muiTableBodyCellProps: {
+                        align: 'center',
+                    },
+
+                }))
+            );
+
         columns.push({
             header: factor,
             accessorKey: factor,
@@ -85,7 +125,7 @@ const MyMRTable = ({ omic, sign, thr }) => {
         })
 
         return columns;
-    }, [omic, f2i]);
+    }, [omic, f2i, mdataColInfo]);
 
     /*
     Get data
@@ -95,12 +135,14 @@ const MyMRTable = ({ omic, sign, thr }) => {
 
         let data = {};
 
-        Object.keys(myLoadings).filter(
+        Object.keys(myLoadings)./*filter(
             f => sign == '+' ? myLoadings[f] > 0 : myLoadings[f] < 0
-        ).map(
+        ).*/map(
             f => {
                 data[f] = {
-                    ...f2iJson[f], [factor]: Math.round(myLoadings[f] * 10000) / 10000
+                    ...f2iJson[f],
+                    ...f2MeanL[f],
+                    [factor]: Math.round(myLoadings[f] * 10000) / 10000
                 }
             })
 
@@ -148,10 +190,35 @@ const MyMRTable = ({ omic, sign, thr }) => {
             shape: 'rounded',
             variant: 'outlined',
         },
+
+        renderTopToolbar: ({ table }) => {
+            const myRows = table.getFilteredRowModel().flatRows;
+            const myRowsID = myRows.map(e => e.id);
+
+            const [rowsID, setRowsID] = useState([]);
+
+            useEffect(() => {
+                const myTimeOut = setTimeout(() => console.log('ReRender'), 2000);
+                return () => clearTimeout(myTimeOut);
+            }, [rowsID]);
+
+            // if new elements, set them and reRender
+            if (
+                !myRowsID.map(i => rowsID.includes(i)).every(e => e) ||
+                !rowsID.map(i => myRowsID.includes(i)).every(e => e)
+            ) {
+                setRowsID(myRowsID);
+                // Send to upper component to plot GSEA
+                // Introduce in setTimeOut the execution of a function to reRender upper component
+            }
+        }
     })
 
     return (
-        <MaterialReactTable table={table} />
+        <>
+            <MaterialReactTable table={table} />
+            <Box onClick={() => console.log(table.getFilteredRowModel())}>Click</Box>
+        </>
     )
 }
 

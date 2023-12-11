@@ -36,9 +36,9 @@ const useStyles = (scatterMode) => ({
     },
     selectedCell: {
         border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
-        '&:hover': {
+        /*'&:hover': {
             border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
-        },
+        },*/
     },
 })
 
@@ -47,7 +47,8 @@ const firstColStyles = {
     padding: 0.5,
     border: `1px solid ${myGridColor}`,
     borderRight: `1px solid rgba(10,10,10,1)`,
-    fontSize: myFontSize, whiteSpace: 'nowrap',
+    fontSize: myFontSize, 
+    whiteSpace: 'nowrap',
     userSelect: 'none',
 };
 
@@ -77,7 +78,7 @@ export default function TablePvalues({
     rowNames
 }) {
 
-    const dispatchResults = useDispatchResults();
+    //const dispatchResults = useDispatchResults();
     const classes = useStyles(scatterMode);
 
     //const savedSelectedCell = useResults().MOFA.displayOpts.selectedCell;
@@ -100,14 +101,6 @@ export default function TablePvalues({
         if (scatterMode == '2D') return
         setSelectedCell({ rowIndex, colIndex });
         setSelectedPlot({ mdataCol: rowNames[rowIndex], Factor: factorNames[colIndex] });
-        /*dispatchResults({
-            type: 'set-selected-plot-cell-mofa',
-            rowIndex: rowIndex,
-            colIndex: colIndex,
-            mdataCol: rowNames[rowIndex],
-            Factor: factorNames[colIndex]
-        })*/
-
         console.log(`Plot scatter: MOFA ${factorNames[colIndex]} vs ${rowNames[rowIndex]}`)
     };
 

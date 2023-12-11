@@ -51,7 +51,7 @@ const DownloadComponent = ({ scatterRef }) => {
 
     return (
         <Box sx={{ height: 0 }}>
-            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 5000 }}>
+            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 500 }}>
                 <IconButton
                     aria-label="download"
                     size='small'
@@ -72,7 +72,6 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
     let scatterType;
     if (mdataColType == 'categorical') scatterType = 'category'
     if (mdataColType == 'numeric') scatterType = 'number'
-
 
     return (
         <Box>

@@ -130,12 +130,12 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                 nFeatRef.current[omic].down = number
                 setThrL(prevState => ({ ...prevState, down: fLVecDown[number][1] }));
                 thrLRef.current[omic].down = fLVecDown[number][1]
-            } else if (number < 0) {
+            } /*else if (number < 0) {
                 setNFeat(prevState => ({ ...prevState, down: 0 }));
                 nFeatRef.current[omic].down = 0
                 setThrL(prevState => ({ ...prevState, down: fLVecDown[0][1] }));
                 thrLRef.current[omic].down = fLVecDown[0][1]
-            } else if (number >= fLVecDown.length) {
+            }*/ else if (number >= fLVecDown.length) {
                 setNFeat(prevState => ({ ...prevState, down: fLVecDown.length }));
                 nFeatRef.current[omic].down = fLVecDown.length
                 setThrL(prevState => ({ ...prevState, down: 0 }));
@@ -146,12 +146,12 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
         if (type == 'up') {
             const fLVecUp = fLVec.filter(e => e[1] > 0);
 
-            if (number > 0 && number < fLVecUp.length) {
+            if (number >= 0 && number < fLVecUp.length) {
                 setNFeat(prevState => ({ ...prevState, up: number }));
                 nFeatRef.current[omic].up = number;
-                setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - number][1] }));
-                thrLRef.current[omic].up = fLVecUp[fLVecUp.length - number][1]
-            } else if (number <= 0) {
+                setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - number - 1][1] }));
+                thrLRef.current[omic].up = fLVecUp[fLVecUp.length - number - 1][1]
+            } else if (number < 0) {
                 setNFeat(prevState => ({ ...prevState, up: 0 }));
                 nFeatRef.current[omic].up = 0;
                 setThrL(prevState => ({ ...prevState, up: fLVecUp[fLVecUp.length - 1][1] }));
@@ -230,7 +230,7 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                     <Slider
                         //aria-label="Small steps"
                         track='inverted'
-                        value={[thrL.down, thrL.up]}
+                        value={[Math.floor(1000*thrL.down)/1000, Math.ceil(1000*thrL.up)/1000]}
                         getAriaValueText={valuetext}
                         valueLabelDisplay="auto"
                         step={0.001}
