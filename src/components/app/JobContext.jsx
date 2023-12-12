@@ -35,7 +35,10 @@ function jobReducer(draft, action) {
             console.log('findJob')
             return action.results;
         }
-
+        case 'set-os': {
+            draft.OS = action.OS;
+            break;
+        }
         case 'user-upload': {
             let df = new dfd.DataFrame(action.dfJson)
             df.setIndex({ column: df.columns[0], inplace: true });
@@ -148,6 +151,7 @@ function jobReducer(draft, action) {
 }
 
 const jobTemplate = {
+    "OS": null,
     "jobID": null,
     "userFileNames": { // Name of the files uploaded by the user
         "xq": null,

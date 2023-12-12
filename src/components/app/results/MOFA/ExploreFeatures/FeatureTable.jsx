@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 //MRT Imports
 import {
@@ -23,32 +23,71 @@ import { useResults } from '@/components/app/ResultsContext';
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 //import '@splidejs/react-splide/css';
 import "@splidejs/splide/dist/css/splide.min.css"
+import { MySection, MySectionContainer } from '@/components/MySection';
+import GProfiler from './GProfiler';
+import MetabolomicSetSelector from './MetabolomicSetSelector';
+import GSEA from './GSEA';
 
 //Icons Imports
 
 //Mock Data
 
 function FeatureTable({ omic, thrLRef }) {
+    
+    // Row filtered by the user
+    const fRef = useRef({ up: [], down: [] });
+
+    // When user modify the main table, a re-render is produced
+    const [reRender, setReRender] = useState(false);
+    const myReRender = useCallback(() => setReRender(prev => !prev), []);
+    useEffect( () => {
+        const myTimeOut = setTimeout(myReRender, 2000);
+        return () => clearTimeout(myTimeOut);
+    }, [myReRender]);
 
     return (
         <Splide aria-label="My Favorite Images">
-            <SplideSlide>
-                <Box sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant='h5'>Positively Associated</Typography>
-                    <MyMRTable omic={omic} sign='+' thr={thrLRef[omic].up} />
-                </Box>
-            </SplideSlide>
-            <SplideSlide>
-                <Box sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant='h5'>Negatively Associated</Typography>
-                    <MyMRTable omic={omic} sign='-' thr={thrLRef[omic].down} />
-                </Box>
-            </SplideSlide>
+            {['up', 'down'].map(sign => (
+                <SplideSlide key={sign}>
+                    <Box sx={{ p: 2, textAlign: 'center' }}>
+                        <Typography variant='h5'>
+                            {sign == 'up' ? 'Positively' : 'Negatively'} Associated {omic == 'q' ? 'Proteins' : 'Metabolites'}
+                        </Typography>
+                        <MySectionContainer height='80vh'>
+                            <MySection>
+                                <MyMRTable
+                                    omic={omic}
+                                    sign={sign}
+                                    thr={thrLRef[omic][sign]}
+                                    fRef={fRef}
+                                    myReRender={myReRender}
+                                />
+                            </MySection>
+                            <MySection>
+                                {fRef.current[sign].length > 0 &&
+                                    <Box sx={{ display: 'flex' }}>
+                                        <Box sx={{ width: '45%' }}>
+                                            {omic == 'q' ?
+                                                <GProfiler fRef={fRef.current[sign]} />
+                                                :
+                                                <MetabolomicSetSelector />
+                                            }
+                                        </Box>
+                                        <Box sx={{ width: '45%' }}>
+                                            <GSEA />
+                                        </Box>
+                                    </Box>
+                                }
+                            </MySection>
+                        </MySectionContainer>
+                    </Box>
+                </SplideSlide>
+            ))}
         </Splide>
     )
 };
 
-const MyMRTable = ({ omic, sign, thr }) => {
+const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
 
     const xi = useJob().norm[`x${omic}`]
     const f2i = useJob().user[`${omic}2i`];
@@ -63,17 +102,19 @@ const MyMRTable = ({ omic, sign, thr }) => {
         const f2MeanL = {};
         xi.columns.map(i => { f2MeanL[i] = {} });
 
-        mdataColInfo.levels.map(l => {
-            let xiL = new dfd.DataFrame(
-                mdataColInfo.level2id[l].map(element => xiJson[element]).filter(i => i != undefined)
-            );
+        if (mdataColInfo.type == 'categorical') {
+            mdataColInfo.levels.map(l => {
+                let xiL = new dfd.DataFrame(
+                    mdataColInfo.level2id[l].map(element => xiJson[element]).filter(i => i != undefined)
+                );
 
-            const fMeanSerie = xiL.mean({ axis: 0 }).round(4);
+                const fMeanSerie = xiL.mean({ axis: 0 }).round(4);
 
-            fMeanSerie.index.map((f, i) => {
-                f2MeanL[f][l] = fMeanSerie.values[i];
-            });
-        }, [xi, mdataColInfo]);
+                fMeanSerie.index.map((f, i) => {
+                    f2MeanL[f][l] = fMeanSerie.values[i];
+                });
+            }, [xi, mdataColInfo]);
+        }
 
         return f2MeanL
     })
@@ -121,7 +162,7 @@ const MyMRTable = ({ omic, sign, thr }) => {
             muiTableBodyCellProps: {
                 align: 'center',
             },
-            filterFn: sign == '+' ? 'greaterThan' : 'lessThan'
+            filterFn: sign == 'up' ? 'greaterThan' : 'lessThan'
         })
 
         return columns;
@@ -136,7 +177,7 @@ const MyMRTable = ({ omic, sign, thr }) => {
         let data = {};
 
         Object.keys(myLoadings)./*filter(
-            f => sign == '+' ? myLoadings[f] > 0 : myLoadings[f] < 0
+            f => sign == 'up' ? myLoadings[f] > 0 : myLoadings[f] < 0
         ).*/map(
             f => {
                 data[f] = {
@@ -176,7 +217,7 @@ const MyMRTable = ({ omic, sign, thr }) => {
             showColumnFilters: true,
             showGlobalFilter: false,
             columnFilters: [{ id: factor, value: Math.round(thr * 10000) / 10000 }],
-            sorting: [{ id: factor, desc: sign == '+' ? true : false }]
+            sorting: [{ id: factor, desc: sign == 'up' ? true : false }]
         },
         paginationDisplayMode: 'pages',
         positionToolbarAlertBanner: 'bottom',
@@ -192,15 +233,18 @@ const MyMRTable = ({ omic, sign, thr }) => {
         },
 
         renderTopToolbar: ({ table }) => {
-            const myRows = table.getFilteredRowModel().flatRows;
-            const myRowsID = myRows.map(e => e.id);
+            const myFlatRows = table.getFilteredRowModel().flatRows;
+            const myRows = myFlatRows.map(e => e.original);
+            const myRowsID = myFlatRows.map(e => e.id);
 
+            const [rows, setRows] = useState([]);
             const [rowsID, setRowsID] = useState([]);
 
             useEffect(() => {
-                const myTimeOut = setTimeout(() => console.log('ReRender'), 2000);
+                fRef.current[sign] = rows;
+                const myTimeOut = setTimeout(() => {myReRender(); console.log('rendered')}, 5000);
                 return () => clearTimeout(myTimeOut);
-            }, [rowsID]);
+            }, [rows]);
 
             // if new elements, set them and reRender
             if (
@@ -208,17 +252,16 @@ const MyMRTable = ({ omic, sign, thr }) => {
                 !rowsID.map(i => myRowsID.includes(i)).every(e => e)
             ) {
                 setRowsID(myRowsID);
-                // Send to upper component to plot GSEA
-                // Introduce in setTimeOut the execution of a function to reRender upper component
+                setRows(myRows);
             }
         }
     })
 
     return (
-        <>
+        <Box sx={{ px: 5, pb: 3 }}>
             <MaterialReactTable table={table} />
-            <Box onClick={() => console.log(table.getFilteredRowModel())}>Click</Box>
-        </>
+            {false && <Box onClick={() => console.log(table.getFilteredRowModel())}>Click</Box>}
+        </Box>
     )
 }
 

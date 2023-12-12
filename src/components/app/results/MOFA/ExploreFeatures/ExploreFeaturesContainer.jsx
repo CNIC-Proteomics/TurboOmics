@@ -6,8 +6,6 @@ import TopBarDialog from './TopBarDialog';
 import { MySection, MySectionContainer } from '@/components/MySection';
 import FeatureTable from './FeatureTable';
 import { Box } from '@mui/material';
-import MyMotion from '@/components/MyMotion';
-import { Splide, SplideSlide } from '@splidejs/react-splide';
 import "@splidejs/splide/dist/css/splide.min.css"
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -51,34 +49,30 @@ function ExploreFeaturesContainer({
                 setSelectedOmic={setSelectedOmic}
                 scrollOmic={scrollOmic}
             />
-            <MySectionContainer height='85vh'>
-                <MySection>
-                    <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
-                        <Box
-                            sx={{ display: 'flex', overflow: 'hidden', width: '200%' }}
-                        >
-                            <Box
-                                sx={{
-                                    width: '50%',
-                                    opacity: selectedOmic == 'q' ? 1 : 0,
-                                    transition: 'all ease 0.5s'
-                                }}
-                            >
-                                <FeatureTable omic='q' thrLRef={thrLRef} />
-                            </Box>
-                            <Box
-                                sx={{
-                                    width: '50%',
-                                    opacity: selectedOmic == 'm' ? 1 : 0,
-                                    transition: 'all ease 0.5s'
-                                }}
-                            >
-                                <FeatureTable omic='m' thrLRef={thrLRef} />
-                            </Box>
-                        </Box>
+            <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
+                <Box
+                    sx={{ display: 'flex', width: '200%' }}
+                >
+                    <Box
+                        sx={{
+                            width: '50%',
+                            opacity: selectedOmic == 'q' ? 1 : 0,
+                            transition: 'all ease 0.5s'
+                        }}
+                    >
+                        <FeatureTable omic='q' thrLRef={thrLRef} />
                     </Box>
-                </MySection>
-            </MySectionContainer>
+                    <Box
+                        sx={{
+                            width: '50%',
+                            opacity: selectedOmic == 'm' ? 1 : 0,
+                            transition: 'all ease 0.5s'
+                        }}
+                    >
+                        <FeatureTable omic='m' thrLRef={thrLRef} />
+                    </Box>
+                </Box>
+            </Box>
         </Dialog >
     )
 }
