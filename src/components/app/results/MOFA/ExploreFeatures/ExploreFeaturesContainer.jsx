@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import OmicSelector from './OmicSelector';
 import TopBarDialog from './TopBarDialog';
 import { MySection, MySectionContainer } from '@/components/MySection';
-import FeatureTable from './FeatureTable';
+import MainContent from './MainContent';
 import { Box } from '@mui/material';
 import "@splidejs/splide/dist/css/splide.min.css"
 
@@ -60,7 +60,7 @@ function ExploreFeaturesContainer({
                             transition: 'all ease 0.5s'
                         }}
                     >
-                        <FeatureTable omic='q' thrLRef={thrLRef} />
+                        <MainContent omic='q' thrLRef={thrLRef} />
                     </Box>
                     <Box
                         sx={{
@@ -69,7 +69,7 @@ function ExploreFeaturesContainer({
                             transition: 'all ease 0.5s'
                         }}
                     >
-                        <FeatureTable omic='m' thrLRef={thrLRef} />
+                        <MainContent omic='m' thrLRef={thrLRef} />
                     </Box>
                 </Box>
             </Box>

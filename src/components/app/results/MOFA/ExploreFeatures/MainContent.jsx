@@ -7,6 +7,7 @@ import {
     MRT_GlobalFilterTextField,
     MRT_ToggleFiltersButton,
 } from 'material-react-table';
+import { download, generateCsv, mkConfig } from 'export-to-csv';
 
 //Material UI Imports
 import {
@@ -17,12 +18,14 @@ import {
     Typography,
     lighten,
 } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+
+import { Splide, SplideSlide } from '@splidejs/react-splide';
+import "@splidejs/splide/dist/css/splide.min.css"
+
 import { useJob } from '@/components/app/JobContext';
 import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
 import { useResults } from '@/components/app/ResultsContext';
-import { Splide, SplideSlide } from '@splidejs/react-splide';
-//import '@splidejs/react-splide/css';
-import "@splidejs/splide/dist/css/splide.min.css"
 import { MySection, MySectionContainer } from '@/components/MySection';
 import GProfiler from './GProfiler';
 import MetabolomicSetSelector from './MetabolomicSetSelector';
@@ -32,15 +35,15 @@ import GSEA from './GSEA';
 
 //Mock Data
 
-function FeatureTable({ omic, thrLRef }) {
-    
+function MainContent({ omic, thrLRef }) {
+
     // Row filtered by the user
     const fRef = useRef({ up: [], down: [] });
 
     // When user modify the main table, a re-render is produced
     const [reRender, setReRender] = useState(false);
     const myReRender = useCallback(() => setReRender(prev => !prev), []);
-    useEffect( () => {
+    useEffect(() => { // Execute reRender after the first rendering
         const myTimeOut = setTimeout(myReRender, 2000);
         return () => clearTimeout(myTimeOut);
     }, [myReRender]);
@@ -113,11 +116,11 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
                 fMeanSerie.index.map((f, i) => {
                     f2MeanL[f][l] = fMeanSerie.values[i];
                 });
-            }, [xi, mdataColInfo]);
+            });
         }
 
         return f2MeanL
-    })
+    }, [xi, mdataColInfo])
 
     /*
     Get columns
@@ -166,7 +169,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
         })
 
         return columns;
-    }, [omic, f2i, mdataColInfo]);
+    }, [f2i, mdataColInfo, factor, sign]);
 
     /*
     Get data
@@ -189,12 +192,36 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
 
         data = Object.values(data);
         return data;
-    }, [omic, f2i]);
+    }, [f2i, f2MeanL, factor, myLoadings]);
 
 
     /*
     Design MRT
     */
+
+
+    const handleExportRows = (rows) => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename:`${omic}_${factor}_vs_${mdataCol}_filtered`
+        });
+        const rowData = rows.map((row) => row.original);
+        const csv = generateCsv(csvConfig)(rowData);
+        download(csvConfig)(csv);
+    };
+
+    const handleExportData = () => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename:`${omic}_${factor}_vs_${mdataCol}`
+        });
+        const csv = generateCsv(csvConfig)(data);
+        download(csvConfig)(csv);
+    };
     const table = useMaterialReactTable({
         columns,
         data,
@@ -232,7 +259,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
             variant: 'outlined',
         },
 
-        renderTopToolbar: ({ table }) => {
+        renderTopToolbar: ({ table }) => <MyRenderTopToolbar table={table} fRef={fRef} sign={sign} myReRender={myReRender}/> /*{
             const myFlatRows = table.getFilteredRowModel().flatRows;
             const myRows = myFlatRows.map(e => e.original);
             const myRowsID = myFlatRows.map(e => e.id);
@@ -242,7 +269,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
 
             useEffect(() => {
                 fRef.current[sign] = rows;
-                const myTimeOut = setTimeout(() => {myReRender(); console.log('rendered')}, 5000);
+                const myTimeOut = setTimeout(() => { myReRender() }, 5000);
                 return () => clearTimeout(myTimeOut);
             }, [rows]);
 
@@ -254,15 +281,71 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
                 setRowsID(myRowsID);
                 setRows(myRows);
             }
-        }
+
+            return (<></>)
+        }*/,
+
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box
+                sx={{
+                    display: 'flex',
+                    gap: '16px',
+                    padding: '8px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={handleExportData}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export All Data
+                </Button>
+                <Button
+                    disabled={table.getFilteredRowModel().rows.length === 0}
+                    //export all rows, including from the next page, (still respects filtering and sorting)
+                    onClick={() =>
+                        handleExportRows(table.getFilteredRowModel().rows)
+                    }
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export Filtered Rows
+                </Button>
+            </Box>
+        )
     })
 
     return (
         <Box sx={{ px: 5, pb: 3 }}>
             <MaterialReactTable table={table} />
-            {false && <Box onClick={() => console.log(table.getFilteredRowModel())}>Click</Box>}
         </Box>
     )
 }
 
-export default FeatureTable
+const MyRenderTopToolbar = ({ table, fRef, sign, myReRender }) => {
+    const myFlatRows = table.getFilteredRowModel().flatRows;
+    const myRows = myFlatRows.map(e => e.original);
+    const myRowsID = myFlatRows.map(e => e.id);
+
+    const [rows, setRows] = useState([]);
+    const [rowsID, setRowsID] = useState([]);
+
+    useEffect(() => {
+        fRef.current[sign] = rows;
+        const myTimeOut = setTimeout(() => { myReRender() }, 5000);
+        return () => clearTimeout(myTimeOut);
+    }, [rows, fRef, sign, myReRender]);
+
+    // if new elements, set them and reRender
+    if (
+        !myRowsID.map(i => rowsID.includes(i)).every(e => e) ||
+        !rowsID.map(i => myRowsID.includes(i)).every(e => e)
+    ) {
+        setRowsID(myRowsID);
+        setRows(myRows);
+    }
+
+    return (<></>)
+}
+
+export default MainContent

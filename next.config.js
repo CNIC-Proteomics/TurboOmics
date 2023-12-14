@@ -2,7 +2,8 @@
 const nextConfig = {
     output: 'export',
     basePath: '/TurboPutative',
-    images: { unoptimized: true },
+    images: { unoptimized: true }
+    //transpilePackages: ['@mui/x-charts']
 }
 
 module.exports = nextConfig

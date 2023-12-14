@@ -39,7 +39,7 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
         setThrL(myThrL);
         thrLRef.current[omic] = myThrL;
 
-    }, [fLVec, nFeatRef, omic]);
+    }, [fLVec, nFeatRef, omic, thrLRef]);
     /**/
 
     /*
