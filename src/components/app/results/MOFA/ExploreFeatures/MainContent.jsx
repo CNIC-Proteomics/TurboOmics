@@ -30,6 +30,9 @@ import { MySection, MySectionContainer } from '@/components/MySection';
 import GProfiler from './GProfiler';
 import MetabolomicSetSelector from './MetabolomicSetSelector';
 import GSEA from './GSEA';
+import { MRT_ColumnPinningButtons, MRT_ShowHideColumnsButton, MRT_ShowHideColumnsMenu } from 'material-react-table/dist';
+import EnrichmentQ from './EnrichmentQ';
+import EnrichmentM from './EnrichmentM';
 
 //Icons Imports
 
@@ -48,6 +51,32 @@ function MainContent({ omic, thrLRef }) {
         return () => clearTimeout(myTimeOut);
     }, [myReRender]);
 
+    // Get mean of each feature per level
+    const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
+    const mdataColInfo = useJob().mdataType[mdataCol];
+    const xi = useJob().norm[`x${omic}`];
+    const xiJson = danfo2RowColJson(xi);
+    const f2MeanL = useMemo(() => {
+        const f2MeanL = {};
+        xi.columns.map(i => { f2MeanL[i] = {} });
+
+        if (mdataColInfo.type == 'categorical') {
+            mdataColInfo.levels.map(l => {
+                let xiL = new dfd.DataFrame(
+                    mdataColInfo.level2id[l].map(element => xiJson[element]).filter(i => i != undefined)
+                );
+
+                const fMeanSerie = xiL.mean({ axis: 0 }).round(4);
+
+                fMeanSerie.index.map((f, i) => {
+                    f2MeanL[f][l] = fMeanSerie.values[i];
+                });
+            });
+        }
+
+        return f2MeanL
+    }, [xi, mdataColInfo]);
+
     return (
         <Splide aria-label="My Favorite Images">
             {['up', 'down'].map(sign => (
@@ -64,23 +93,23 @@ function MainContent({ omic, thrLRef }) {
                                     thr={thrLRef[omic][sign]}
                                     fRef={fRef}
                                     myReRender={myReRender}
+                                    f2MeanL={f2MeanL}
                                 />
                             </MySection>
                             <MySection>
-                                {fRef.current[sign].length > 0 &&
-                                    <Box sx={{ display: 'flex' }}>
-                                        <Box sx={{ width: '45%' }}>
-                                            {omic == 'q' ?
-                                                <GProfiler fRef={fRef.current[sign]} />
-                                                :
-                                                <MetabolomicSetSelector />
-                                            }
-                                        </Box>
-                                        <Box sx={{ width: '45%' }}>
-                                            <GSEA />
-                                        </Box>
-                                    </Box>
-                                }
+                                {fRef.current[sign].length > 0 && <>
+                                    {omic == 'q' ?
+                                        <EnrichmentQ
+                                            fRef={fRef.current[sign]}
+                                            f2MeanL={f2MeanL}
+                                        />
+                                        :
+                                        <EnrichmentM 
+                                            fRef={fRef.current[sign]}
+                                            f2MeanL={f2MeanL}
+                                        />
+                                    }
+                                </>}
                             </MySection>
                         </MySectionContainer>
                     </Box>
@@ -90,16 +119,16 @@ function MainContent({ omic, thrLRef }) {
     )
 };
 
-const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
+const MyMRTable = ({ omic, sign, thr, fRef, myReRender, f2MeanL }) => {
 
-    const xi = useJob().norm[`x${omic}`]
     const f2i = useJob().user[`${omic}2i`];
     const factor = useResults().MOFA.displayOpts.selectedPlot.Factor;
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
     const mdataColInfo = useJob().mdataType[mdataCol];
     const myLoadings = useResults().MOFA.data.loadings[omic][factor];
 
-    const xiJson = danfo2RowColJson(xi);
+    /*
+    const xi = useJob().norm[`x${omic}`]
 
     const f2MeanL = useMemo(() => {
         const f2MeanL = {};
@@ -120,7 +149,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
         }
 
         return f2MeanL
-    }, [xi, mdataColInfo])
+    }, [xi, mdataColInfo]);*/
 
     /*
     Get columns
@@ -199,29 +228,6 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
     Design MRT
     */
 
-
-    const handleExportRows = (rows) => {
-        const csvConfig = mkConfig({
-            fieldSeparator: ',',
-            decimalSeparator: '.',
-            useKeysAsHeaders: true,
-            filename:`${omic}_${factor}_vs_${mdataCol}_filtered`
-        });
-        const rowData = rows.map((row) => row.original);
-        const csv = generateCsv(csvConfig)(rowData);
-        download(csvConfig)(csv);
-    };
-
-    const handleExportData = () => {
-        const csvConfig = mkConfig({
-            fieldSeparator: ',',
-            decimalSeparator: '.',
-            useKeysAsHeaders: true,
-            filename:`${omic}_${factor}_vs_${mdataCol}`
-        });
-        const csv = generateCsv(csvConfig)(data);
-        download(csvConfig)(csv);
-    };
     const table = useMaterialReactTable({
         columns,
         data,
@@ -237,7 +243,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
         enableRowActions: false,
         enableRowSelection: false,
         enableDensityToggle: false,
-        enableFullScreenToggle: false,
+        enableFullScreenToggle: true,
         enableGlobalFilter: false,
         initialState: {
             density: 'compact',
@@ -248,10 +254,7 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
         },
         paginationDisplayMode: 'pages',
         positionToolbarAlertBanner: 'bottom',
-        /*muiSearchTextFieldProps: {
-          size: 'small',
-          variant: 'outlined',
-        },*/
+
         muiPaginationProps: {
             //color: 'secondary',
             rowsPerPageOptions: [10],//, 20, 30],
@@ -259,60 +262,14 @@ const MyMRTable = ({ omic, sign, thr, fRef, myReRender }) => {
             variant: 'outlined',
         },
 
-        renderTopToolbar: ({ table }) => <MyRenderTopToolbar table={table} fRef={fRef} sign={sign} myReRender={myReRender}/> /*{
-            const myFlatRows = table.getFilteredRowModel().flatRows;
-            const myRows = myFlatRows.map(e => e.original);
-            const myRowsID = myFlatRows.map(e => e.id);
-
-            const [rows, setRows] = useState([]);
-            const [rowsID, setRowsID] = useState([]);
-
-            useEffect(() => {
-                fRef.current[sign] = rows;
-                const myTimeOut = setTimeout(() => { myReRender() }, 5000);
-                return () => clearTimeout(myTimeOut);
-            }, [rows]);
-
-            // if new elements, set them and reRender
-            if (
-                !myRowsID.map(i => rowsID.includes(i)).every(e => e) ||
-                !rowsID.map(i => myRowsID.includes(i)).every(e => e)
-            ) {
-                setRowsID(myRowsID);
-                setRows(myRows);
-            }
-
-            return (<></>)
-        }*/,
-
-        renderTopToolbarCustomActions: ({ table }) => (
-            <Box
-                sx={{
-                    display: 'flex',
-                    gap: '16px',
-                    padding: '8px',
-                    flexWrap: 'wrap',
-                }}
-            >
-                <Button
-                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                    onClick={handleExportData}
-                    startIcon={<FileDownloadIcon />}
-                >
-                    Export All Data
-                </Button>
-                <Button
-                    disabled={table.getFilteredRowModel().rows.length === 0}
-                    //export all rows, including from the next page, (still respects filtering and sorting)
-                    onClick={() =>
-                        handleExportRows(table.getFilteredRowModel().rows)
-                    }
-                    startIcon={<FileDownloadIcon />}
-                >
-                    Export Filtered Rows
-                </Button>
-            </Box>
-        )
+        renderTopToolbar: ({ table }) => (
+            <MyRenderTopToolbar
+                table={table}
+                fRef={fRef}
+                sign={sign}
+                myReRender={myReRender}
+            />
+        ),
     })
 
     return (
@@ -345,7 +302,60 @@ const MyRenderTopToolbar = ({ table, fRef, sign, myReRender }) => {
         setRows(myRows);
     }
 
-    return (<></>)
+    const handleExportRows = (rows) => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename: `${omic}_${factor}_vs_${mdataCol}_filtered`
+        });
+        const rowData = rows.map((row) => row.original);
+        const csv = generateCsv(csvConfig)(rowData);
+        download(csvConfig)(csv);
+    };
+
+    const handleExportData = () => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename: `${omic}_${factor}_vs_${mdataCol}`
+        });
+        const csv = generateCsv(csvConfig)(data);
+        download(csvConfig)(csv);
+    };
+
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                gap: '16px',
+                padding: '8px',
+                flexWrap: 'wrap',
+            }}
+        >
+            <Box>
+                <MRT_ShowHideColumnsButton table={table} />
+            </Box>
+            <Button
+                //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                onClick={handleExportData}
+                startIcon={<FileDownloadIcon />}
+            >
+                Export All Data
+            </Button>
+            <Button
+                disabled={table.getFilteredRowModel().rows.length === 0}
+                //export all rows, including from the next page, (still respects filtering and sorting)
+                onClick={() =>
+                    handleExportRows(table.getFilteredRowModel().rows)
+                }
+                startIcon={<FileDownloadIcon />}
+            >
+                Export Filtered Rows
+            </Button>
+        </Box>
+    )
 }
 
 export default MainContent

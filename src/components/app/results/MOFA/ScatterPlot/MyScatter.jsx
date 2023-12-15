@@ -17,6 +17,7 @@ import {
     Legend
 } from "recharts";
 import downloadSVG from '@/utils/downloadSVG';
+import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -41,7 +42,7 @@ const CustomTooltip = ({ active, payload }) => {
     return null;
 };
 
-const DownloadComponent = ({ scatterRef }) => {
+/*const DownloadComponent = ({ scatterRef }) => {
     const downloadScatter = () => {
         const scatterComp = scatterRef.current.container.cloneNode(true);
         const fullFig = window.document.createElement('div');
@@ -63,7 +64,7 @@ const DownloadComponent = ({ scatterRef }) => {
             </Box>
         </Box>
     )
-}
+}*/
 
 export function MyScatter({ scatterData, mdataCol, Factor }) {
 
@@ -75,7 +76,7 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} />
+            <DownloadComponent scatterRef={scatterRef} fileName={'MOFA_Scatter_1D'} />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
@@ -112,7 +113,7 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} />
+            <DownloadComponent scatterRef={scatterRef} fileName='MOFA_Scatter_2D' />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
