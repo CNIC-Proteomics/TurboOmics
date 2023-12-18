@@ -16,7 +16,7 @@ function GSEA({ f2MeanL, fSet }) {
         g2: mdataColInfo.levels[1]
     });
 
-    console.log(f2MeanL, fSet)
+    //console.log(f2MeanL, fSet)
 
     return (
         <Box sx={{ mt: 3 }}>
@@ -34,7 +34,7 @@ function GSEA({ f2MeanL, fSet }) {
                         alt="GSEA"
                     /></Box>
             </Box>
-            <Box sx={{ height: 480 }}>
+            <Box sx={{ height: 460 }}>
                 <GroupsSelector
                     groups={groups}
                     setGroups={setGroups}

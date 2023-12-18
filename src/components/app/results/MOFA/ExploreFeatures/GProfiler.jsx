@@ -13,7 +13,7 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
-function GProfiler({ fRef, setCategory }) {
+function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
 
     const BASE_URL = useVars().BASE_URL;
     const [qSet, setQSet] = useState([]);
@@ -32,6 +32,7 @@ function GProfiler({ fRef, setCategory }) {
     }
 
     const gProfiler = useCallback(async () => {
+        setLoadingEnrichment(true);
         const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/gost/profile/',
             {
@@ -50,6 +51,7 @@ function GProfiler({ fRef, setCategory }) {
         )
         const resJson = await res.json();
         setGoRes(resJson);
+        setTimeout(() => setLoadingEnrichment(false), 2000);
     }, [OS, qSet, myBackg]);
 
     useEffect(() => {
@@ -104,7 +106,7 @@ const MyBarChart = ({ myData }) => {
     const plotRef = useRef()
     return (
         <Box sx={{
-            height: 480,
+            height: 460,
             overflowY: 'auto',
             overflowX: 'hidden',
         }}>
@@ -116,7 +118,7 @@ const MyBarChart = ({ myData }) => {
                 <BarChart
                     ref={plotRef}
                     width={530}
-                    height={Math.max(500, 35 * myData.length)}
+                    height={Math.max(480, 35 * myData.length)}
                     data={myData}
                     margin={{
                         top: 0,
@@ -246,34 +248,23 @@ const CategoryTable = ({ myData, setCategory }) => {
 
     // Row selection for GSEA
     const [rowSelection, setRowSelection] = useState({});
+
+    const initialSelectedRow = useMemo(() => {
+        return myData.length > 0 ? { [myData[0].native]: true } : {}
+    }, [myData]);
     useEffect(() => {
-        const catIndex = parseInt(Object.keys(rowSelection)[0]);
-        if (!isNaN(catIndex)) {
-            setCategory(myData[catIndex]);
-        }
+        setRowSelection(initialSelectedRow);
+    }, [initialSelectedRow]);
+
+    useEffect(() => {
+        if (Object.keys(rowSelection).length == 0) {
+            setCategory(null);
+        } else {
+            setCategory(
+                myData.filter(e => e.native == Object.keys(rowSelection)[0])[0]
+            );
+        };
     }, [rowSelection, myData, setCategory])
-
-    //optionally access the underlying virtualizer instance
-    const rowVirtualizerInstanceRef = useRef(null);
-
-    //const [data, setData] = useState(myData);
-    const [isLoading, setIsLoading] = useState(true);
-    const [sorting, setSorting] = useState([]);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        //scroll to the top of the table when the sorting changes
-        try {
-            rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-        } catch (error) {
-            console.error(error);
-        }
-    }, [sorting]);
 
     const table = useMaterialReactTable({
         columns,
@@ -282,12 +273,12 @@ const CategoryTable = ({ myData, setCategory }) => {
         layoutMode: 'grid',
         enableBottomToolbar: false,
         enableColumnResizing: true,
-        enableColumnVirtualization: true,
+        //enableColumnVirtualization: true,
         //enableGlobalFilterModes: true,
         enablePagination: false,
         enableColumnPinning: false,
         enableRowNumbers: false,
-        enableRowVirtualization: true,
+        //enableRowVirtualization: true,
         enableRowActions: false,
         enableRowSelection: true,
         enableMultiRowSelection: false,
@@ -295,20 +286,17 @@ const CategoryTable = ({ myData, setCategory }) => {
         enableColumnFilters: false,
         enableFullScreenToggle: false,
         enableHiding: false,
-        enableColumnActions:false, 
+        enableColumnActions: false,
         muiTableContainerProps: { sx: { maxHeight: '250px' } },
-        onSortingChange: setSorting,
+        //onSortingChange: setSorting,
         initialState: {
             density: 'compact',
             showGlobalFilter: true,
-            showColumnFilters: false
+            showColumnFilters: false,
+            rowSelection: { initialSelectedRow }
         },
-        state: { isLoading, sorting },
-        rowVirtualizerInstanceRef, //optional
-        rowVirtualizerOptions: { overscan: 10 }, //optionally customize the row virtualizer
-        columnVirtualizerOptions: { overscan: 2 }, //optionally customize the column virtualizer
         positionToolbarAlertBanner: 'bottom', //move the alert banner to the bottom
-        getRowId: (row) => row.userId, //give each row a more useful id
+        getRowId: (row) => row.native, //give each row a more useful id
         muiTableBodyRowProps: ({ row }) => ({
             //add onClick to row to select upon clicking anywhere in the row
             onClick: row.getToggleSelectedHandler(),
@@ -336,7 +324,11 @@ const CategoryTable = ({ myData, setCategory }) => {
         )
     });
 
-    return <MaterialReactTable table={table} />;
+    return (
+        <>
+            <MaterialReactTable table={table} />
+        </>
+    )
 };
 
 export default GProfiler

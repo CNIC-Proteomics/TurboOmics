@@ -18,7 +18,7 @@ function MyAutocomplete() {
 
     useEffect(() => {
         dispatchJob({ type: 'set-os', OS: expOS });
-    }, [expOS, dispatchJob])
+    }, [expOS, dispatchJob]);
 
     return (
         <Box sx={{ py: 1, mb: 1 }}>

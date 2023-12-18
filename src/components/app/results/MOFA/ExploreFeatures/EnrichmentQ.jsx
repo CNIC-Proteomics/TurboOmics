@@ -1,6 +1,6 @@
-import { Box, Button } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import GProfiler from './GProfiler'
 import GSEA from './GSEA'
 import { useResults } from '@/components/app/ResultsContext';
@@ -8,15 +8,17 @@ import { useJob } from '@/components/app/JobContext';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/dist';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 
-function EnrichmentQ({ fRef, f2MeanL }) {
+function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
 
     const { OS } = useJob()
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
     const mdataColInfo = useJob().mdataType[mdataCol];
     const [category, setCategory] = useState(null);
     const [qCat, setQCat] = useState(null);
+    const [loadingPCTable, setLoadingPCTable] = useState(true);
 
     const fetchProteins = useCallback(async () => {
+        setLoadingPCTable(true);
         const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
             {
@@ -30,35 +32,53 @@ function EnrichmentQ({ fRef, f2MeanL }) {
             }
         );
 
-        const myQ = Object.keys(f2MeanL);
         const resJson = await res.json();
-        const qCat = resJson.result.filter(
+        const myQ = Object.keys(f2MeanL);
+        let myQCat = resJson.result.filter(
             e => myQ.includes(e.converted)
         );
-        setQCat(qCat);
+        myQCat = myQCat.filter(
+            (json, index, self) => index === self.findIndex((t) => t.converted === json.converted)
+        ); //drop duplicates
+        setQCat(myQCat);
+        setTimeout(() => setLoadingPCTable(false), 500);
     }, [category, OS, f2MeanL]);
 
     useEffect(() => {
-        if (category == null) return;
-        const myTimeOut = setTimeout(fetchProteins, 100);
-        return () => clearTimeout(myTimeOut);
+        if (category == null) {
+            setQCat(null);
+        } else {
+            const myTimeOut = setTimeout(fetchProteins, 100);
+            return () => clearTimeout(myTimeOut);
+        }
     }, [category, fetchProteins]);
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
             <Box sx={{ width: '45%' }}>
-                <GProfiler fRef={fRef} setCategory={setCategory} />
+                <GProfiler
+                    fRef={fRef}
+                    setCategory={setCategory}
+                    setLoadingEnrichment={setLoadingEnrichment}
+                />
             </Box>
             <Box sx={{ width: '45%' }}>
-                {mdataColInfo.type == 'categorical' && mdataColInfo.levels.length > 1 && qCat && <>
-                    <GSEA
-                        f2MeanL={f2MeanL}
-                        fSet={qCat.map(e => e.converted)}
-                    />
-                    <Box sx={{ pl: 2, mt: 1 }}>
-                        <ProteinCategoryTable qCat={qCat} fRef={fRef} />
-                    </Box>
-                </>}
+                {
+                    mdataColInfo.type == 'categorical' &&
+                    mdataColInfo.levels.length > 1 &&
+                    qCat &&
+                    <>
+                        <GSEA
+                            f2MeanL={f2MeanL}
+                            fSet={qCat.map(e => e.converted)}
+                        />
+                        <Box sx={{ pl: 2, mt: 1 }}>
+                            <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
+                                <ProteinCategoryTable qCat={qCat} fRef={fRef} />
+                            </Box>
+                        </Box>
+                    </>
+                }
             </Box>
         </Box>
     )
@@ -87,7 +107,6 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
 
         data.sort((a, b) => (b.filtered - a.filtered));
         return data
-
     }, [qCat, mySet]);
 
     const columns = useMemo(() => ([
@@ -130,6 +149,24 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
         download(csvConfig)(csv);
     };
 
+    const rowVirtualizerInstanceRef = useRef(null);
+    //const [data, setData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [sorting, setSorting] = useState([]);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsLoading(false);
+        }
+    }, []);
+    useEffect(() => {
+        //scroll to the top of the table when the sorting changes
+        try {
+            rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+        } catch (error) {
+            console.error(error);
+        }
+    }, [sorting]);
+
     const table = useMaterialReactTable({
         columns,
         data: myData,
@@ -148,9 +185,17 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
         enableHiding: false,
         enableColumnActions: false,
         rowPinningDisplayMode: 'select-sticky',
-        muiTableContainerProps: { sx: { maxHeight: '240px' } },
-        //enableRowSelection: (row) => row.original.age >= 21,
+        muiTableContainerProps: { sx: { maxHeight: '220px' } },
+        enableRowVirtualization: true,
+        enableColumnVirtualization: true,
         getRowId: (row) => row.converted,
+        state: {
+            rowSelection: mySet,
+            isLoading, sorting
+        },
+        rowVirtualizerInstanceRef, //optional
+        rowVirtualizerOptions: { overscan: 5 },
+        columnVirtualizerOptions: { overscan: 2 },
         initialState: {
             rowSelection: mySet,
             density: 'compact',
@@ -176,7 +221,9 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
         )
     });
 
-    return <MaterialReactTable table={table} />;
+    return (
+        <MaterialReactTable table={table} />
+    )
 };
 
 export default EnrichmentQ

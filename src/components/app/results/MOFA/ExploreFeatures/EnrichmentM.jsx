@@ -1,18 +1,43 @@
 import { Box } from '@mui/material'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import MetabolomicSetSelector from './MetabolomicSetSelector'
 import GSEA from './GSEA'
+import { useResults } from '@/components/app/ResultsContext'
+import { useJob } from '@/components/app/JobContext'
 
-function EnrichmentM() {
+function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
+
+    const [mCat, setMCat] = useState(null);
+    const updateMCat = (myMCat) => setMCat(myMCat);
+    console.log(mCat);
+
+    const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
+    const mdataColInfo = useJob().mdataType[mdataCol];
+
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
             <Box sx={{ width: '45%' }}>
-                <MetabolomicSetSelector />
+                <MetabolomicSetSelector
+                    setLoadingEnrichment={setLoadingEnrichment}
+                    fRef={fRef}
+                    updateMCat={updateMCat}
+                />
             </Box>
             <Box sx={{ width: '45%' }}>
-                {false && <GSEA />}
+                {
+                    mdataColInfo.type == 'categorical' &&
+                    mdataColInfo.levels.length > 1 &&
+                    mCat &&
+                    <>
+                        <GSEA
+                            f2MeanL={f2MeanL}
+                            fSet={mCat}
+                        />
+                    </>
+                }
             </Box>
-        </Box>)
+        </Box>
+    )
 }
 
 export default EnrichmentM
