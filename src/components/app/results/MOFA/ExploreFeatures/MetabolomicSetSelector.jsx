@@ -143,6 +143,7 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
         enableFullScreenToggle: false,
         enableHiding: false,
         enableColumnActions: false,
+        enableGlobalFilter: true,
         rowPinningDisplayMode: 'select-sticky',
         muiTableContainerProps: { sx: { maxHeight: '400px' } },
         enableRowVirtualization: true,
@@ -160,6 +161,20 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
             density: 'compact',
             showGlobalFilter: true,
         },
+        
+        filterFns: {
+            myCustomFilterFn: (row, id, filterValue) => {
+                if (row.getValue(id)) {
+                    const regex = new RegExp(filterValue);
+                    return regex.test(row.getValue(id))//.startsWith(filterValue)
+                }
+                else {
+                    return false
+                }
+            }
+          },
+          globalFilterFn: 'myCustomFilterFn',
+
         renderTopToolbarCustomActions: ({ table }) => (
             <MyTopToolbarActions
                 table={table}
