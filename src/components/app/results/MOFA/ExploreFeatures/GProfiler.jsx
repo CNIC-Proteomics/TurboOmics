@@ -1,6 +1,5 @@
 import { useJob } from '@/components/app/JobContext'
 import { Box, Button, Typography } from '@mui/material';
-//import { BarChart } from '@mui/x-charts';
 
 import { Cell, BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -16,15 +15,15 @@ import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
 
     const BASE_URL = useVars().BASE_URL;
-    const [qSet, setQSet] = useState([]);
-    const [goRes, setGoRes] = useState(null);
+    const [qSet, setQSet] = useState([]); // Filtered proteins
+    const [goRes, setGoRes] = useState(null); // All categories
 
     const q2i = useJob().user.q2i;
     const { OS } = useJob()
-    const myBackg = useMemo(() => q2i.index, [q2i]);
-    const mySet = fRef.map(e => e[q2i.columns[0]]);
+    const myBackg = useMemo(() => q2i.index, [q2i]); // All proteins in exp.
+    const mySet = fRef.map(e => e[q2i.columns[0]]); // Filtered proteins
 
-    if (
+    if ( // If filtered proteins changes, set it.
         !mySet.map(e => qSet.includes(e)).every(e => e) ||
         !qSet.map(e => mySet.includes(e)).every(e => e)
     ) {
@@ -52,7 +51,7 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
         const resJson = await res.json();
         setGoRes(resJson);
         setTimeout(() => setLoadingEnrichment(false), 2000);
-    }, [OS, qSet, myBackg]);
+    }, [OS, qSet, myBackg, setLoadingEnrichment]);
 
     useEffect(() => {
         const myTimeOut = setTimeout(gProfiler, 100);
@@ -106,7 +105,7 @@ const MyBarChart = ({ myData }) => {
     const plotRef = useRef()
     return (
         <Box sx={{
-            height: 460,
+            height: 520,
             overflowY: 'auto',
             overflowX: 'hidden',
         }}>
@@ -264,7 +263,7 @@ const CategoryTable = ({ myData, setCategory }) => {
                 myData.filter(e => e.native == Object.keys(rowSelection)[0])[0]
             );
         };
-    }, [rowSelection, myData, setCategory])
+    }, [rowSelection, myData, setCategory]);
 
     const table = useMaterialReactTable({
         columns,

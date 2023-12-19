@@ -16,9 +16,9 @@ function MetabolomicSetSelector({ setLoadingEnrichment, fRef, updateMCat }) {
     const [selectedField, setSelectedField] = useState(options[0]);
 
     useEffect(() => {
-        const myTimeOut = setTimeout(() => setLoadingEnrichment(false), 500);
+        const myTimeOut = setTimeout(() => setLoadingEnrichment(false), 2000);
         return () => clearTimeout(myTimeOut);
-    }, [])
+    }, [fRef, setLoadingEnrichment])
 
     return (
         <Box sx={{ textAlign: 'center' }}>
@@ -49,7 +49,7 @@ const FieldSelector = ({ options, selectedField, setSelectedField }) => {
 
     return (
         <Box>
-            <Typography variant='h6'>Select Field to Create Category</Typography>
+            <Typography variant='h6'>Apply Filter to Create Category</Typography>
             <Autocomplete
                 id="metabolomics-feature-field"
                 sx={{ width: 300, margin: 'auto', mt: 2 }}
@@ -79,7 +79,7 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
         const mySet = {};
         fRef.map(e => { mySet[e[idCol]] = true });
         return mySet
-    }, [fRef]);
+    }, [fRef, idCol]);
 
     const myData = useMemo(() => {
         const m2iJson = danfo2RowColJson(m2i);
@@ -202,7 +202,7 @@ const MyTopToolbarActions = ({ table, updateMCat }) => {
         }
 
         return () => clearInterval(myTimeOut);
-    }, [savedMIndexFiltered]);
+    }, [savedMIndexFiltered, mIndex, updateMCat]);
 
     const handleExportRows = (rows) => {
         const csvConfig = mkConfig({

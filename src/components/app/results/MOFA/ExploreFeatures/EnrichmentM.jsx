@@ -9,7 +9,6 @@ function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
 
     const [mCat, setMCat] = useState(null);
     const updateMCat = (myMCat) => setMCat(myMCat);
-    console.log(mCat);
 
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
     const mdataColInfo = useJob().mdataType[mdataCol];
@@ -32,6 +31,7 @@ function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
                         <GSEA
                             f2MeanL={f2MeanL}
                             fSet={mCat}
+                            omic='m'
                         />
                     </>
                 }

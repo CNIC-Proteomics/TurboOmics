@@ -3,7 +3,6 @@ import Slide from '@mui/material/Slide';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import OmicSelector from './OmicSelector';
 import TopBarDialog from './TopBarDialog';
-import { MySection, MySectionContainer } from '@/components/MySection';
 import MainContent from './MainContent';
 import { Box } from '@mui/material';
 import "@splidejs/splide/dist/css/splide.min.css"

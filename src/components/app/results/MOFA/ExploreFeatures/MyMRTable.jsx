@@ -88,8 +88,8 @@ const MyMRTable = ({
     Get data
     */
     const data = useMemo(() => {
+        
         let f2iJson = danfo2RowColJson(f2i.fillNa(''));
-
         let data = {};
 
         Object.keys(myLoadings)./*filter(
@@ -181,9 +181,9 @@ const MyRenderTopToolbar = ({
     useEffect(() => {
         const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 500);
         fRef.current[sign] = rows;
-        const myTimeOut = setTimeout(() => { myReRender() }, 2500);
+        const myTimeOut = setTimeout(() => { myReRender() }, 1000);
         return () => {clearTimeout(myTimeOut); clearTimeout(myTimeOut2)};
-    }, [rows, fRef, sign, myReRender]);
+    }, [rows, fRef, sign, myReRender, setLoadingEnrichment]);
 
     // if new elements, set them and reRender
     if (

@@ -13,8 +13,8 @@ function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
     const { OS } = useJob()
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
     const mdataColInfo = useJob().mdataType[mdataCol];
-    const [category, setCategory] = useState(null);
-    const [qCat, setQCat] = useState(null);
+    const [category, setCategory] = useState(null); // Selected category
+    const [qCat, setQCat] = useState(null); // P^roteins of the selected category
     const [loadingPCTable, setLoadingPCTable] = useState(true);
 
     const fetchProteins = useCallback(async () => {
@@ -33,10 +33,10 @@ function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
         );
 
         const resJson = await res.json();
-        const myQ = Object.keys(f2MeanL);
+        const myQ = Object.keys(f2MeanL); // All proteins of the experiment
         let myQCat = resJson.result.filter(
             e => myQ.includes(e.converted)
-        );
+        ); // Get proteins category that are in the experiment
         myQCat = myQCat.filter(
             (json, index, self) => index === self.findIndex((t) => t.converted === json.converted)
         ); //drop duplicates
@@ -71,6 +71,7 @@ function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
                         <GSEA
                             f2MeanL={f2MeanL}
                             fSet={qCat.map(e => e.converted)}
+                            omic='q'
                         />
                         <Box sx={{ pl: 2, mt: 1 }}>
                             <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
@@ -92,7 +93,7 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
         const mySet = {};
         fRef.map(e => { mySet[e[idCol]] = true });
         return mySet
-    }, [fRef])
+    }, [fRef, idCol]);
 
     const myData = useMemo(() => {
         const mySetArr = Object.keys(mySet);
