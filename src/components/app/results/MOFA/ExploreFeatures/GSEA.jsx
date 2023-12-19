@@ -13,7 +13,7 @@ import { resolve } from 'styled-jsx/css';
 
 function GSEA({ f2MeanL, fSet, omic }) {
 
-    const EMPIRICAL_PVALUE = 20;
+    const EMPIRICAL_PVALUE = 50;
 
     const BASE_URL = useVars().BASE_URL;
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
