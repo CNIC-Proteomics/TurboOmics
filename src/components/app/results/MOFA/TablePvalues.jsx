@@ -36,9 +36,6 @@ const useStyles = (scatterMode) => ({
     },
     selectedCell: {
         border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
-        /*'&:hover': {
-            border: scatterMode == '1D' ? '1px solid rgba(50,50,50,1)' : `1px solid ${myGridColor}`,
-        },*/
     },
 })
 

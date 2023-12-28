@@ -57,9 +57,19 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
+
+                    let regex = new RegExp('');
+                    try {
+                        regex = new RegExp(filterText);
+                    } catch {
+                        regex = new RegExp('');
+                    }
+
                     return (
                         featureObj['mdataValue'] != null &&
-                        `${featureObj['mdataValue']}`.toLowerCase().includes(filterText.toLowerCase()))
+                        regex.test(featureObj['mdataValue'])
+                        //`${featureObj['mdataValue']}`.toLowerCase().includes(filterText.toLowerCase())
+                    )
                 }
             );
 

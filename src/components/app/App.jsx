@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useEffect, useState } from 'react';
 
 import { JobProvider } from './JobContext';
@@ -48,11 +46,6 @@ export default function App() {
                                 />
                             }
                         </MyMotion>
-                    }
-
-                    {
-                        //page == 'create-job' &&
-                        //<CreateJobDialog page={page} setPage={setPage} />
                     }
 
                     {

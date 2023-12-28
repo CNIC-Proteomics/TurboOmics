@@ -53,7 +53,6 @@ export default function PCAOmic({ title, omic }) {
     )
 
     useEffect(() => {
-        console.log('useEffect to get data');
 
         if (status.status == 'waiting') {
             console.log('Get data from server');

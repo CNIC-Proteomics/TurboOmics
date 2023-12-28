@@ -28,14 +28,15 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                 <DialogActions sx={{ border: '0px solid red' }}>
                     <Button
                         sx={{ border: '0px solid blue', margin: 'auto' }}
-                        onClick={() => {setCreatingJob(''); setPage('results')}}
+                        onClick={() => { setCreatingJob(''); setPage('results') }}
                     >
                         No
                     </Button>
                     <Box style={{ margin: 'auto', cursor: 'not-allowed' }} >
-                        <Button 
-                        style={{ color: 'rgb(150,150,150)' }}
-                        onClick={() => {setCreatingJob('annotations-params')}}
+                        <Button
+                            style={{ color: 'rgb(150,150,150)' }}
+                            onClick={() => { setCreatingJob('annotations-params') }}
+                            disabled
                         >
                             Yes
                         </Button>

@@ -165,7 +165,12 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
         filterFns: {
             myCustomFilterFn: (row, id, filterValue) => {
                 if (row.getValue(id)) {
-                    const regex = new RegExp(filterValue);
+                    let regex = new RegExp('');
+                    try {
+                        regex = new RegExp(filterValue);
+                    } catch {
+                        regex = new RegExp('');
+                    }
                     return regex.test(row.getValue(id))//.startsWith(filterValue)
                 }
                 else {

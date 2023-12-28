@@ -30,6 +30,7 @@ export function JobProvider({ children }) {
 function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
     console.log(action);
+    
     switch (action.type) {
         case 'find-job': {
             console.log('findJob')

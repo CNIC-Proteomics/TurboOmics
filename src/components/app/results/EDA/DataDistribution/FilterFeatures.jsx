@@ -39,9 +39,20 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
+                    
+                    let regex = new RegExp('');
+                    try {
+                        regex = new RegExp(filterText);
+
+                    } catch (err) {
+                        regex = new RegExp('')
+                    }
+
                     return (
                         featureObj[filterCol] != null && 
-                        `${featureObj[filterCol]}`.toLowerCase().includes(filterText.toLowerCase()))
+                        regex.test(featureObj[filterCol])
+                        //`${featureObj[filterCol]}`.toLowerCase().includes(filterText.toLowerCase())
+                        )
                 }
             );
 
@@ -107,7 +118,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
                 }
             </Box>
             <Box sx={{ mt: 0 }}>
-                {true && <FilterTable data={filteredFeatures} columns={columns} />}
+                <FilterTable data={filteredFeatures} columns={columns} />
             </Box>
         </Box>
     )
