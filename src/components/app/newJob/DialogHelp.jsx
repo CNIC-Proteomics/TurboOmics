@@ -31,7 +31,7 @@ export default function DialogHelp({ title }) {
 
     return (
         <div className="mt-0 pt-0">
-            <IconButton onClick={openDialog}>
+            <IconButton onClick={openDialog} disabled>
                 <InfoOutlinedIcon />
             </IconButton>
             <BootstrapDialog

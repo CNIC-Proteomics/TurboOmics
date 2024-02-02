@@ -88,7 +88,7 @@ const MyMRTable = ({
     Get data
     */
     const data = useMemo(() => {
-        
+
         let f2iJson = danfo2RowColJson(f2i.fillNa(''));
         let data = {};
 
@@ -164,12 +164,12 @@ const MyMRTable = ({
     )
 }
 
-const MyRenderTopToolbar = ({ 
-    table, 
-    fRef, 
-    sign, 
-    myReRender, 
-    setLoadingEnrichment 
+const MyRenderTopToolbar = ({
+    table,
+    fRef,
+    sign,
+    myReRender,
+    setLoadingEnrichment
 }) => {
     const myFlatRows = table.getFilteredRowModel().flatRows;
     const myRows = myFlatRows.map(e => e.original);
@@ -182,7 +182,7 @@ const MyRenderTopToolbar = ({
         const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 500);
         fRef.current[sign] = rows;
         const myTimeOut = setTimeout(() => { myReRender() }, 1000);
-        return () => {clearTimeout(myTimeOut); clearTimeout(myTimeOut2)};
+        return () => { clearTimeout(myTimeOut); clearTimeout(myTimeOut2) };
     }, [rows, fRef, sign, myReRender, setLoadingEnrichment]);
 
     // if new elements, set them and reRender
@@ -199,7 +199,7 @@ const MyRenderTopToolbar = ({
             fieldSeparator: ',',
             decimalSeparator: '.',
             useKeysAsHeaders: true,
-            filename: `${omic}_${factor}_vs_${mdataCol}_filtered`
+            filename: 'Feature_Table'//`${omic}_${factor}_vs_${mdataCol}_filtered`
         });
         const rowData = rows.map((row) => row.original);
         const csv = generateCsv(csvConfig)(rowData);
@@ -211,7 +211,7 @@ const MyRenderTopToolbar = ({
             fieldSeparator: ',',
             decimalSeparator: '.',
             useKeysAsHeaders: true,
-            filename: `${omic}_${factor}_vs_${mdataCol}`
+            filename: 'Feature_Table'//`${omic}_${factor}_vs_${mdataCol}`
         });
         const csv = generateCsv(csvConfig)(data);
         download(csvConfig)(csv);
@@ -229,13 +229,15 @@ const MyRenderTopToolbar = ({
             <Box>
                 <MRT_ShowHideColumnsButton table={table} />
             </Box>
-            <Button
-                //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                onClick={handleExportData}
-                startIcon={<FileDownloadIcon />}
-            >
-                Export All Data
-            </Button>
+            {false && (
+                <Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={handleExportData}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export All Data
+                </Button>
+            )}
             <Button
                 disabled={table.getFilteredRowModel().rows.length === 0}
                 //export all rows, including from the next page, (still respects filtering and sorting)
