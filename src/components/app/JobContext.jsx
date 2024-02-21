@@ -30,10 +30,10 @@ export function JobProvider({ children }) {
 function jobReducer(draft, action) {
     console.log(`jobReducer called: ${action.type}`);
     console.log(action);
-    
+
     switch (action.type) {
         case 'find-job': {
-            console.log('findJob')
+            console.log('findJob');
             return action.results;
         }
         case 'set-os': {
@@ -41,15 +41,17 @@ function jobReducer(draft, action) {
             break;
         }
         case 'user-upload': {
-            let df = new dfd.DataFrame(action.dfJson)
+            let df = new dfd.DataFrame(action.dfJson);
+
             df.setIndex({ column: df.columns[0], inplace: true });
 
-            if (action.fileType == 'xq' || action.fileType == 'xm') {
+            if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 df.drop({ columns: [df.columns[0]], inplace: true });
                 let dfMV = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
                 let thr = generateArray(0, 1.05, 0.05);
                 thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }))
                 draft.results.PRE.MV[action.fileType] = thr;
+                draft.omics.push(action.fileType.slice(-1));
             }
 
             if (action.fileType == 'mdata') {
@@ -87,8 +89,8 @@ function jobReducer(draft, action) {
                         draft.mdataType[columnName].levels = levels;
 
                         draft.mdataType[columnName].level2id = {}
-                        levels.map(e => {draft.mdataType[columnName].level2id[e] = []})
-                        
+                        levels.map(e => { draft.mdataType[columnName].level2id[e] = [] })
+
                         let myCol = df.column(columnName);
                         myCol.index.map((myID, i) => {
                             if (levels.includes(myCol.values[i])) {
@@ -129,15 +131,15 @@ function jobReducer(draft, action) {
             break;
         }
 
-        case 'set-annotations-mode': {
+        /*case 'set-annotations-mode': {
             draft.annotations.mode = action.mode;
             break;
-        }
+        }*/
 
-        case 'set-annotations-column': {
+        /*case 'set-annotations-column': {
             draft.annotations.column = action.column;
             break;
-        }
+        }*/
 
         case 'set-job-id': {
             draft.jobID = action.jobID;
@@ -152,64 +154,77 @@ function jobReducer(draft, action) {
 }
 
 const jobTemplate = {
-    "OS": null,
+    "OS": null, //organism
     "jobID": null,
+    "omics": [], // Omics selected by the user {q, m, t}
     "userFileNames": { // Name of the files uploaded by the user
         "xq": null,
         "xm": null,
+        "xt": null,
         "mdata": null,
         "q2i": null,
-        "m2i": null
+        "m2i": null,
+        "t2i": null
     },
     "user": { // Danfo dataframes uploaded by the user
         "xq": null,
         "xm": null,
+        "xt": null,
         "mdata": null,
         "q2i": null,
-        "m2i": null
+        "m2i": null,
+        "t2i": null
     },
     "index": { // Index of danfo dataframes (we need it to preserve it after json conversion)
         "xq": null,
         "xm": null,
+        "xt": null,
         "mdata": null,
         "q2i": null,
-        "m2i": null
+        "m2i": null,
+        "t2i": null
     },
     "norm": { // Feature-center, scaled and imputed Danfo dataframes
         "xq": null,
-        "xm": null
+        "xm": null,
+        "xt": null
     },
     "mdataType": {}, // {mdata_columns} --> {categorical, numeric}
-    "annotations": {
+    /*"annotations": {
         "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)
         "column": null
-    },
+    },*/
     "results": {
         "PRE": { // Results computed when user upload the files
             'log': { // log transformation
                 'xq': false,
-                'xm': false
+                'xm': false,
+                'xt': false
             },
             'scale': { // center and scale
                 'xq': false,
-                'xm': true
+                'xm': true,
+                'xt': false
             },
             'MV': { // Missing values --> Array of objects used to plot graph
                 'xq': null, // [{thr: x, nFeatures: y}, ...]
-                'xm': null
+                'xm': null,
+                'xt': null
             },
             'MVThr': { // MV Threshold selected by the user
                 'xq': 0.2,
-                'xm': 0.2
+                'xm': 0.2,
+                'xt': 0.2
             },
             'MVType': { // Type of missing value imputation
                 'xq': 'KNN',
-                'xm': 'KNN'
+                'xm': 'KNN',
+                'xt': 'KNN'
             }
         },
-        "EDA": null,
+        /*"EDA": null,
         "MOFA": null,
         "CORR": null,
-        "ML": null
+        "ML": null*/
     }
 }

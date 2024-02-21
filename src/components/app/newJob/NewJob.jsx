@@ -25,12 +25,12 @@ export default function NewJob() {
                 <DragFile title="Metabolomic Metadata" fileType="m2i" />
             </Box>
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-                <DragFile title="Proteomic Quantifications" fileType="xq" />
+                <DragFile title="Proteomic Quantifications" fileType="xq" traspose={true} />
                 <Box sx={{ height: '100%' }}>
                     <MyAutocomplete />
                     <SummaryTable />
                 </Box>
-                <DragFile title="Metabolomic Quantifications" fileType="xm" />
+                <DragFile title="Metabolomic Quantifications" fileType="xm" traspose={true} />
             </Box>
 
             <Box sx={{ py: 1, display: 'flex', justifyContent: 'space-around' }}>

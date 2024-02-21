@@ -2,9 +2,9 @@ export function danfo2Json(job) {
     return {
         ...job,
         'user': {
+            'mdata': dfd.toJSON(job.user.mdata),
             'xq': dfd.toJSON(job.user.xq),
             'xm': dfd.toJSON(job.user.xm),
-            'mdata': dfd.toJSON(job.user.mdata),
             'q2i': dfd.toJSON(job.user.q2i),
             'm2i': dfd.toJSON(job.user.m2i)
         },

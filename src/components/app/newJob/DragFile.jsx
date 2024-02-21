@@ -9,14 +9,14 @@ import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
 const fileFormat = ["TSV"];
 
 
-export default function DragFile({ title, fileType }) {
+export default function DragFile({ title, fileType, traspose=false }) {
 
     const fileName = useJob().userFileNames[fileType];
     const dispatchJob = useDispatchJob();
 
     async function handleChange(file) {
         const fileText = await file.text();
-        let dfJson = await tsvToDanfo(fileText);
+        let dfJson = await tsvToDanfo(fileText, '\t', traspose);
 
         dispatchJob({
             type: 'user-upload',
