@@ -47,10 +47,23 @@ function jobReducer(draft, action) {
 
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 df.drop({ columns: [df.columns[0]], inplace: true });
+
+                // Missing values calculations
                 let dfMV = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
                 let thr = generateArray(0, 1.05, 0.05);
                 thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }))
                 draft.results.PRE.MV[action.fileType] = thr;
+
+                // Create omic2i in case it was not uploaded
+                if (draft.user[`${action.fileType.slice(-1)}2i`] == null) {
+                    let omic2i = [];
+                    df.columns.map(e => omic2i.push({'ID':e}));
+                    omic2i = new dfd.DataFrame(omic2i);
+                    omic2i.setIndex({column: 'ID', inplace:true});
+                    draft.user[`${action.fileType.slice(-1)}2i`] = omic2i;
+                }
+
+                // Set omic
                 draft.omics.push(action.fileType.slice(-1));
             }
 
@@ -156,6 +169,7 @@ function jobReducer(draft, action) {
 const jobTemplate = {
     "OS": null, //organism
     "jobID": null,
+    "myomics": ['q', 'm', 't'],
     "omics": [], // Omics selected by the user {q, m, t}
     "userFileNames": { // Name of the files uploaded by the user
         "xq": null,

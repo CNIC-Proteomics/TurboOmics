@@ -27,7 +27,7 @@ export default function Results() {
 
     const section = Math.floor(value);
 
-    const { jobID } = useJob();
+    const { jobID, omics } = useJob();
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -35,7 +35,7 @@ export default function Results() {
     };
 
     const fetchStatus = useCallback(async () => {
-        const res = await fetch(`${API_URL}/get_status/${jobID}`);
+        const res = await fetch(`${API_URL}/get_status/${jobID}/${omics.join('')}`);
         const resJson = await res.json();
 
         // If there is any change set it

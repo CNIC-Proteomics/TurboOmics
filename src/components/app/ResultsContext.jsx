@@ -149,6 +149,22 @@ function resultsReducer(draft, action) {
     }
 }
 
+const PCA_omicTemplate = {
+    data: {
+        projections: null,
+        loadings: null,
+        explained_variance: null,
+        anova: null
+    }, // {projections, loadings, explained_variance, anova}
+    status: { status: 'waiting' }, // status -> {ok, waiting, error}
+    displayOpts: {
+        scatterMode: '1D',
+        selectedPlot: null,
+        selectedCell: null,
+        selectedPlot2D: { x: 1, y: 2, g: 'No color' },
+        filterCol: 'All features',
+    }
+}
 
 const resultsTemplate = {
     'value': 0.1,
@@ -166,47 +182,20 @@ const resultsTemplate = {
             'groupby': { label: 'All values', value: 'All values' },
             'filterCol': {
                 'q2i': 'All features',
-                'm2i': 'All features'
+                'm2i': 'All features',
+                't2i': 'All features'
             },
             'filterText': {
                 'q2i': '',
-                'm2i': ''
+                'm2i': '',
+                't2i': ''
             },
         },
 
         'PCA': {
-            'q': {
-                data: {
-                    projections: null,
-                    loadings: null,
-                    explained_variance: null,
-                    anova: null
-                }, // {projections, loadings, explained_variance, anova}
-                status: { status: 'waiting' }, // status -> {ok, waiting, error}
-                displayOpts: {
-                    scatterMode: '1D',
-                    selectedPlot: null,
-                    selectedCell: null,
-                    selectedPlot2D: { x: 1, y: 2, g: 'No color' },
-                    filterCol: 'All features',
-                }
-            },
-            'm': {
-                data: {
-                    projections: null,
-                    loadings: null,
-                    explained_variance: null,
-                    anova: null
-                },
-                status: { status: 'waiting' },
-                displayOpts: {
-                    scatterMode: '1D',
-                    selectedPlot: null,
-                    selectedCell: null,
-                    selectedPlot2D: { x: 1, y: 2, g: 'No color' },
-                    filterCol: 'All features',
-                }
-            }
+            'q': PCA_omicTemplate,
+            'm': PCA_omicTemplate,
+            't': PCA_omicTemplate
         }
     },
     'MOFA': {

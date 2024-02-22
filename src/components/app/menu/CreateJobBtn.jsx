@@ -35,6 +35,7 @@ export default function CreateJobBtn({ setCreatingJob }) {
         });
 
         // Create job in back-end
+        console.log(danfo2Json(job))
         const res = await fetch(`${API_URL}/create_job`, {
             method: 'POST',
             headers: {
@@ -45,6 +46,9 @@ export default function CreateJobBtn({ setCreatingJob }) {
 
         // Set jobContext received by back-end
         const resJson = await res.json();
+
+        console.log(resJson);
+
         const newJob = json2Danfo(resJson);
         dispatchJob({
             type: 'set-job-context',
@@ -55,6 +59,8 @@ export default function CreateJobBtn({ setCreatingJob }) {
 
         // Finish loading state
         setCreatingJob('ask-annotations');
+
+        console.log(newJob);
     }
 
     return (

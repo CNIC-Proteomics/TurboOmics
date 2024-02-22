@@ -36,7 +36,6 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                         <Button
                             style={{ color: 'rgb(150,150,150)' }}
                             onClick={() => { setCreatingJob('annotations-params') }}
-                            disabled
                         >
                             Yes
                         </Button>
