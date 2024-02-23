@@ -33,6 +33,8 @@ const MVmethod = [
 
 export default function PlotMV({ fileType, omic }) {
 
+    const { omics } = useJob();
+
     const myLog = useJob().results.PRE.log[fileType];
     const myScale = useJob().results.PRE.scale[fileType];
 
@@ -54,7 +56,7 @@ export default function PlotMV({ fileType, omic }) {
         MVType: MVType
     })
 
-    if (MVdata == null) return (<></>)
+    //if (MVdata == null) return (<></>)
 
     const error = console.error;
     console.error = (...args) => {
@@ -63,66 +65,68 @@ export default function PlotMV({ fileType, omic }) {
     };
 
     return (
-        <Box sx={{ width: "33%" }}>
-            <Typography variant='h6' sx={{ textAlign: 'center' }}>Apply:</Typography>
-            <MySwitch actionType='set-log' fileType={fileType} myChecked={myLog} label={'Log Transformation'} />
-            <MySwitch actionType='set-scale' fileType={fileType} myChecked={myScale} label={'Center & Scale'} />
+        <Box sx={{ width: "30%" }}>
+            {omics.includes(fileType.slice(-1)) && <>
+                <Typography variant='h6' sx={{ textAlign: 'center' }}>Apply:</Typography>
+                <MySwitch actionType='set-log' fileType={fileType} myChecked={myLog} label={'Log Transformation'} />
+                <MySwitch actionType='set-scale' fileType={fileType} myChecked={myScale} label={'Center & Scale'} />
 
-            {xTable.isNa().sum({ axis: 0 }).sum() == 0 ?
-                <>
-                    <Box sx={{ mt: 3 }}>
-                        <Typography variant='h6' sx={{ textAlign: 'center' }}>No missing value detected</Typography>
-                    </Box>
-                </>
-                :
-                <>
-                    <Box sx={{ mt: 3, textAlign: 'center', overflow: 'auto' }}>
-                        <Typography variant='h6'>{omic} Features vs MV Threshold</Typography>
-                        <Box sx={{ width: 550, margin: 'auto' }} >
-                            <LineChart
-                                id='1'
-                                width={550}
-                                height={200}
-                                data={MVdata}
-                                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                                onClick={e => e != null && setThr(e.activeLabel)}
-                            >
-                                <ReferenceLine x={thr} stroke='rgba(100,100,100,1)' />
-                                <Line type="monotone" dataKey="Features" stroke="#8884d8" />
-                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                <XAxis id={1} dataKey="MVThr" label={{ value: "Missing Values Threshold", position: 'insideBottom', offset: -10 }} />
-                                <YAxis label={{ value: "Accepted Features", position: "insideLeft", angle: -90, dy: 60, offset: -5 }} />
-                                <Tooltip />
-                            </LineChart>
+                {xTable.isNa().sum({ axis: 0 }).sum() == 0 ?
+                    <>
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant='h6' sx={{ textAlign: 'center' }}>No missing value detected</Typography>
                         </Box>
-                        <Box sx={{ margin: 'auto', width: 550 }}>
-                            <Box sx={{ position: 'relative', left: 30, margin: 'auto', width: 450 }}>
-                                <DiscreteSlider thr={thr} setThr={setThr} />
-                                <Box sx={{ display: 'flex', justifyContent: 'end', flexDirection: 'column' }}>
-                                    <Typography>Selected MV Threshold: {thr}</Typography>
-                                    <Box sx={{ p: 0 }}>
-                                        <TextField
-                                            id="outlined-select-currency"
-                                            select
-                                            label="Select"
-                                            value={MVType}
-                                            helperText="Please select imputation type"
-                                            size="small"
-                                            sx={{ width: "100%" }}
-                                            onChange={e => setMVType(e.target.value)}
-                                        >
-                                            {MVmethod.map((option) => (
-                                                <MenuItem key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
+                    </>
+                    :
+                    <>
+                        <Box sx={{ mt: 3, textAlign: 'center', overflow: 'auto' }}>
+                            <Typography variant='h6'>{omic} Features vs MV Threshold</Typography>
+                            <Box sx={{ width: 450, margin: 'auto' }}>
+                                <LineChart
+                                    id='1'
+                                    width={450}
+                                    height={200}
+                                    data={MVdata}
+                                    margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                                    onClick={e => e != null && setThr(e.activeLabel)}
+                                >
+                                    <ReferenceLine x={thr} stroke='rgba(100,100,100,1)' />
+                                    <Line type="monotone" dataKey="Features" stroke="#8884d8" />
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                    <XAxis id={1} dataKey="MVThr" label={{ value: "Missing Values Threshold", position: 'insideBottom', offset: -10 }} />
+                                    <YAxis label={{ value: "Accepted Features", position: "insideLeft", angle: -90, dy: 60, offset: -5 }} />
+                                    <Tooltip />
+                                </LineChart>
+                            </Box>
+                            <Box sx={{ margin: 'auto', width: 450 }}>
+                                <Box sx={{ position: 'relative', left: 30, margin: 'auto', width: 350 }}>
+                                    <DiscreteSlider thr={thr} setThr={setThr} />
+                                    <Box sx={{ display: 'flex', justifyContent: 'end', flexDirection: 'column' }}>
+                                        <Typography>Selected MV Threshold: {thr}</Typography>
+                                        <Box sx={{ p: 0 }}>
+                                            <TextField
+                                                id="outlined-select-currency"
+                                                select
+                                                label="Select"
+                                                value={MVType}
+                                                helperText="Please select imputation type"
+                                                size="small"
+                                                sx={{ width: "100%" }}
+                                                onChange={e => setMVType(e.target.value)}
+                                            >
+                                                {MVmethod.map((option) => (
+                                                    <MenuItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Box>
                                     </Box>
                                 </Box>
                             </Box>
                         </Box>
-                    </Box>
-                </>}
+                    </>}
+            </>}
         </Box>
     )
 }

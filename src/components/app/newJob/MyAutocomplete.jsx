@@ -21,28 +21,30 @@ function MyAutocomplete() {
     }, [expOS, dispatchJob]);
 
     return (
-        <Box sx={{ py: 1, mb: 1 }}>
-            <Autocomplete
-                id="virtualize-demo"
-                sx={{ width: 300 }}
-                disableListWrap
-                value={expOS}
-                onChange={(e, newValue) => handleInput(e, newValue)}
-                //PopperComponent={StyledPopper}
-                //ListboxComponent={ListboxComponent}
-                options={os}
-                //groupBy={(option) => option[0].toUpperCase()}
-                renderInput={(params) => <TextField {...params} label="Organism" />}
-                renderOption={(props, option) => {
-                    return (
-                        <li {...props} key={option.id}>
-                            {option.label}
-                        </li>
-                    );
-                }}
-            //renderOption={(props, option, state) => [props, option, state.index]}
-            //renderGroup={(params) => params}
-            />
+        <Box sx={{display:'flex', justifyContent:'center', alignItems:'center', height:'100%' }}>
+            <Box sx={{ width: 300 }}>
+                <Autocomplete
+                    id="virtualize-demo"
+                    sx={{ width: 300 }}
+                    disableListWrap
+                    value={expOS}
+                    onChange={(e, newValue) => handleInput(e, newValue)}
+                    //PopperComponent={StyledPopper}
+                    //ListboxComponent={ListboxComponent}
+                    options={os}
+                    //groupBy={(option) => option[0].toUpperCase()}
+                    renderInput={(params) => <TextField {...params} label="Organism" />}
+                    renderOption={(props, option) => {
+                        return (
+                            <li {...props} key={option.id}>
+                                {option.label}
+                            </li>
+                        );
+                    }}
+                //renderOption={(props, option, state) => [props, option, state.index]}
+                //renderGroup={(params) => params}
+                />
+            </Box>
         </Box>
     )
 }

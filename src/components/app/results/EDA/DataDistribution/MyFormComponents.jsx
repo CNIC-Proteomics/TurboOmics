@@ -36,20 +36,21 @@ export function MySwitch({ handleSwitch, label }) {
 
 export function MySelectGroupby({ options, handleSelect, label }) {
 
+    // Self-component state to change fluidly
     const savedGroupby = useResults().EDA.DD.groupby;
-    const dispatchResults = useDispatchResults();
-
     const [groupby, setGroupby] = useState(savedGroupby);
-
+    
+    
     const handleChange = e => {
         setGroupby({ label: e.value, value: e.value });
         setTimeout(() => handleSelect(e), 100);
     }
-
-    // Save showNorm state to be restored
+    
+    // Save state to be restored !!!!!! CHECK THIS
+    const dispatchResults = useDispatchResults();
     useEffect(() => {
         dispatchResults({ type: 'set-eda-dd-groupby', groupby: groupby });
-    }, [groupby, dispatchResults])
+    }, [groupby, dispatchResults]);
 
 
     return (

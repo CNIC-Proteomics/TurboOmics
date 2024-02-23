@@ -27,7 +27,7 @@ export default function DragFile({ title, fileType, traspose=false }) {
     };
 
     return (
-        <div className="DragFile mx-2 text-center" style={{ width: '30%' }}>
+        <div style={{ width: '30%', textAlign:'center' }}>
             <Card sx={{ transition: "all 1s ease", backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)' }} >
                 <Typography variant="h6" className="pt-2">{title}</Typography>
                 <DialogHelp title={title} />

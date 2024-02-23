@@ -12,58 +12,83 @@ import ImageIcon from '@mui/icons-material/Image';
 import downloadImage from './downloadImage';
 import { useResults, useDispatchResults } from '@/components/app/ResultsContext';
 import { MySection, MySectionContainer } from '@/components/MySection';
+import OmicView from './OmicView';
+import OmicSelector from './OmicSelector';
 
 export default function DataDistribution() {
 
-    const qHistRef = useRef();
-    const qBoxRef = useRef();
-    const mHistRef = useRef();
-    const mBoxRef = useRef();
+    const omicViewRef = useRef()
 
+    const { omics } = useJob();
+    const [selOmic, setSelOmic] = useState(omics[0]);
+
+    // Ref to download figures
+    const figRef = useRef(
+        omics.reduce((obj, omic) => ({ ...obj, [omic]: {} }), {})
+    );
+
+    // Display options (norm & groupby mdata & feature filtration) 
     const savedShowNorm = useResults().EDA.DD.showNorm;
-    const savedGroupby = useResults().EDA.DD.groupby;
-    //const dispatchResults = useDispatchResults();
-
-    const [showPlot, setShowPlot] = useState({ 'q': false, 'm': false });
-
-    const [filteredID, setFilteredID] = useState({ 'q2i': [], 'm2i': [] });
     const [showNorm, setShowNorm] = useState(savedShowNorm);
+
+    const savedGroupby = useResults().EDA.DD.groupby;
     const [groupby, setGroupby] = useState(savedGroupby);
 
+    const [filteredID, setFilteredID] = useState(
+        omics.reduce((obj, omic) => ({ ...obj, [`${omic}2i`]: [] }), {})
+    );
+
+    // Extract categorical mdata columns (adding a generic one)
     const { mdataType } = useJob();
-    let mdataCols = useJob().user.mdata.columns.map(e => ({ label: e, value: e }));
-    mdataCols = mdataCols.filter(e => mdataType[e.value].type == 'categorical');
+    let mdataCols = useJob().user.mdata.columns
+        .map(e => ({ label: e, value: e }))
+        .filter(e => mdataType[e.value].type == 'categorical');
     mdataCols = [{ label: 'All values', value: 'All values' }, ...mdataCols];
 
-    const updatePlot = useCallback((omics = ['q', 'm']) => {
+
+    // Control display plot
+    const [showPlot, setShowPlot] = useState(
+        omics.reduce((obj, omic) => ({ ...obj, [omic]: false }), {})
+    );
+
+    const updatePlot = useCallback((omics = omics) => {
         omics.map(
             omic => {
                 setShowPlot(prevState => ({ ...prevState, [omic]: false }))
             }
-        )
+        );
         omics.map(
             omic => setTimeout(() => setShowPlot(prevState => ({ ...prevState, [omic]: true })), 300)
-        )
-    }, [])
+        );
+    }, []);
 
+
+    // Handle change in groupby
     const handleSelect = useCallback(e => {
         setGroupby({ label: e.value, value: e.value })
-        updatePlot(['q', 'm']);
+        updatePlot(omics);
     }, [updatePlot])
 
+
+    // Handle change in norm
     const handleSwitch = useCallback(e => {
         setShowNorm(e.target.checked);
-        updatePlot(['q', 'm']);
+        updatePlot(omics);
     }, [updatePlot]);
 
     return (
         <Box>
+            <OmicSelector
+                selOmic={selOmic}
+                setSelOmic={setSelOmic}
+                omicViewRef={omicViewRef}
+            />
             <Grid
                 container
                 direction='row'
                 justifyContent='center'
                 alignItems='center'
-                sx={{ mb: 3, mt: 0 }}
+                sx={{ mb: 3, mt: 3 }}
             >
                 {false && <Grid item xs={3} sx={{ pt: 3 }}>
                     <MySwitch handleSwitch={handleSwitch} label="Centered & Scaled" />
@@ -76,102 +101,30 @@ export default function DataDistribution() {
                     />
                 </Grid>
             </Grid>
-            <MySectionContainer height="70vh">
-                <Box sx={{ flexGrow: 1, p: 0, mt: 0 }}>
-                    <Grid
-                        container
-                        direction='row'
-                        justifyContent='center'
-                        spacing={0}
-                        sx={{ p: 0 }}
-                    >
-                        <Grid item sx={{ borderRight: '1px solid #cccccc' }} xs={6}>
-                            <MySection>
-                                <Typography
-                                    variant='h6'
-                                    sx={{ textAlign: 'center', color: '#555555' }}
-                                >
-                                    Proteomics
-                                    <IconButton
-                                        aria-label="download"
-                                        size='small'
-                                        onClick={e => downloadImage(qHistRef.current, qBoxRef.current, 'Proteomics')}
-                                        sx={{ opacity: 0.5, visibility: showPlot['q'] ? 'visible' : 'hidden', paddingBottom: 1 }}
-                                    >
-                                        <ImageIcon />
-                                    </IconButton>
-                                </Typography>
-                                {showPlot['q'] ?
-                                    <Box sx={{ height: 550, overflowX: 'auto' }}>
-                                        <PlotData
-                                            fileType='xq'
-                                            filteredID={filteredID.q2i}
-                                            groupby={groupby.value}
-                                            showNorm={showNorm}
-                                            histRef={qHistRef}
-                                            boxRef={qBoxRef}
-                                        />
-                                    </Box>
-                                    :
-                                    <Box sx={{ textAlign: 'center', pt: 20, height: 550 }}>
-                                        <CircularProgress size={100} thickness={2} />
-                                    </Box>
-                                }
-                            </MySection>
-                            <MySection>
-                                <FilterFeatures
-                                    omic='q'
-                                    fileType='q2i'
-                                    setFilteredID={setFilteredID}
-                                    updatePlot={updatePlot}
-                                />
-                            </MySection>
-                        </Grid>
-                        <Grid item xs={6} sx={{ borderLeft: '1px solid #cccccc' }}>
-                            <MySection>
-                                <Typography
-                                    variant='h6'
-                                    sx={{ textAlign: 'center', color: '#555555' }}
-                                >
-                                    Metabolomics
-                                    <IconButton
-                                        aria-label="download"
-                                        size='small'
-                                        onClick={e => downloadImage(mHistRef.current, mBoxRef.current, 'Metabolomics')}
-                                        sx={{ opacity: 0.5, visibility: showPlot['m'] ? 'visible' : 'hidden', paddingBottom: 1 }}
-                                    >
-                                        <ImageIcon />
-                                    </IconButton>
-                                </Typography>
-                                {showPlot['m'] ?
-                                    <Box sx={{ height: 550, overflowX: 'auto' }}>
-                                        <PlotData
-                                            fileType='xm'
-                                            filteredID={filteredID.m2i}
-                                            groupby={groupby.value}
-                                            showNorm={showNorm}
-                                            histRef={mHistRef}
-                                            boxRef={mBoxRef}
-                                        />
-                                    </Box>
-                                    :
-                                    <Box sx={{ textAlign: 'center', pt: 20, height: 550 }}>
-                                        <CircularProgress size={100} thickness={2} />
-                                    </Box>
-                                }
-                            </MySection>
-                            <MySection>
-                                <FilterFeatures
-                                    omic='m'
-                                    fileType='m2i'
-                                    setFilteredID={setFilteredID}
-                                    updatePlot={updatePlot}
-                                />
-                            </MySection>
-                        </Grid>
-                    </Grid>
+            <Box ref={omicViewRef} sx={{ overflow: 'hidden' }}>
+                <Box sx={{ display: 'flex', width: `${omics.length}00%`, }}>
+                    {omics.map(omic => (
+                        <Box sx={{
+                            width: `${100 / omics.length}%`,
+                            opacity: selOmic == omic ? 1 : 0,
+                            transition: 'all 1s ease'
+                        }}
+                        >
+                            <OmicView
+                                key={omic}
+                                omic={omic}
+                                figRef={figRef}
+                                showPlot={showPlot}
+                                showNorm={showNorm}
+                                filteredID={filteredID[`${omic}2i`]}
+                                setFilteredID={setFilteredID}
+                                updatePlot={updatePlot}
+                                groupby={groupby.value}
+                            />
+                        </Box>
+                    ))}
                 </Box>
-            </MySectionContainer>
+            </Box>
         </Box>
     )
 }

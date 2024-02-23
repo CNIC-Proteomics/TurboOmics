@@ -10,6 +10,7 @@ import { useDispatchResults, useResults } from '../ResultsContext';
 import { CircularProgress, Grid } from '@mui/material';
 import { useVars } from '@/components/VarsContext';
 import MOFA from './MOFA/MOFA';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 
 export default function Results() {
 
@@ -74,7 +75,7 @@ export default function Results() {
             <Box
                 sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}
             >
-                <Box sx={{width:'15%', borderRight: 1, borderColor: 'divider'}}>
+                <Box sx={{ width: '15%', borderRight: 1, borderColor: 'divider' }}>
                     <Tabs
                         orientation="vertical"
                         variant="scrollable"
@@ -157,13 +158,20 @@ export default function Results() {
 const TabComponent = ({ text, status }) => {
     return (
         <Grid container sx={{ m: 'auto', height: 55 }}>
-            {status == 'waiting' &&
+            {(status == 'waiting' || status == 'error') &&
                 <Box sx={{ position: 'absolute', height: '100%' }}>
-                    <Box sx={{ height: 20, position: 'relative', top: '35%', left: 7 }}>
-                        <CircularProgress
-                            sx={{ verticalAlign: 'middle' }}
-                            size={15}
-                            thickness={5} />
+                    <Box sx={{ height: 20, position: 'relative', top: '35%', left: 20 }}>
+                        {status == 'waiting' &&
+                            <CircularProgress
+                                sx={{ verticalAlign: 'middle' }}
+                                size={15}
+                                thickness={5}
+                            />
+                        }
+                        {
+                            status == 'error' &&
+                            <ErrorOutlineOutlinedIcon />
+                        }
                     </Box>
                 </Box>
             }

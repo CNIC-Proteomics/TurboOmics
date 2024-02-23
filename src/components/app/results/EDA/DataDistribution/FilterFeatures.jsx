@@ -8,31 +8,33 @@ import { useDispatchResults, useResults } from '@/components/app/ResultsContext'
 
 export default function FilterFeatures({ omic, fileType, setFilteredID, updatePlot }) {
 
-    const savedFilterText = useResults().EDA.DD.filterText[fileType];
-    const savedFilterCol = useResults().EDA.DD.filterCol[fileType];
     const dispatchResults = useDispatchResults();
-
+    
+    // Component states to filter features
+    const savedFilterText = useResults().EDA.DD.filterText[fileType];
     const [filterText, setFilterText] = useState(savedFilterText);
+    
+    const savedFilterCol = useResults().EDA.DD.filterCol[fileType];
     const [filterCol, setFilterCol] = useState(savedFilterCol);
 
     const f2i = useJob().user[fileType];
 
     const { filteredFeatures, columns } = useMemo(() => {
-        console.log('calculating filteredFeatures')
+        console.log('calculating filteredFeatures');
 
-        let filteredFeatures = {}
+        let filteredFeatures = [];
         let columns = [{
-            accessorKey: 'ID',
-            header: 'ID',
+            accessorKey: ' ',
+            header: ' ',
             size: 60,
-        }]
+        }];
 
         if (f2i.columns.includes(filterCol)) {
 
             filteredFeatures = f2i.column(filterCol);
             filteredFeatures = filteredFeatures.values.map(
                 (value, i) => ({
-                    ID: filteredFeatures.index[i],
+                    ' ': filteredFeatures.index[i],
                     [filterCol]: value
                 })
             )
@@ -51,7 +53,6 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
                     return (
                         featureObj[filterCol] != null && 
                         regex.test(featureObj[filterCol])
-                        //`${featureObj[filterCol]}`.toLowerCase().includes(filterText.toLowerCase())
                         )
                 }
             );
@@ -66,7 +67,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
             filteredFeatures = f2i.index
             filteredFeatures = filteredFeatures.map(
                 (value, i) => ({
-                    ID: value,
+                    ' ': value,
                 })
             )
         }
@@ -79,7 +80,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
 
         const myTimeout = setTimeout(() => {
             setFilteredID(prevState => ({
-                ...prevState, [fileType]: filteredFeatures.map(feature => feature.ID)
+                ...prevState, [fileType]: filteredFeatures.map(feature => feature[' '])
             }));
             updatePlot([omic]);
             console.log('Features recalculated');
@@ -88,7 +89,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
         return () => clearTimeout(myTimeout);
     }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
 
-    // Save data
+    // Save data !!! CHECK THIS
     useEffect(() => {
         dispatchResults({ type: 'set-eda-dd-filter', filterCol: filterCol, fileType: fileType });
         dispatchResults({ type: 'set-eda-dd-filter-text', filterText: filterText, fileType: fileType });

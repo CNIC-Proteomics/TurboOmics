@@ -10,10 +10,18 @@ import {
 import { myPalette } from "@/utils/myPalette";
 
 
-export default function MyHistogram({ dataHist, gValues, xrange, yrange, xTicks, histRef }) {
+export default function MyHistogram({
+    dataHist,
+    gValues,
+    xrange,
+    yrange,
+    xTicks,
+    figRef,
+    omic
+}) {
     return (
         <AreaChart
-            ref={histRef}
+            ref={(node) => { figRef.current[omic]['Hist'] = node }}
             style={{ margin: 'auto' }}
             width={500}
             height={210}

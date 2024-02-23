@@ -43,7 +43,7 @@ export default function FilterTable({ columns, data }) {
         enableRowNumbers: false,
         enableRowVirtualization: true,
         enableColumnFilters: false,
-        muiTableContainerProps: { sx: { maxHeight: '560px' } },
+        muiTableContainerProps: { sx: { maxHeight: '450px' } },
         onSortingChange: setSorting,
         state: { isLoading, sorting },
         rowVirtualizerInstanceRef, //optional

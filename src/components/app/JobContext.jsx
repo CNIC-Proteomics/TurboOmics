@@ -41,6 +41,8 @@ function jobReducer(draft, action) {
             break;
         }
         case 'user-upload': {
+            const omic = action.fileType.slice(-1)
+
             let df = new dfd.DataFrame(action.dfJson);
 
             df.setIndex({ column: df.columns[0], inplace: true });
@@ -55,16 +57,20 @@ function jobReducer(draft, action) {
                 draft.results.PRE.MV[action.fileType] = thr;
 
                 // Create omic2i in case it was not uploaded
-                if (draft.user[`${action.fileType.slice(-1)}2i`] == null) {
+                if (draft.user[`${omic}2i`] == null) {
+                    let myKey = `${omic}ID`;
                     let omic2i = [];
-                    df.columns.map(e => omic2i.push({'ID':e}));
+                    df.columns.map(e => omic2i.push({[myKey]:e}));
                     omic2i = new dfd.DataFrame(omic2i);
-                    omic2i.setIndex({column: 'ID', inplace:true});
-                    draft.user[`${action.fileType.slice(-1)}2i`] = omic2i;
+                    omic2i.setIndex({column:myKey, inplace:true});
+                    draft.user[`${omic}2i`] = omic2i;
+                    draft.index[`${omic}2i`] = omic2i.index;
                 }
 
                 // Set omic
-                draft.omics.push(action.fileType.slice(-1));
+                const sOmics = [...draft.omics];
+                sOmics.push(omic);
+                draft.omics = sortOmics(sOmics);
             }
 
             if (action.fileType == 'mdata') {
@@ -241,4 +247,14 @@ const jobTemplate = {
         "CORR": null,
         "ML": null*/
     }
+}
+
+const sortOmics = (sOmics) => {
+    const res = [];
+
+    if (sOmics.includes('t')) res.push('t');
+    if (sOmics.includes('q')) res.push('q');
+    if (sOmics.includes('m')) res.push('m');
+
+    return res;
 }

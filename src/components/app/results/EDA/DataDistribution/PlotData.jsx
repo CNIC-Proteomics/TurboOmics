@@ -10,11 +10,16 @@ import { myPalette } from '@/utils/myPalette';
 import { danfo2RowColJson } from "@/utils/jobDanfoJsonConverter";
 import MyMotion from '@/components/MyMotion';
 
-export default function PlotData({ fileType, filteredID, groupby, showNorm, histRef, boxRef }) {
+export default function PlotData({ 
+    omic,
+    fileType, 
+    filteredID, 
+    groupby, 
+    showNorm, 
+    figRef
+}) {
 
-    //const histRef = useRef();
-    //const boxRef = useRef();
-
+    // Get data matrices
     const mdata = useJob().user.mdata;
 
     const xi_all = {
@@ -23,8 +28,7 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm, hist
     }
     const xi = showNorm ? xi_all.norm : xi_all.user;
 
-    //console.log(xi)
-    const { myData, dataAnova, gValues, idx2g } = useMemo(() => {
+    const { myData, gValues, idx2g } = useMemo(() => {
         // From index to group
         const idx2g = {}
         for (let i = 0; i < mdata.shape[0]; i++) {
@@ -45,12 +49,12 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm, hist
         );
 
         // Create object with data used for plotting
-        let dataAnova = [];
         let myData = {};
         gValues.map(e => myData[e] = []);
 
         // Get values from xi dataframe and add to data divided by groups
         let xiJson = danfo2RowColJson(xi);
+
         Object.keys(xiJson).map(
             idx => {
                 if (Object.keys(idx2g).includes(idx)) {
@@ -61,19 +65,13 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm, hist
                                 filteredID.includes(feature)
                             ) {
                                 myData[idx2g[idx]].push(xiJson[idx][feature]);
-                                dataAnova.push({
-                                    ID: idx,
-                                    feature: feature,
-                                    g: idx2g[idx],
-                                    x: xiJson[idx][feature]
-                                });
                             }
                         }
                     )
                 }
             })
-        return { myData, dataAnova, gValues, idx2g };
-    }, [groupby, mdata, xi, filteredID])
+        return { myData, gValues, idx2g };
+    }, [groupby, mdata, xi, filteredID]);
 
     // Get maximum and minimum 
     const { xrange, xTicks, minimum, maximum } = useMemo(e => {
@@ -175,7 +173,8 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm, hist
                     xrange={xrange}
                     xTicks={xTicks}
                     yrange={yrange}
-                    histRef={histRef}
+                    figRef={figRef}
+                    omic={omic}
                 />
             </Box>
             <Box sx={{ height: 280, width: 500, margin: 'auto', overflowX: 'hidden', overflowY: 'hidden' }}>
@@ -184,7 +183,8 @@ export default function PlotData({ fileType, filteredID, groupby, showNorm, hist
                         data={dataBox}
                         xrange={xrange}
                         xTicks={xTicks}
-                        boxRef={boxRef}
+                        figRef={figRef}
+                        omic={omic}
                     />
                 </MyMotion>
             </Box>
