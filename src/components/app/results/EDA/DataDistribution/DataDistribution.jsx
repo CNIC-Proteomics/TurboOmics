@@ -104,14 +104,15 @@ export default function DataDistribution() {
             <Box ref={omicViewRef} sx={{ overflow: 'hidden' }}>
                 <Box sx={{ display: 'flex', width: `${omics.length}00%`, }}>
                     {omics.map(omic => (
-                        <Box sx={{
-                            width: `${100 / omics.length}%`,
-                            opacity: selOmic == omic ? 1 : 0,
-                            transition: 'all 1s ease'
-                        }}
+                        <Box
+                            key={omic}
+                            sx={{
+                                width: `${100 / omics.length}%`,
+                                opacity: selOmic == omic ? 1 : 0,
+                                transition: 'all 1s ease'
+                            }}
                         >
                             <OmicView
-                                key={omic}
                                 omic={omic}
                                 figRef={figRef}
                                 showPlot={showPlot}

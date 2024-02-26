@@ -1,42 +1,40 @@
 import { Box, Grid, Typography } from '@mui/material'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import PCAOmic from './PCAOmic'
 import { MySectionContainer } from '@/components/MySection'
+import { useJob } from '@/components/app/JobContext'
+import { useVars } from '@/components/VarsContext'
+import OmicSelector from '../DataDistribution/OmicSelector';
 
 export default function PCA() {
+
+    const { omics } = useJob();
+    const [selOmic, setSelOmic] = useState(omics[0]);
+    const omicViewRef = useRef();
+
     return (
         <Box>
-            <Grid container>
-                <Grid item xs={6}><MyHeader>Proteomics</MyHeader></Grid>
-                <Grid item xs={6}><MyHeader>Metabolomics</MyHeader></Grid>
-            </Grid>
-            <MySectionContainer height="75vh">
-                <Grid container>
-                    <Grid item xs={6}>
-                        <PCAOmic
-                            title='Proteomics'
-                            omic='q'
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <PCAOmic
-                            title='Metabolomics'
-                            omic='m'
-                        />
-                    </Grid>
-                </Grid>
-            </MySectionContainer>
+            <OmicSelector
+                selOmic={selOmic}
+                setSelOmic={setSelOmic}
+                omicViewRef={omicViewRef}
+            />
+            <Box ref={omicViewRef} sx={{ overflow: 'hidden' }}>
+                <Box sx={{ display: 'flex', width: `${omics.length}00%` }} >
+                    {omics.map(omic => (
+                        <Box
+                            key={omic}
+                            sx={{
+                                width: `${100 / omics.length}%`,
+                                opacity: omic == selOmic ? 1 : 0,
+                                transition: 'all 1s ease'
+                            }}
+                        >
+                            <PCAOmic omic={omic} />
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
         </Box>
-    )
-}
-
-const MyHeader = ({ children }) => {
-    return (
-        <Typography
-            variant='h6'
-            sx={{ textAlign: 'center', color: '#555555' }}
-        >
-            {children}
-        </Typography>
     )
 }

@@ -7,9 +7,11 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
+import { useVars } from '@/components/VarsContext';
 
 export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
+    const {OMIC2NAME} = useVars();
     const dispatchResults = useDispatchResults();
     const { displayOpts } = useResults().EDA.PCA[omic];
     const [filterText, setFilterText] = useState('');
@@ -55,20 +57,18 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                 }
             ).filter(e => e != null)
 
+            // Filter by regex
+            let regex = new RegExp('');
+            try {
+                regex = new RegExp(filterText);
+            } catch {
+                regex = new RegExp('');
+            }
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
-
-                    let regex = new RegExp('');
-                    try {
-                        regex = new RegExp(filterText);
-                    } catch {
-                        regex = new RegExp('');
-                    }
-
                     return (
                         featureObj['mdataValue'] != null &&
                         regex.test(featureObj['mdataValue'])
-                        //`${featureObj['mdataValue']}`.toLowerCase().includes(filterText.toLowerCase())
                     )
                 }
             );
@@ -84,12 +84,10 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         (prev, curr, i) => ({ ...prev, [`PCA${i}`]: curr }),
                         { 'PCA0': selectedLoadings[value][0] }
                     )
-                    //PCA: selectedLoadings[value]
                 })
             )
         }
 
-        //filteredFeatures = filteredFeatures.filter(e => e.PCA != undefined);
         return { filteredFeatures, columns }
     }, [selectedLoadings, filterText, filterCol, f2i, selectedPCA]);
 
@@ -100,7 +98,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                     <IconButton
                         aria-label="download"
                         size='small'
-                        onClick={e => downloadTable(filteredFeatures, columns)}
+                        onClick={e => downloadTable(OMIC2NAME[omic], filteredFeatures, columns)}
                         sx={{ opacity: 0.5, color: 'rgb(13,110,253)' }}
                         variant='danger'
                     >
@@ -139,10 +137,10 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
     )
 }
 
-const downloadTable = (data, columns) => {
+const downloadTable = (name, data, columns) => {
     const csvConfig = mkConfig({
         useKeysAsHeaders: true,
-        filename: 'PCA_Loading_Table'
+        filename: `PCA_Loading_Table-${name}`
     });
 
     const newData = data.map(oldObj => {
@@ -198,7 +196,7 @@ function FilterTable({ columns, data }) {
         enableRowNumbers: false,
         enableColumnFilters: false,
         enableRowVirtualization: true,
-        muiTableContainerProps: { sx: { maxHeight: '560px' } },
+        muiTableContainerProps: { sx: { maxHeight: '510px' } },
         onSortingChange: setSorting,
         state: { isLoading, sorting },
         rowVirtualizerInstanceRef, //optional
@@ -214,30 +212,3 @@ function FilterTable({ columns, data }) {
         </MyMotion>
     );
 };
-
-/*
-
-                <MaterialReactTable
-                    columns={columns}
-                    data={data} //10,000 rows
-                    enableBottomToolbar={false}
-                    enableTopToolbar={false}
-                    enableColumnResizing
-                    enableColumnVirtualization
-                    enableColumnActions={false}
-                    enableColumnFilters={false}
-                    enableGlobalFilterModes={false}
-                    enableFullScreenToggle={false}
-                    enablePinning={false}
-                    enablePagination={false}
-                    enableRowNumbers={false}
-                    enableDensityToggle={false}
-                    enableRowVirtualization
-                    muiTableContainerProps={{ sx: { maxHeight: '500px' } }}
-                    onSortingChange={setSorting}
-                    state={{ isLoading, sorting }}
-                    rowVirtualizerInstanceRef={rowVirtualizerInstanceRef} //optional
-                    rowVirtualizerProps={{ overscan: 1 }} //optionally customize the row virtualizer
-                    columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
-                />
-                */

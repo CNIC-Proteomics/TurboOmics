@@ -12,10 +12,9 @@ import {
 } from '@mui/material';
 //import DownloadIcon from '@mui/icons-material/Download';
 import GridOnIcon from '@mui/icons-material/GridOn';
-import ImageIcon from '@mui/icons-material/Image';
 import { CSVLink } from 'react-csv';
-import downloadSVG from '@/utils/downloadSVG';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
+import { useVars } from '@/components/VarsContext';
 
 
 const separator = ",";
@@ -69,10 +68,13 @@ const calculateBackgroundColorExpVar = (value) => {
 
 export default function TablePvalues({ omic, data, rowNames, colNames, expVar, setSelectedPlot, scatterMode }) {
 
+    const { OMIC2NAME } = useVars()
+
     const savedSelectedCell = useResults().EDA.PCA[omic].displayOpts.selectedCell;
+    const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
+
     const dispatchResults = useDispatchResults();
     const classes = useStyles(scatterMode);
-    const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
 
     const handleCellClick = (rowIndex, colIndex) => {
         if (scatterMode == '2D') return
@@ -85,7 +87,7 @@ export default function TablePvalues({ omic, data, rowNames, colNames, expVar, s
             colIndex: colIndex,
             mdataCol: rowNames[rowIndex],
             PCA: colNames[colIndex]
-        })
+        });
 
         console.log(`Plot scatter: PCA ${colNames[colIndex]} vs ${rowNames[rowIndex]}`)
     };
@@ -110,7 +112,11 @@ export default function TablePvalues({ omic, data, rowNames, colNames, expVar, s
                     size='small'
                     sx={{ opacity: 0.5, position: 'relative', top: -21 }}
                 >
-                    <CSVLink data={csvData} filename={"PCA_Anova_pvalues.csv"} separator={separator}>
+                    <CSVLink
+                        data={csvData}
+                        filename={`PCA_Anova_pvalues/${OMIC2NAME[omic]}.csv`}
+                        separator={separator}
+                    >
                         <GridOnIcon />
                     </CSVLink>
                 </IconButton>

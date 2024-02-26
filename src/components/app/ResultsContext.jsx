@@ -158,7 +158,7 @@ const PCA_omicTemplate = {
     }, // {projections, loadings, explained_variance, anova}
     status: { status: 'waiting' }, // status -> {ok, waiting, error}
     displayOpts: {
-        scatterMode: '1D',
+        scatterMode: '2D',
         selectedPlot: null,
         selectedCell: null,
         selectedPlot2D: { x: 1, y: 2, g: 'No color' },

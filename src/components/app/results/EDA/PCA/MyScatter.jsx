@@ -18,6 +18,7 @@ import {
     Legend
 } from "recharts";
 import downloadSVG from '@/utils/downloadSVG';
+import { useVars } from '@/components/VarsContext';
 
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -32,9 +33,18 @@ const CustomTooltip = ({ active, payload }) => {
                     color: 'rgba(50,50,50,0.8)'
                 }}
             >
-                <Typography variant='h8' sx={{ display: 'block' }}>{`${payload[0].payload.element}`}</Typography>
-                {true && <Typography variant='h9' sx={{ display: 'block' }}>{`${payload[0].name}: ${typeof(payload[0].value)=='string' ? payload[0].value: payload[0].value.toFixed(3)}`}</Typography>}
-                {true && <Typography variant='h9' sx={{ display: 'block' }}>{`${payload[1].name}: ${payload[1].value.toFixed(3)}`}</Typography>}
+                <Typography variant='h8' sx={{ display: 'block' }}>
+                    {`${payload[0].payload.element}`}
+                </Typography>
+                <Typography variant='h9' sx={{ display: 'block' }}>
+                    {
+                        `${payload[0].name}: ${typeof (payload[0].value) == 'string' ?
+                            payload[0].value : payload[0].value.toFixed(3)}`
+                    }
+                </Typography>
+                <Typography variant='h9' sx={{ display: 'block' }}>
+                    {`${payload[1].name}: ${payload[1].value.toFixed(3)}`}
+                </Typography>
             </Box>
         );
     }
@@ -42,12 +52,12 @@ const CustomTooltip = ({ active, payload }) => {
     return null;
 };
 
-const DownloadComponent = ({ scatterRef }) => {
+const DownloadComponent = ({ scatterRef, name }) => {
     const downloadScatter = () => {
         const scatterComp = scatterRef.current.container.cloneNode(true);
         const fullFig = window.document.createElement('div');
         fullFig.appendChild(scatterComp);
-        downloadSVG(fullFig, 'PCA_Scatter');
+        downloadSVG(fullFig, `PCA_Scatter-${name}`);
     }
 
     return (
@@ -66,7 +76,9 @@ const DownloadComponent = ({ scatterRef }) => {
     )
 }
 
-export function MyScatter({ scatterData, mdataCol, PCA }) {
+export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
+
+    const {OMIC2NAME} = useVars();
 
     const scatterRef = useRef();
     const mdataColType = useJob()['mdataType'][mdataCol].type;
@@ -77,7 +89,7 @@ export function MyScatter({ scatterData, mdataCol, PCA }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} />
+            <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]} />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
@@ -108,13 +120,14 @@ export function MyScatter({ scatterData, mdataCol, PCA }) {
     )
 }
 
-export function MyScatter2D({ scatterData, selectedPlot2D }) {
+export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
 
+    const {OMIC2NAME} = useVars();
     const scatterRef = useRef();
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} />
+            <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]}  />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
@@ -142,7 +155,7 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                         <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
                     </YAxis>
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-                    {Object.keys(scatterData).length>1 && <Legend verticalAlign="top" />}
+                    {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
                     {
                         Object.keys(scatterData).map((level, i) => {
                             return (

@@ -7,10 +7,9 @@ import { MyScatter, MyScatter2D } from './MyScatter';
 import TableLoadings from './TableLoadings';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import SelectorPCA2D from './SelectorPCA2D';
-import { MySection, MySectionContainer } from '@/components/MySection';
 
 
-export default function PCAOmic({ title, omic }) {
+export default function PCAOmic({ omic }) {
 
     // useRef to store an interval requesting to the server
     const fetchRef = useRef(null);
@@ -27,7 +26,7 @@ export default function PCAOmic({ title, omic }) {
     const { projections, loadings, explained_variance, anova } = data;
 
     const { mdata } = useJob().user;
-    const { mdataType } = useJob()
+    const { mdataType } = useJob();
     const { jobID } = useJob();
 
     const { displayOpts } = useResults().EDA.PCA[omic]
@@ -50,7 +49,7 @@ export default function PCAOmic({ title, omic }) {
         }
     },
         [API_URL, jobID, omic, dispatchResults, fetchRef]
-    )
+    );
 
     useEffect(() => {
 
@@ -80,103 +79,97 @@ export default function PCAOmic({ title, omic }) {
     );
 
     return (
-        <Box sx={{ borderRight: omic == 'q' ? '1px solid #cccccc' : '0px' }}>
-            {(() => {
-                if (status.status == 'ok') {
-                    return (
-                        <Box sx={{ padding: 1 }}>
-                            <MySection>
-                                <Box sx={{pt:3}}>
-                                    <TablePvalues
-                                        omic={omic}
-                                        data={pvTable}
-                                        rowNames={pvRowNames}
-                                        colNames={pvColNames}
-                                        expVar={pvExpVar}
-                                        setSelectedPlot={setSelectedPlot}
-                                        scatterMode={scatterMode}
-                                    />
+        <Box>
+            {status.status == 'ok' ? (
+                <Box sx={{ padding: 0.2, transition: 'all 1s ease' }}>
+                    <Box sx={{ margin:'auto', pt: 3, width:'90%' }}>
+                        <TablePvalues
+                            omic={omic}
+                            data={pvTable}
+                            rowNames={pvRowNames}
+                            colNames={pvColNames}
+                            expVar={pvExpVar}
+                            setSelectedPlot={setSelectedPlot}
+                            scatterMode={scatterMode}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+                        <Box sx={{ width: '45%' }}>
+                            <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                <Box sx={{ mb: 2 }}>
+                                    <ToggleButtonGroup
+                                        color="primary"
+                                        value={scatterMode}
+                                        exclusive
+                                        onChange={(e, mode) => {
+                                            setScatterMode(e.target.value);
+                                            dispatchResults({ type: 'set-scatter-mode', mode: e.target.value, omic: omic });
+                                        }}
+                                        aria-label="Platform"
+                                    >
+                                        <ToggleButton value="1D">1D</ToggleButton>
+                                        <ToggleButton value="2D">2D</ToggleButton>
+                                    </ToggleButtonGroup>
                                 </Box>
-                                </MySection>
-                                <MySection>
-                                <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <ToggleButtonGroup
-                                            color="primary"
-                                            value={scatterMode}
-                                            exclusive
-                                            onChange={(e, mode) => {
-                                                setScatterMode(e.target.value);
-                                                dispatchResults({ type: 'set-scatter-mode', mode: e.target.value, omic: omic });
-                                            }}
-                                            aria-label="Platform"
-                                        >
-                                            <ToggleButton value="1D">1D</ToggleButton>
-                                            <ToggleButton value="2D">2D</ToggleButton>
-                                        </ToggleButtonGroup>
+                            </Box>
+                            <Box sx={{ textAlign: 'center' }}>
+                                {scatterMode == '1D' ?
+                                    <Box sx={{ height: 75, pt: 3 }}>
+                                        <Typography variant='body1'>Select a pvalue cell to plot PCA</Typography>
                                     </Box>
-                                </Box>
-                                <Box sx={{ textAlign: 'center' }}>
+                                    :
+                                    <SelectorPCA2D
+                                        pvColNames={pvColNames}
+                                        pvRowNames={pvRowNames}
+                                        selectedPlot2D={selectedPlot2D}
+                                        setSelectedPlot2D={setSelectedPlot2D}
+                                        omic={omic}
+                                    />
+                                }
+                            </Box>
+                            {scatterData &&
+                                <Box>
                                     {scatterMode == '1D' ?
-                                        <Box sx={{ height: 75, pt: 3 }}>
-                                            <Typography variant='body1'>Select a pvalue cell to plot PCA</Typography>
-                                        </Box>
-                                        :
-                                        <SelectorPCA2D
-                                            pvColNames={pvColNames}
-                                            pvRowNames={pvRowNames}
-                                            selectedPlot2D={selectedPlot2D}
-                                            setSelectedPlot2D={setSelectedPlot2D}
+                                        <MyScatter
                                             omic={omic}
+                                            scatterData={scatterData}
+                                            mdataCol={selectedPlot.mdataCol}
+                                            PCA={selectedPlot.PCA}
+                                        />
+                                        :
+                                        <MyScatter2D
+                                            omic={omic}
+                                            scatterData={scatterData}
+                                            selectedPlot2D={selectedPlot2D}
                                         />
                                     }
                                 </Box>
-                                {scatterData &&
-                                    <Box>
-                                        {scatterMode == '1D' ?
-                                            <MyScatter
-                                                scatterData={scatterData}
-                                                mdataCol={selectedPlot.mdataCol}
-                                                PCA={selectedPlot.PCA}
-                                            />
-                                            :
-                                            <MyScatter2D
-                                                scatterData={scatterData}
-                                                selectedPlot2D={selectedPlot2D}
-                                            />
-                                        }
-                                    </Box>
-                                }
-                            </MySection>
-                            {selectedLoadings &&
-                                <MySection>
-                                    <Box sx={{ marginTop: 5, textAlign: 'center' }}>
-                                        <TableLoadings
-                                            omic={omic}
-                                            selectedLoadings={selectedLoadings}
-                                            selectedPCA={scatterMode == '1D' ? [selectedPlot.PCA,] : [selectedPlot2D.x, selectedPlot2D.y]}
-                                        />
-                                    </Box>
-                                </MySection>
                             }
                         </Box>
-                    )
-                } else if (status.status == 'waiting') {
-                    return (
-                        <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
-                            <CircularProgress size={100} thickness={2} />
+                        <Box sx={{ width: '45%' }}>
+                            {selectedLoadings &&
+                                <Box sx={{ marginTop: 5, textAlign: 'center' }}>
+                                    <TableLoadings
+                                        omic={omic}
+                                        selectedLoadings={selectedLoadings}
+                                        selectedPCA={
+                                            scatterMode == '1D' ?
+                                                [selectedPlot.PCA,] :
+                                                [selectedPlot2D.x, selectedPlot2D.y]
+                                        }
+                                    />
+                                </Box>
+                            }
                         </Box>
-                    )
-                } else if (status.status == 'error') {
-                    return (
-                        <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
-                            An error occurred
-                        </Box>
-                    )
-                }
-            })()
+                    </Box>
+                </Box>
+            ) : (
+                <Box sx={{ textAlign: 'center', pt: 15, height: '30vh' }}>
+                    <CircularProgress size={100} thickness={2} />
+                </Box>
+            )
             }
-        </Box>
+        </Box >
     )
 }
 
