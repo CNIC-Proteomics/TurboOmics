@@ -7,18 +7,19 @@ const { useState, useEffect } = require("react");
 function MyAutocomplete() {
 
     let initOS = useJob().OS;
-    initOS = initOS == null ? os[52] : initOS;
+    //initOS = initOS == null ? os[52] : initOS;
 
     const [expOS, setExpOS] = useState(initOS);
     const dispatchJob = useDispatchJob();
 
     const handleInput = (e, newValue) => {
         setExpOS(newValue);
+        dispatchJob({ type: 'set-os', OS: newValue });
     }
 
-    useEffect(() => {
+    /*useEffect(() => {
         dispatchJob({ type: 'set-os', OS: expOS });
-    }, [expOS, dispatchJob]);
+    }, [expOS, dispatchJob]);*/
 
     return (
         <Box sx={{display:'flex', justifyContent:'center', alignItems:'center', height:'100%' }}>
@@ -41,6 +42,7 @@ function MyAutocomplete() {
                             </li>
                         );
                     }}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                 //renderOption={(props, option, state) => [props, option, state.index]}
                 //renderGroup={(params) => params}
                 />

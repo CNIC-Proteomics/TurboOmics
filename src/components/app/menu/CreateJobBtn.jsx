@@ -14,7 +14,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 
-export default function CreateJobBtn({ setCreatingJob }) {
+export default function CreateJobBtn({ setCreatingJob, setPage }) {
 
     const dispatchJob = useDispatchJob();
     const dispatchResults = useDispatchResults();
@@ -28,6 +28,7 @@ export default function CreateJobBtn({ setCreatingJob }) {
 
         // Get and set jobID
         const jobID = DEV_MODE ? '123456' : generateIdentifier(10);
+        //const jobID =  generateIdentifier(10);
         console.log(`Creating job: ${jobID}`);
         dispatchJob({
             type: 'set-job-id',
@@ -35,7 +36,6 @@ export default function CreateJobBtn({ setCreatingJob }) {
         });
 
         // Create job in back-end
-        console.log(danfo2Json(job))
         const res = await fetch(`${API_URL}/create_job`, {
             method: 'POST',
             headers: {
@@ -47,8 +47,6 @@ export default function CreateJobBtn({ setCreatingJob }) {
         // Set jobContext received by back-end
         const resJson = await res.json();
 
-        console.log(resJson);
-
         const newJob = json2Danfo(resJson);
         dispatchJob({
             type: 'set-job-context',
@@ -58,9 +56,12 @@ export default function CreateJobBtn({ setCreatingJob }) {
         dispatchResults({type:'reset-results'});
 
         // Finish loading state
-        setCreatingJob('ask-annotations');
-
-        console.log(newJob);
+        if (job.omics.includes('m')) {
+            setCreatingJob('ask-annotations');
+        } else {
+            setCreatingJob('');
+            setPage('results');
+        }
     }
 
     return (

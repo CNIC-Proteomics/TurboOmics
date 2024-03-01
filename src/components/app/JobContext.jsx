@@ -1,6 +1,7 @@
 import generateArray from '@/utils/generateArray';
 import React, { createContext, useContext } from 'react';
 import { useImmerReducer } from 'use-immer';
+const { os } = require('@/utils/os');
 
 const JobContext = createContext(null);
 const DispatchJobContext = createContext(null);
@@ -60,9 +61,9 @@ function jobReducer(draft, action) {
                 if (draft.user[`${omic}2i`] == null) {
                     let myKey = `${omic}ID`;
                     let omic2i = [];
-                    df.columns.map(e => omic2i.push({[myKey]:e}));
+                    df.columns.map(e => omic2i.push({ [myKey]: e }));
                     omic2i = new dfd.DataFrame(omic2i);
-                    omic2i.setIndex({column:myKey, inplace:true});
+                    omic2i.setIndex({ column: myKey, inplace: true });
                     draft.user[`${omic}2i`] = omic2i;
                     draft.index[`${omic}2i`] = omic2i.index;
                 }
@@ -150,16 +151,6 @@ function jobReducer(draft, action) {
             break;
         }
 
-        /*case 'set-annotations-mode': {
-            draft.annotations.mode = action.mode;
-            break;
-        }*/
-
-        /*case 'set-annotations-column': {
-            draft.annotations.column = action.column;
-            break;
-        }*/
-
         case 'set-job-id': {
             draft.jobID = action.jobID;
             break;
@@ -172,37 +163,29 @@ function jobReducer(draft, action) {
     }
 }
 
+const fileInfoTemplate = {
+    "xq": null,
+    "xm": null,
+    "xt": null,
+    "mdata": null,
+    "q2i": null,
+    "m2i": null,
+    "t2i": null
+};
+
 const jobTemplate = {
-    "OS": null, //organism
+    "OS": os[52], //organism
     "jobID": null,
     "myomics": ['q', 'm', 't'],
     "omics": [], // Omics selected by the user {q, m, t}
     "userFileNames": { // Name of the files uploaded by the user
-        "xq": null,
-        "xm": null,
-        "xt": null,
-        "mdata": null,
-        "q2i": null,
-        "m2i": null,
-        "t2i": null
+        ...fileInfoTemplate
     },
     "user": { // Danfo dataframes uploaded by the user
-        "xq": null,
-        "xm": null,
-        "xt": null,
-        "mdata": null,
-        "q2i": null,
-        "m2i": null,
-        "t2i": null
+        ...fileInfoTemplate
     },
     "index": { // Index of danfo dataframes (we need it to preserve it after json conversion)
-        "xq": null,
-        "xm": null,
-        "xt": null,
-        "mdata": null,
-        "q2i": null,
-        "m2i": null,
-        "t2i": null
+        ...fileInfoTemplate
     },
     "norm": { // Feature-center, scaled and imputed Danfo dataframes
         "xq": null,
@@ -210,10 +193,7 @@ const jobTemplate = {
         "xt": null
     },
     "mdataType": {}, // {mdata_columns} --> {categorical, numeric}
-    /*"annotations": {
-        "mode": 0, // 0 --> User defined annotations by column; 1 --> Perform annotations (CMM-TP)
-        "column": null
-    },*/
+
     "results": {
         "PRE": { // Results computed when user upload the files
             'log': { // log transformation
@@ -253,8 +233,8 @@ const sortOmics = (sOmics) => {
     const res = [];
 
     if (sOmics.includes('t')) res.push('t');
-    if (sOmics.includes('q')) res.push('q');
     if (sOmics.includes('m')) res.push('m');
+    if (sOmics.includes('q')) res.push('q');
 
     return res;
 }

@@ -10,22 +10,19 @@ export function danfo2Json(job) {
             omicsDataJson[`${myomic}2i`] = null;
         }
         
-    })
+    });
 
     return {
         ...job,
         'user': {
             'mdata': dfd.toJSON(job.user.mdata),
             ...omicsDataJson
-            /*'xq': dfd.toJSON(job.user.xq),
-            'xm': dfd.toJSON(job.user.xm),
-            'q2i': dfd.toJSON(job.user.q2i),
-            'm2i': dfd.toJSON(job.user.m2i)*/
         },
-        /*"norm": {
-            "xq": null,
-            "xm": null
-        },*/
+        'norm': { // Set these in case of re-sending a job. Otherwise ERROR
+            'xq': null,
+            'xm': null,
+            'xt': null
+        }
     }
 }
 
@@ -65,15 +62,9 @@ export function json2Danfo(job) {
         'user': {
             'mdata': new dfd.DataFrame(job.user.mdata, { index: job.index.mdata }),
             ...omicsDataJson
-            /*'xq': new dfd.DataFrame(job.user.xq, { index: job.index.xq }),
-            'xm': new dfd.DataFrame(job.user.xm, { index: job.index.xm }),
-            'q2i': new dfd.DataFrame(job.user.q2i, { index: job.index.q2i }),
-            'm2i': new dfd.DataFrame(job.user.m2i, { index: job.index.m2i })*/
         },
         'norm': {
             ...omicsNormDataJson
-            /*'xq': new dfd.DataFrame(job.norm.xq, { index: job.index.xq }),
-            'xm': new dfd.DataFrame(job.norm.xm, { index: job.index.xm }),*/
         }
     }
 }

@@ -53,20 +53,20 @@ export default function SummaryTable() {
                                 </TableRow>
                             }
                             {
-                                user.xq != null &&
-                                <TableRow>
-                                    <StyledCell>Proteomic features</StyledCell>
-                                    <StyledCell>
-                                        {user.xq.isNa().sum({ axis: 0 }).div(user.xq.shape[0]).le(qThr).sum()} / {user.xq.shape[1]}
-                                    </StyledCell>
-                                </TableRow>
-                            }
-                            {
                                 user.xm != null &&
                                 <TableRow>
                                     <StyledCell>Metabolomic features</StyledCell>
                                     <StyledCell>
                                         {user.xm.isNa().sum({ axis: 0 }).div(user.xm.shape[0]).le(mThr).sum()} / {user.xm.shape[1]}
+                                    </StyledCell>
+                                </TableRow>
+                            }
+                            {
+                                user.xq != null &&
+                                <TableRow>
+                                    <StyledCell>Proteomic features</StyledCell>
+                                    <StyledCell>
+                                        {user.xq.isNa().sum({ axis: 0 }).div(user.xq.shape[0]).le(qThr).sum()} / {user.xq.shape[1]}
                                     </StyledCell>
                                 </TableRow>
                             }

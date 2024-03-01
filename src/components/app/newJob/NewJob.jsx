@@ -30,19 +30,19 @@ export default function NewJob() {
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
                 <DragFile title="Transcriptomic Metadata" fileType="t2i" />
-                <DragFile title="Proteomic Metadata" fileType="q2i" />
                 <DragFile title="Metabolomic Metadata" fileType="m2i" />
+                <DragFile title="Proteomic Metadata" fileType="q2i" />
             </Box>
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
                 <DragFile title="Transcriptomic Quantifications" fileType="xt" traspose={true} />
-                <DragFile title="Proteomic Quantifications" fileType="xq" traspose={true} />
                 <DragFile title="Metabolomic Quantifications" fileType="xm" traspose={true} />
+                <DragFile title="Proteomic Quantifications" fileType="xq" traspose={true} />
             </Box>
 
             <Box sx={{ py: 1, display: 'flex', justifyContent: 'space-between' }}>
                 <PlotMV fileType='xt' omic='Transcriptomic' />
-                <PlotMV fileType='xq' omic='Proteomic' />
                 <PlotMV fileType='xm' omic='Metabolomic' />
+                <PlotMV fileType='xq' omic='Proteomic' />
             </Box>
         </Box>
     )

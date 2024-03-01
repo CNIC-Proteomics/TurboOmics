@@ -14,7 +14,7 @@ export default function MenuOption({ children, text, id, setPage, page }) {
 
     const jobID = useJob().jobID;
 
-    const resultsDisable = id == 'results' && jobID == null
+    const resultsDisable = id == 'results' && jobID == null;
 
     let backgroundColor;
 
