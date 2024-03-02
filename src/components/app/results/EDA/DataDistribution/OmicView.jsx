@@ -51,7 +51,7 @@ function OmicView({
                             <ImageIcon />
                         </IconButton>
                     </Typography>
-                    {showPlot['q'] ?
+                    {showPlot[omic] ?
                         <Box sx={{ height: 500, overflow: 'hidden', mt:3 }}>
                             <PlotData
                                 omic={omic}

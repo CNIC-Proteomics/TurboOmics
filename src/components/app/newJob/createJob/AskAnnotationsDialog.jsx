@@ -25,16 +25,15 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                         Metabolomic features will be annotated using <a target='_blank' href='http://ceumass.eps.uspceu.es/'>Ceu Mass Mediator</a> and simplified using <a target='_blank' href='https://proteomics.cnic.es/TurboPutative/webserver'>TurboPutative</a> (not available yet).
                     </DialogContentText>
                 </DialogContent>
-                <DialogActions sx={{ border: '0px solid red' }}>
+                <DialogActions>
                     <Button
-                        sx={{ border: '0px solid blue', margin: 'auto' }}
+                        sx={{ margin: 'auto' }}
                         onClick={() => { setCreatingJob(''); setPage('results') }}
                     >
                         No
                     </Button>
                     <Box style={{ margin: 'auto', cursor: 'not-allowed' }} >
                         <Button
-                            style={{ color: 'rgb(150,150,150)' }}
                             onClick={() => { setCreatingJob('annotations-params') }}
                         >
                             Yes

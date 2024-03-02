@@ -20,7 +20,7 @@ export default function NewJob() {
     return (
         <Box sx={{ width: '100%' }} className='p-2'>
 
-            <Box sx={{ mt: 1, mb:3, display: 'flex', justifyContent: 'space-between' }}>
+            <Box sx={{ mt: 1, mb: 3, display: 'flex', justifyContent: 'space-between' }}>
                 <Box sx={{ width: '30%' }}><MyAutocomplete /></Box>
                 <DragFile title="Metadata" fileType="mdata" />
                 <Box sx={{ width: '30%' }}><SummaryTable /></Box>
