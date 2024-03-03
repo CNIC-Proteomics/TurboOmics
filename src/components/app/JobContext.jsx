@@ -156,6 +156,11 @@ function jobReducer(draft, action) {
             break;
         }
 
+        case 'set-ann-params': {
+            draft.annParams = action.annParams;
+            break;
+        }
+
         case 'set-job-context': {
             return action.jobContext;
         }
@@ -222,10 +227,7 @@ const jobTemplate = {
                 'xt': 'KNN'
             }
         },
-        /*"EDA": null,
-        "MOFA": null,
-        "CORR": null,
-        "ML": null*/
+        annParams: null // Annotations params for putative annotations
     }
 }
 

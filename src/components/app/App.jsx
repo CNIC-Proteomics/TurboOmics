@@ -10,20 +10,30 @@ import Results from './results/Results'
 import { ResultsProvider } from './ResultsContext';
 import AskAnnotationsDialog from './newJob/createJob/AskAnnotationsDialog';
 import CreateJobWaiting from './newJob/createJob/CreateJobWaiting';
-import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsDialog';
+import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog';
+import Annotating from './newJob/createJob/Annotating';
 
 
 
 export default function App() {
 
     const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
-    const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", 'annotations-params"
-
+    const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", "annotations-params"
+    const [annotating, setAnnotating] = useState(false);
     return (
         <div>
             <JobProvider>
                 <ResultsProvider>
-                    <Menu page={page} setPage={setPage} setCreatingJob={setCreatingJob} />
+                    <Menu
+                        page={page}
+                        setPage={setPage}
+                        setCreatingJob={setCreatingJob}
+                        setAnnotating={setAnnotating}
+                    />
+
+                    {annotating &&
+                        <Annotating />
+                    }
 
                     {
                         page == 'new-job' &&
@@ -43,6 +53,8 @@ export default function App() {
                                 <AnnotationsParamsDialog
                                     creatingJob={creatingJob}
                                     setCreatingJob={setCreatingJob}
+                                    setAnnotating={setAnnotating}
+                                    setPage={setPage}
                                 />
                             }
                         </MyMotion>

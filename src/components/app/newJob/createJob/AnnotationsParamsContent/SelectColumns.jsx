@@ -19,12 +19,6 @@ function SelectColumns({ annParams, setAnnParams }) {
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
-            <Box sx={{ width: '70%' }}>
-                <Typography variant='h6' sx={{ textAlign: 'center' }}>
-                    Metabolomic Metadata
-                </Typography>
-                <DisplayMetadataTable />
-            </Box>
             <Box sx={{ width: '25%' }}>
                 <Typography variant='h6' sx={{ textAlign: 'center' }}>
                     Set Columns
@@ -71,6 +65,12 @@ function SelectColumns({ annParams, setAnnParams }) {
                         options={ionOptions}
                     />
                 </Box>
+            </Box>
+            <Box sx={{ width: '70%' }}>
+                <Typography variant='h6' sx={{ textAlign: 'center' }}>
+                    Metabolomic Metadata
+                </Typography>
+                <DisplayMetadataTable />
             </Box>
         </Box>
 
@@ -153,9 +153,9 @@ const ColumnSelector = ({ id, label, value, setAnnParams, options }) => {
                 value={value}
                 onChange={(e, newValue) => {
                     setAnnParams(prev => ({ ...prev, [id]: newValue }))
-                    if (id =='ionCol') {
+                    if (id == 'ionCol') {
                         setAnnParams(prev => ({ ...prev, ionValPos: null, ionValNeg: null }))
-                    } 
+                    }
                 }}
                 options={options}
                 renderInput={(params) => <TextField {...params} label={label} />}

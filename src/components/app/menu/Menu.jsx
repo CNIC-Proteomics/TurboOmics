@@ -11,7 +11,7 @@ import CreateJobBtn from './CreateJobBtn';
 import LoadSampleBtn from './LoadSampleBtn';
 import { Box } from '@mui/material';
 
-export default function Menu({ page, setPage, setCreatingJob }) {
+export default function Menu({ page, setPage, setCreatingJob, setAnnotating }) {
 
     const { user, OS, omics } = useJob();
 
@@ -30,6 +30,7 @@ export default function Menu({ page, setPage, setCreatingJob }) {
                     <CreateJobBtn
                         setCreatingJob={setCreatingJob}
                         setPage={setPage}
+                        setAnnotating={setAnnotating}
                     />
                 </MyMotion>
             }

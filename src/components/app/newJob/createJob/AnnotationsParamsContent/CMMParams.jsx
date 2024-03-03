@@ -17,6 +17,7 @@ function CMMParams({ annParams, setAnnParams }) {
                         label="Number"
                         type="number"
                         value={annParams.mzError}
+                        InputProps={{ inputProps: { min: 1 } }}
                         onChange={
                             (e) => setAnnParams(prev => ({ ...prev, mzError: e.target.value }))
                         }

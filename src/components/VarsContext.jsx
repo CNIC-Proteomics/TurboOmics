@@ -5,6 +5,8 @@ const DEV_MODE = true;
 const VarsContext = createContext({
     DEV_MODE: DEV_MODE,
     BASE_URL: '/TurboPutative',
+    SERVER_URL: DEV_MODE ? 'http://localhost:8080/TurboPutative' :
+        'https://proteomics.cnic.es/TurboPutative',
     API_URL: DEV_MODE ? 'http://localhost:8080/TurboPutative/api/tbomics' :
         'https://proteomics.cnic.es/TurboPutative/api/tbomics',
     OMIC2NAME: {

@@ -8,14 +8,19 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import { Box } from '@mui/material';
-import AnnotationsParamsContent from './AnnotationsParamsContent/AnnotationsParamsContent';
+import AnnotationsParamsContent from './AnnotationsParamsContent';
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AnnotationsParamsDialog({ creatingJob, setCreatingJob }) {
+export default function AnnotationsParamsDialog({
+    creatingJob,
+    setCreatingJob,
+    setPage,
+    setAnnotating
+}) {
 
     //const [loading, setLoading] = useState(false);
 
@@ -24,7 +29,7 @@ export default function AnnotationsParamsDialog({ creatingJob, setCreatingJob })
             fullScreen
             open={creatingJob == 'annotations-params'}
             TransitionComponent={Transition}
-            sx={{zIndex:10}}
+            sx={{ zIndex: 10 }}
         >
             <AppBar sx={{ position: 'relative', backgroundColor: 'rgba(160, 0, 0, 1)' }}>
                 <Toolbar>
@@ -42,7 +47,11 @@ export default function AnnotationsParamsDialog({ creatingJob, setCreatingJob })
                 </Toolbar>
             </AppBar>
             <Box className="m-2">
-                <AnnotationsParamsContent />
+                <AnnotationsParamsContent
+                    setPage={setPage}
+                    setCreatingJob={setCreatingJob}
+                    setAnnotating={setAnnotating}
+                />
             </Box>
         </Dialog>
     )

@@ -14,7 +14,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 
-export default function CreateJobBtn({ setCreatingJob, setPage }) {
+export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating }) {
 
     const dispatchJob = useDispatchJob();
     const dispatchResults = useDispatchResults();
@@ -22,6 +22,8 @@ export default function CreateJobBtn({ setCreatingJob, setPage }) {
     const { DEV_MODE, API_URL } = useVars();
 
     const handleCreateJob = async () => {
+
+        setAnnotating(false);
 
         // Set loading state
         setCreatingJob('waiting');
