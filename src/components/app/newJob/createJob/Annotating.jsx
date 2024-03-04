@@ -4,12 +4,14 @@ import { useJob } from '../../JobContext'
 import { useVars } from '@/components/VarsContext';
 
 const BATCH_SIZE = 5;
+const TIME_SLEEP = 1000; //in milliseconds
 //const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
 const CMM_URI = "mediator/api/v3/batch";
 
 function Annotating() {
 
-    const {SERVER_URL} = useVars();
+    const { jobID } = useJob();
+    const { SERVER_URL, API_URL } = useVars();
 
     const xm_mid = useJob().norm.xm.columns;
 
@@ -50,40 +52,96 @@ function Annotating() {
         return mzBatches;
     });
 
+    const fetchCMM = (ion_mode, adducts, masses) => {
+        return new Promise(async (resolve, reject) => {
+            const body = {
+                "metabolites_type": "all-except-peptides",
+                "databases": ["all-except-mine"],
+                "masses_mode": "mz",
+                "ion_mode": ion_mode,
+                "adducts": adducts,
+                "tolerance": annParams.mzError,
+                "tolerance_mode": "ppm",
+                "masses": masses
+            };
+
+
+            try {
+                const res = await fetch(
+                    `${SERVER_URL}/${CMM_URI}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(body)
+                    });
+
+                if (res.ok) {
+                    console.log('Successful POST request');
+                    const resJson = await res.json()
+                    resolve(resJson.results);
+                } else {
+                    console.error('Error on POST request:', res.statusText);
+                    reject([]);
+                }
+            } catch (error) {
+                console.error('Error al realizar la solicitud POST:', error);
+                reject([]);
+            }
+        })
+    }
+
     const requestCMM = async () => {
         console.log('Startinng request to CMM');
-        console.log(`${SERVER_URL}/${CMM_URI}`)
-        try {
-            const res = await fetch(
-                `${SERVER_URL}/${CMM_URI}`, 
-                {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    "metabolites_type": "all-except-peptides",
-                    "databases": ["all-except-mine"],
-                    "masses_mode": "mz",
-                    "ion_mode": "negative",
-                    "adducts": ["M-H", "M-2H"],
-                    "tolerance": 10.0,
-                    "tolerance_mode": "ppm",
-                    "masses": [400.3432, 422.32336]
-                })
-            });
 
-            if (res.ok) {
-                console.log('Solicitud POST exitosa');
-                const resJson = await res.json()
-                console.log(resJson);
-            } else {
-                console.error('Error en la solicitud POST:', res.statusText);
+        const fullResCMM = { 'pos': [], 'neg': [] };
+
+        // POSITIVE
+        if (annParams.ionValPos !== null) {
+            //for (let i = 0; i < mzBatches.pos.length; i++) {
+            for (let i = 0; i < 1; i++) {
+                const resCMM = await fetchCMM('positive', annParams.posAdd, mzBatches.pos[i]);
+                fullResCMM.pos = [...fullResCMM.pos, ...resCMM];
+                await new Promise(r => setTimeout(r, TIME_SLEEP));
             }
-        } catch (error) {
-            console.error('Error al realizar la solicitud POST:', error);
-            return;
+
+            console.log('Positive: Sending request to TP');
+            const resTP = await fetch(`${API_URL}/run_turboputative/pos/${jobID}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(fullResCMM.pos)
+                }
+            );
+            console.log('Positive:', resTP)
         }
+
+        // NEGATIVE
+        if (annParams.ionValNeg !== null) {
+            //for (let i = 0; i < mzBatches.neg.length; i++) {
+            for (let i = 0; i < 1; i++) {
+                const resCMM = await fetchCMM('negative', annParams.negAdd, mzBatches.neg[i]);
+                fullResCMM.neg = [...fullResCMM.neg, ...resCMM];
+                await new Promise(r => setTimeout(r, TIME_SLEEP));
+            }
+
+            console.log('Negative: Sending request to TP');
+            const resTP = await fetch(`${API_URL}/run_turboputative/neg/${jobID}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(fullResCMM.neg)
+                }
+            );
+        }
+
+        // Run interval to ask if positive and negative finished
+
     };
 
 
@@ -111,11 +169,11 @@ function Annotating() {
             }}
             >
                 <Box sx={{
-                    width: '12%',
+                    width: '11%',
                     height: 80,
                     border: '0px solid red',
                     textAlign: 'center',
-                    pt: 2
+                    pt: 4
                 }}
                 >
                     <Box sx={{ border: '0px solid green' }}>
@@ -123,7 +181,9 @@ function Annotating() {
                             <CircularProgress disableShrink size={20} />
                         </Box>
                         <Box>
-                            <Typography variant='body2'>Running CMM</Typography>
+                            <Typography variant='body2' sx={{ userSelect: 'none' }}>
+                                Running CMM
+                            </Typography>
                         </Box>
                     </Box>
                 </Box>

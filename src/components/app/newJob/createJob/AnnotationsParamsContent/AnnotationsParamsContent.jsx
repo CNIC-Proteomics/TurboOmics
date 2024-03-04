@@ -8,10 +8,14 @@ import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArro
 import TPPSection from './TPPSection';
 import { DEFAULT_NEGATIVE_DATA, DEFAULT_POSITIVE_DATA_NH4 } from './TPPSection'
 import AnnotateButton from './AnnotateButton';
-import { useDispatchJob } from '@/components/app/JobContext';
+import { useDispatchJob, useJob } from '@/components/app/JobContext';
+import { useVars } from '@/components/VarsContext';
 
 
-function AnnotationsParamsContent({setPage, setCreatingJob, setAnnotating}) {
+function AnnotationsParamsContent({ setPage, setCreatingJob, setAnnotating }) {
+
+    const { API_URL } = useVars();
+    const { jobID } = useJob();
 
     const dispatchJob = useDispatchJob();
 
@@ -35,18 +39,24 @@ function AnnotationsParamsContent({setPage, setCreatingJob, setAnnotating}) {
     const onAnnotate = () => {
 
         if (
-            !(annParams.mzError>0) ||
-            !(annParams.mRtWPos>0) ||
-            !(annParams.lRtWPos>0) ||
-            !(annParams.mRtWNeg>0) ||
-            !(annParams.lRtWNeg>0)
+            !(annParams.mzError > 0) ||
+            !(annParams.mRtWPos > 0) ||
+            !(annParams.lRtWPos > 0) ||
+            !(annParams.mRtWNeg > 0) ||
+            !(annParams.lRtWNeg > 0)
         ) {
             window.alert('Error! Please check number fields');
             return;
         }
 
-        dispatchJob({type:'set-ann-params', annParams: annParams});
-        setAnnotating(true)
+        fetch(`${API_URL}/post_ann_params/${jobID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(annParams)
+        });
+
+        dispatchJob({ type: 'set-ann-params', annParams: annParams });
+        setAnnotating(true);
         setCreatingJob('');
         setPage('results');
     }
@@ -56,7 +66,7 @@ function AnnotationsParamsContent({setPage, setCreatingJob, setAnnotating}) {
             <AnnotateButton
                 showButton={
                     annParams.mzCol &&
-                    annParams.rtCol &&
+                    //annParams.rtCol &&
                     annParams.ionCol &&
                     (
                         (annParams.ionValPos && annParams.posAdd.length > 0) ||
