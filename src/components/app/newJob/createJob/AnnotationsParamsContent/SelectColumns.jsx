@@ -103,7 +103,7 @@ const DisplayMetadataTable = () => {
             setData(m2iJson);
             setIsLoading(false);
         }
-    }, []);
+    }, [m2i]);
 
     useEffect(() => {
         //scroll to the top of the table when the sorting changes

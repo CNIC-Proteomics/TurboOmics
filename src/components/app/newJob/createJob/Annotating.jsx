@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Typography } from '@mui/material'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Box, CircularProgress, Link, Typography } from '@mui/material'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchJob, useJob } from '../../JobContext'
 import { useVars } from '@/components/VarsContext';
 
@@ -19,33 +19,35 @@ function Annotating() {
     // Get data from jobContext
     const { jobID } = useJob();
     const xm_mid = useJob().norm.xm.columns;
-    const { m2i } = useJob().user;
     const m2i_fileName = useJob().userFileNames.m2i;
     const { annParams } = useJob();
+    const { m2i } = useJob().user;
+    const [fixed_m2i, setFixed_m2i] = useState(m2i);
 
     // Component state
+    const [progress, setProgress] = useState(0);
     const [loadText, setLoadText] = useState('');
     const [status, setStatus] = useState('waiting'); // waiting, error, ok
 
     // Batches of mz to be sent to CMM
     const mzBatches = useMemo(() => {
 
-        const mzSerie = m2i.column(annParams.mzCol.id);
-        const ionSerie = m2i.column(annParams.ionCol.id);
+        const mzSerie = fixed_m2i.column(annParams.mzCol.id);
+        const ionSerie = fixed_m2i.column(annParams.ionCol.id);
 
         const mzList = { pos: [], neg: [] };
         if (annParams.ionValPos !== null) {
             xm_mid.map((mid, i) => {
-                m2i.index.includes(mid) &&
-                    ionSerie.values[m2i.index.indexOf(mid)] == annParams.ionValPos.id &&
-                    mzList['pos'].push(parseFloat(mzSerie.values[m2i.index.indexOf(mid)]));
+                fixed_m2i.index.includes(mid) &&
+                    ionSerie.values[fixed_m2i.index.indexOf(mid)] == annParams.ionValPos.id &&
+                    mzList['pos'].push(parseFloat(mzSerie.values[fixed_m2i.index.indexOf(mid)]));
             });
         }
         if (annParams.ionValNeg !== null) {
             xm_mid.map((mid, i) => {
-                m2i.index.includes(mid) &&
-                    ionSerie.values[m2i.index.indexOf(mid)] == annParams.ionValNeg.id &&
-                    mzList['neg'].push(parseFloat(mzSerie.values[m2i.index.indexOf(mid)]));
+                fixed_m2i.index.includes(mid) &&
+                    ionSerie.values[fixed_m2i.index.indexOf(mid)] == annParams.ionValNeg.id &&
+                    mzList['neg'].push(parseFloat(mzSerie.values[fixed_m2i.index.indexOf(mid)]));
             });
         }
 
@@ -60,12 +62,10 @@ function Annotating() {
         }
 
         return mzBatches;
-    });
+    }, [annParams, fixed_m2i, xm_mid]);
 
     // Get results from TP
-    const getTurboPutative = async () => {
-
-        setLoadText('Running TurboPutative');
+    const getTurboPutative = useCallback(async () => {
 
         let ion_mode = [];
         annParams.ionValPos !== null && ion_mode.push('pos');
@@ -73,10 +73,10 @@ function Annotating() {
 
         const res = await fetch(`${API_URL}/get_turboputative/${jobID}/${ion_mode.join('_')}`);
         const resJson = await res.json();
-        console.log(resJson.status);
+        //console.log(resJson.status);
 
         if (resJson.status == 'ok') {
-            setLoadText('CMM & TP Finished');
+            setLoadText('CMM & TP Finished:');
             setStatus('ok');
             clearInterval(getTPRef.current);
             dispatchJob({
@@ -94,10 +94,10 @@ function Annotating() {
             console.log(resJson);
         }
 
-    }
+    }, [annParams, jobID, API_URL, m2i_fileName, getTPRef, dispatchJob])
 
     // Fetch putative annotations from CMM
-    const fetchCMM = (ion_mode, adducts, masses) => {
+    const fetchCMM = useCallback((ion_mode, adducts, masses) => {
         return new Promise(async (resolve, reject) => {
             const body = {
                 "metabolites_type": "all-except-peptides",
@@ -135,10 +135,10 @@ function Annotating() {
                 reject([]);
             }
         })
-    }
+    }, [annParams, SERVER_URL])
 
     // Loop all mz batches
-    const requestCMM = async () => {
+    const requestCMM = useCallback(async () => {
         console.log('Startinng request to CMM');
 
         const fullResCMM = { 'pos': [], 'neg': [] };
@@ -148,15 +148,16 @@ function Annotating() {
 
             setLoadText('Running CMM Positive Mode');
 
-            //for (let i = 0; i < mzBatches.pos.length; i++) {
-            for (let i = 0; i < 1; i++) {
+            for (let i = 0; i < mzBatches.pos.length; i++) {
+            //for (let i = 0; i < 1; i++) {
+                setProgress(100 * (i + 1) / mzBatches.pos.length);
                 const resCMM = await fetchCMM('positive', annParams.posAdd, mzBatches.pos[i]);
                 fullResCMM.pos = [...fullResCMM.pos, ...resCMM];
                 await new Promise(r => setTimeout(r, TIME_SLEEP));
             }
 
             console.log('Positive: Sending request to TP');
-            const resTP = await fetch(`${API_URL}/run_turboputative/pos/${jobID}`,
+            const resTP = fetch(`${API_URL}/run_turboputative/pos/${jobID}`,
                 {
                     method: 'POST',
                     headers: {
@@ -172,15 +173,16 @@ function Annotating() {
 
             setLoadText('Running CMM Negative Mode');
 
-            //for (let i = 0; i < mzBatches.neg.length; i++) {
-            for (let i = 0; i < 1; i++) {
+            for (let i = 0; i < mzBatches.neg.length; i++) {
+            //for (let i = 0; i < 1; i++) {
+                setProgress(100 * (i + 1) / mzBatches.neg.length);
                 const resCMM = await fetchCMM('negative', annParams.negAdd, mzBatches.neg[i]);
                 fullResCMM.neg = [...fullResCMM.neg, ...resCMM];
                 await new Promise(r => setTimeout(r, TIME_SLEEP));
             }
 
             console.log('Negative: Sending request to TP');
-            const resTP = await fetch(`${API_URL}/run_turboputative/neg/${jobID}`,
+            const resTP = fetch(`${API_URL}/run_turboputative/neg/${jobID}`,
                 {
                     method: 'POST',
                     headers: {
@@ -192,14 +194,16 @@ function Annotating() {
         }
 
         // Run interval to ask if positive and negative finished
-        getTPRef.current = setInterval(getTurboPutative, 10_000);
+        setLoadText('Running TurboPutative');
+        getTPRef.current = setInterval(getTurboPutative, 5_000);
 
-    };
+    }, [annParams, mzBatches, getTPRef, getTurboPutative, API_URL, fetchCMM, jobID]);
 
     useEffect(() => {
+        console.log('useEffect: Run CMM & TP')
         const cmmTimeOut = setTimeout(requestCMM, 1000);
         return () => clearTimeout(cmmTimeOut);
-    }, []);
+    }, [requestCMM]);
 
     return (
         <Box
@@ -231,19 +235,47 @@ function Annotating() {
                     <Box sx={{ width: '100px', textAlign: 'center', border: '0px solid green' }}>
                         {status == 'waiting' &&
                             <Box>
-                                <CircularProgress disableShrink size={20} />
-                            </Box>
-                        }
-                        {status == 'ok' &&
-                            <Box>
-                                <Typography>POS</Typography>
-                                <Typography>NEG</Typography>
+                                {progress == 100 ?
+                                    <CircularProgress size={20} /> :
+                                    <CircularProgress variant="determinate" size={20} value={progress} />
+                                }
                             </Box>
                         }
                         <Box>
                             <Typography variant='body2' sx={{ userSelect: 'none' }}>
                                 {loadText}
                             </Typography>
+                            {status == 'ok' &&
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-evenly',
+                                    mt: 0.5
+                                }}>
+                                    {annParams.ionValPos !== null &&
+                                        <Box>
+                                            <Link
+                                                variant='body2'
+                                                target="_blank"
+                                                href={`${SERVER_URL}/webserver/${jobID}_pos`}
+                                            >
+                                                POS
+                                            </Link>
+                                        </Box>
+                                    }
+                                    {annParams.ionValNeg !== null &&
+                                        <Box>
+                                            <Link
+                                                variant='body2'
+                                                target="_blank"
+                                                href={`${SERVER_URL}/webserver/${jobID}_neg`}
+                                            >
+                                                NEG
+                                            </Link>
+                                        </Box>
+                                    }
+
+                                </Box>
+                            }
                         </Box>
                     </Box>
                 </Box>

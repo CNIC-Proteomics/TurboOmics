@@ -67,14 +67,14 @@ export default function DataDistribution() {
     const handleSelect = useCallback(e => {
         setGroupby({ label: e.value, value: e.value })
         updatePlot(omics);
-    }, [updatePlot])
+    }, [updatePlot, omics])
 
 
     // Handle change in norm
     const handleSwitch = useCallback(e => {
         setShowNorm(e.target.checked);
         updatePlot(omics);
-    }, [updatePlot]);
+    }, [updatePlot, omics]);
 
     return (
         <Box>

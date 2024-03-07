@@ -54,7 +54,7 @@ export default function Results() {
         ) {
             clearInterval(fetchRef.current);
         }
-    }, [API_URL, jobID, fetchRef, dispatchResults, status]);
+    }, [API_URL, jobID, fetchRef, dispatchResults, status, omics]);
 
     // Initialize fetchStatus
     useEffect(() => {

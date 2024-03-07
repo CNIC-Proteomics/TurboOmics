@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Card, CardContent, CardHeader, FormControlLabel, Switch, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Card, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
@@ -6,7 +6,8 @@ function AnnotateButton({ showButton, onAnnotate }) {
 
     const [isHover, setIsHover] = useState(false);
 
-    let bgColor = isHover ? 'rgba(255,0,0,0.4)' : 'rgba(255,0,0,0.2)'
+    let bgColor = isHover ? 'rgba(255,0,0,0.4)' : 'rgba(255,0,0,0.2)';
+    bgColor =  showButton ? bgColor : 'rgba(0,0,0,0.10)';
 
     return (
         <Box sx={{
@@ -17,15 +18,16 @@ function AnnotateButton({ showButton, onAnnotate }) {
             left: "85%",
             zIndex: 100,
             margin: 'right',
-            visibility: showButton ? 'visible' : 'hidden',
-            opacity: showButton ? 1 : 0,
-            transition: 'all 0.5s ease'
+            //visibility: showButton ? 'visible' : 'hidden',
+            //opacity: showButton ? 1 : 0,
+            transition: 'all 0.5s ease',
+            userSelect: 'none'
         }}
         >
             <Card sx={{
                 backgroundColor: bgColor,
                 transition: 'all 1s ease',
-                cursor: 'pointer',
+                cursor: showButton ? 'pointer' : 'not-allowed',
                 width: 150,
                 height: 60,
                 textAlign: 'center',
@@ -33,7 +35,7 @@ function AnnotateButton({ showButton, onAnnotate }) {
             }}
                 onMouseEnter={e => setIsHover(true)}
                 onMouseLeave={e => setIsHover(false)}
-                onClick={onAnnotate}
+                onClick={() => showButton && onAnnotate()}
             >
                 <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
                     <Box>
