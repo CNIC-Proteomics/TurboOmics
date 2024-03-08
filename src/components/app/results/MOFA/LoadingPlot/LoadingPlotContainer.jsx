@@ -1,14 +1,20 @@
 import { Box, Grid, Typography } from '@mui/material'
 import React, { useMemo, useState } from 'react'
 import LoadingPlot from './LoadingPlot';
+import { useJob } from '@/components/app/JobContext';
+import { useVars } from '@/components/VarsContext';
 
 function LoadingPlotContainer({ fLVec, nFeatRef, thrLRef, plotHeatMap }) {
+
+    const { omics } = useJob();
+    const { OMIC2NAME } = useVars();
+
     return (
-        <Grid sx={{ mt: 2 }} container>
-            {['q', 'm'].map(omic => (
-                <Grid item key={omic} xs={6}>
+        <Box sx={{ my: 3, display:'flex', justifyContent:'space-evenly' }} >
+            {omics.map((omic,i) => (
+                <Box key={i} sx={{width:`31%`}}>
                     <Typography variant='h6' sx={{ textAlign: 'center' }}>
-                        {omic == 'q' ? 'Proteomics' : 'Metabolomics'}
+                        {OMIC2NAME[omic]}
                     </Typography>
                     <LoadingPlot
                         omic={omic}
@@ -17,9 +23,9 @@ function LoadingPlotContainer({ fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                         thrLRef={thrLRef}
                         plotHeatMap={plotHeatMap}
                     />
-                </Grid>
+                </Box>
             ))}
-        </Grid >
+        </Box >
     )
 }
 

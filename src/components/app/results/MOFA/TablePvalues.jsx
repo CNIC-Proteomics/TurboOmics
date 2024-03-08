@@ -14,6 +14,8 @@ import {
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { CSVLink } from 'react-csv';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
+import { useJob } from '../../JobContext';
+import { useVars } from '@/components/VarsContext';
 
 
 const separator = ",";
@@ -44,7 +46,7 @@ const firstColStyles = {
     padding: 0.5,
     border: `1px solid ${myGridColor}`,
     borderRight: `1px solid rgba(10,10,10,1)`,
-    fontSize: myFontSize, 
+    fontSize: myFontSize,
     whiteSpace: 'nowrap',
     userSelect: 'none',
 };
@@ -75,11 +77,10 @@ export default function TablePvalues({
     rowNames
 }) {
 
-    //const dispatchResults = useDispatchResults();
-    const classes = useStyles(scatterMode);
+    const { OMIC2NAME } = useVars();
+    const { omics } = useJob();
 
-    //const savedSelectedCell = useResults().MOFA.displayOpts.selectedCell;
-    //const [selectedCell, setSelectedCell] = useState(savedSelectedCell);
+    const classes = useStyles(scatterMode);
 
     // get pvalues
     const pvalues = useMemo(() => {
@@ -87,12 +88,14 @@ export default function TablePvalues({
     }, [anova, rowNames, factorNames]);
 
     // get qExpVar and mExpVar
-    const [qExpVar, mExpVar] = useMemo(() => {
-        return [
-            factorNames.map(e => explained_variance['q'][e]['Explained_Variance']),
-            factorNames.map(e => explained_variance['m'][e]['Explained_Variance'])
-        ];
-    }, [explained_variance, factorNames]);
+    const omic2ExpVar = useMemo(() => {
+        return omics.reduce(
+            (o, e) => ({
+                ...o,
+                [e]: factorNames.map(f => explained_variance[e][f]['Explained_Variance'])
+            }), {}
+        )
+    }, [explained_variance, factorNames, omics]);
 
     const handleCellClick = (rowIndex, colIndex) => {
         if (scatterMode == '2D') return
@@ -105,14 +108,17 @@ export default function TablePvalues({
         let csvData = [];
 
         csvData.push(['Factor / Cond.', ...colNames]);
-        csvData.push(['%Var (P)', ...qExpVar]);
-        csvData.push(['%Var (M)', ...mExpVar]);
+        omics.map(
+            omic => csvData.push([`%Var (${omic.toUpperCase()})`, ...omic2ExpVar[omic]])
+        )
+        //csvData.push(['%Var (P)', ...qExpVar]);
+        //csvData.push(['%Var (M)', ...mExpVar]);
 
         const outData = pvalues.map((e, i) => [rowNames[i], ...e])
         csvData = [...csvData, ...outData];
 
         return csvData;
-    }, [colNames, qExpVar, mExpVar, pvalues, rowNames])
+    }, [colNames, pvalues, rowNames, omics, omic2ExpVar]);
 
     return (
         <>
@@ -133,12 +139,12 @@ export default function TablePvalues({
                         <Table>
                             <TableHead><TableRow><TableCell sx={{ padding: 0, textAlign: 'center' }}>Factor / Cond.</TableCell></TableRow></TableHead>
                             <TableBody>
-                                {['P', 'M'].map(e => (
+                                {omics.map((e, i) => (
                                     <TableRow key={e}>
                                         <TableCell sx={{ padding: 0, border: 0 }}>
                                             <Box
-                                                sx={{ ...firstColStyles, borderBottom: e == 'M' && `1px solid rgba(10,10,10,1)` }}
-                                            >%Var ({e})
+                                                sx={{ ...firstColStyles, borderBottom: i == omics.length - 1 && `1px solid rgba(10,10,10,1)` }}
+                                            >%Var ({OMIC2NAME[e].slice(0,4)}.)
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -173,26 +179,27 @@ export default function TablePvalues({
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {[qExpVar, mExpVar].map((expVar, i) => (
-                                    <TableRow key={i}>
-                                        {expVar.map((e, index) => (
-                                            <TableCell key={index} sx={{ padding: 0, border: 0 }}>
-                                                <Box
-                                                    sx={{
-                                                        padding: 0.5,
-                                                        border: `1px solid ${myGridColor}`,
-                                                        borderBottom: i == 1 && `1px solid rgba(10,10,10,1)`,
-                                                        fontSize: myFontSize,
-                                                        textAlign: 'center',
-                                                        backgroundColor: calculateBackgroundColorExpVar(e),
-                                                        userSelect: 'none',
-                                                    }}>
-                                                    {e.toFixed(2)}
-                                                </Box>
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
+                                {//[qExpVar, mExpVar].map((expVar, i) => (
+                                    omics.map(omic => omic2ExpVar[omic]).map((expVar, i) => (
+                                        <TableRow key={i}>
+                                            {expVar.map((e, index) => (
+                                                <TableCell key={index} sx={{ padding: 0, border: 0 }}>
+                                                    <Box
+                                                        sx={{
+                                                            padding: 0.5,
+                                                            border: `1px solid ${myGridColor}`,
+                                                            borderBottom: i == 1 && `1px solid rgba(10,10,10,1)`,
+                                                            fontSize: myFontSize,
+                                                            textAlign: 'center',
+                                                            backgroundColor: calculateBackgroundColorExpVar(e),
+                                                            userSelect: 'none',
+                                                        }}>
+                                                        {e.toFixed(2)}
+                                                    </Box>
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
                                 {pvalues.map((row, rowIndex) => (
                                     <TableRow key={rowIndex}>
                                         {row.map((value, colIndex) => (

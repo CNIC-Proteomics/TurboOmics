@@ -22,7 +22,7 @@ function AskAnnotationsDialog({ creatingJob, setCreatingJob, setPage }) {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        Metabolomic features will be annotated using <a target='_blank' href='http://ceumass.eps.uspceu.es/'>Ceu Mass Mediator</a> and simplified using <a target='_blank' href='https://proteomics.cnic.es/TurboPutative/webserver'>TurboPutative</a> (not available yet).
+                        Metabolomic features will be annotated using <a target='_blank' href='http://ceumass.eps.uspceu.es/'>Ceu Mass Mediator</a> and simplified using <a target='_blank' href='https://proteomics.cnic.es/TurboPutative/webserver'>TurboPutative</a>.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

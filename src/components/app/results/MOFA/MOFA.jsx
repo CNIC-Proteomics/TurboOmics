@@ -69,12 +69,17 @@ function MOFA() {
     /*
     Initialize selectedPlot columns and index
     */
-    useEffect(() => {
+    if (factorNames != null && rowNames != null && selectedPlot == null) {
+        setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] });
+        setSelectedCell({ rowIndex: 0, colIndex: 0 });
+    }
+
+    /*useEffect(() => {
         if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
             setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] });
             setSelectedCell({ rowIndex: 0, colIndex: 0 });
         }
-    }, [factorNames, rowNames, savedSelectedPlot]);
+    }, [factorNames, rowNames, savedSelectedPlot]);*/
 
     useEffect(() => {
         if (selectedPlot != null && selectedCell != null) {
@@ -91,21 +96,20 @@ function MOFA() {
     /*
     Function to update this component when changing nFeatRef
     */
-    const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
-    const thrLRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
+    const { omics } = useJob();
+    const nFeatRef = useRef(omics.reduce((o, e) => ({ ...o, [e]: { down: 0, up: 0 } }), {}));
+    //const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
+    const thrLRef = useRef(omics.reduce((o, e) => ({ ...o, [e]: { down: 0, up: 0 } }), {}));
+    //const thrLRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
     const [plotHM, setPlotHM] = useState(false);
     const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
-    /*useEffect(() => {
-        const myTimeOut = setTimeout(plotHeatMap, 100);
-        return () => clearInterval(myTimeOut)
-    }, [selectedPlot, plotHeatMap]);*/
-    /**/
 
     /*
     Get arrays with sorted proteins and metabolites (loading and heatmap)
     */
     const fLVec = useMemo(
-        () => getFLVec(dataMOFA, selectedPlot), [dataMOFA, selectedPlot]
+        () => getFLVec(dataMOFA, selectedPlot, omics),
+        [dataMOFA, selectedPlot, omics]
     );
     /**/
 
@@ -195,9 +199,9 @@ function MOFA() {
                                 open={EFLoading}
                             //onClick={handleClose}
                             >
-                                <Box sx={{textAlign:'center'}}>
+                                <Box sx={{ textAlign: 'center' }}>
                                     <CircularProgress color="inherit" />
-                                    <Box sx={{pt:2}}><Typography>Loading features...</Typography></Box>
+                                    <Box sx={{ pt: 2 }}><Typography>Loading features...</Typography></Box>
                                 </Box>
                             </Backdrop>
                             {exploreF && <ExploreFeaturesContainer
@@ -242,10 +246,10 @@ const getRowNames = (dataMOFA, factorNames) => {
     return rowNames;
 }
 
-const getFLVec = (dataMOFA, selectedPlot) => {
+const getFLVec = (dataMOFA, selectedPlot, omics) => {
     if (dataMOFA == null || selectedPlot == null) return null;
 
-    let fLVec = { 'q': [], 'm': [] };
+    let fLVec = omics.reduce((o, e) => ({ ...o, [e]: [] }), {}); //{ 'q': [], 'm': [] };
     Object.keys(fLVec).map(e => {
         fLVec[e] = Object.keys(dataMOFA.loadings[e][selectedPlot.Factor]).map(
             f => [f, dataMOFA.loadings[e][selectedPlot.Factor][f]]

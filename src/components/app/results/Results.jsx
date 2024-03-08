@@ -111,25 +111,25 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='COMMUNITY ANALYSIS' status='' />}
+                            label={<TabComponent text='NETWORK ANALYSIS' status='' />}
                             value={2.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
                             disabled={true}
                         />
 
-                        <Tab
+                        {false && <Tab
                             label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
                             value={3.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
                             disabled={true}
-                        />
+                        />}
 
-                        <Tab
+                        {false && <Tab
                             label={<TabComponent text='DIFFERENTIAL CORRELATION ANALYSIS' status='' />}
                             value={4.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
                             disabled={true}
-                        />
+                        />}
 
                         <Tab
                             label={<TabComponent text='ELASTIC NET' status='' />}

@@ -176,12 +176,12 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
 
     return (
         <Box sx={{ overflow: 'auto' }}>
-            <Box sx={{ mt: 1, display: 'block', m: 'auto', width: 600 }}>
-                <Box sx={{ width: 600, position: 'relative' }}>
+            <Box sx={{ mt: 1, display: 'block', m: 'auto', width: 400 }}>
+                <Box sx={{ width: 400, position: 'relative' }}>
                     <LineChart
                         data={scatterData}
                         margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
-                        width={600} height={200}
+                        width={400} height={200}
                         onClick={e => e != null && handleClick(e.activeLabel)}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
@@ -226,7 +226,7 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                         />
                     </LineChart>
                 </Box>
-                <Box sx={{ width: 490, position: 'relative', left: 80 }}>
+                <Box sx={{ width: 290, position: 'relative', left: 80 }}>
                     <Slider
                         //aria-label="Small steps"
                         track='inverted'
@@ -241,7 +241,7 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                     />
                 </Box>
                 <Box sx={{
-                    width: 490,
+                    width: 290,
                     position: 'relative',
                     left: 80,
                     display: 'flex',
@@ -249,8 +249,8 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                     justifyContent: 'space-around',
                 }}>
                     <Box sx={{ width: '33%' }}>
-                        <Typography variant='body1'>
-                            Negatively Associated Features
+                        <Typography variant='body2'>
+                            Negatively Associated
                         </Typography>
                         <TextField
                             size='small'
@@ -260,8 +260,8 @@ function LoadingPlot({ omic, fLVec, nFeatRef, thrLRef, plotHeatMap }) {
                         />
                     </Box>
                     <Box sx={{ width: '33%' }}>
-                        <Typography variant='body1'>
-                            Positively Associated Features
+                        <Typography variant='body2'>
+                            Positively Associated
                         </Typography>
                         <TextField
                             size='small'

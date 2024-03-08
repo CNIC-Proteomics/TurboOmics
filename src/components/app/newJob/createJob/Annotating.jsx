@@ -5,8 +5,9 @@ import { useVars } from '@/components/VarsContext';
 
 const BATCH_SIZE = 5;
 const TIME_SLEEP = 1000; //in milliseconds
-//const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
-const CMM_URI = "mediator/api/v3/batch";
+const PROXY = "https://corsproxy.io";
+const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
+//const CMM_URI = "mediator/api/v3/batch";
 
 function Annotating() {
 
@@ -113,7 +114,7 @@ function Annotating() {
 
             try {
                 const res = await fetch(
-                    `${SERVER_URL}/${CMM_URI}`,
+                    `${PROXY}/?${CMM_URI}`,
                     {
                         method: 'POST',
                         headers: {
@@ -135,7 +136,7 @@ function Annotating() {
                 reject([]);
             }
         })
-    }, [annParams, SERVER_URL])
+    }, [annParams])
 
     // Loop all mz batches
     const requestCMM = useCallback(async () => {
