@@ -1,42 +1,33 @@
+import { useJob } from '@/components/app/JobContext';
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 
 const HeatMapLegend = ({ nFeatRef, zLegend }) => {
+
+    const omics = useJob().omics
+
     return (
         <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
             <Box sx={{ width: '5%' }}></Box>
-            <Box sx={{mr:0.5}}>
-                {(nFeatRef.current.q.up > 0 || nFeatRef.current.q.down > 0) &&
-                    <Box>
-                        <Legend a={zLegend.q.min} b={zLegend.q.max} />
-                        <Box><Typography variant='h6'></Typography></Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {nFeatRef.current.q.down > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                            {nFeatRef.current.q.up > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                        </Box>
+            {
+                omics.map(omic => (
+                    <Box sx={{ mr: 0.7 }}>
+                        {(nFeatRef.current[omic].up > 0 || nFeatRef.current[omic].down > 0) &&
+                            <Box>
+                                <Legend a={zLegend[omic].min} b={zLegend[omic].max} />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                                    {nFeatRef.current[omic].down > 0 &&
+                                        <Box sx={{ width: 1160/(2*omics.length) }}></Box>
+                                    }
+                                    {nFeatRef.current[omic].up > 0 &&
+                                        <Box sx={{ width: 1160/(2*omics.length) }}></Box>
+                                    }
+                                </Box>
+                            </Box>
+                        }
                     </Box>
-                }
-            </Box>
-            <Box sx={{mx:1}}>
-                {(nFeatRef.current.m.up > 0 || nFeatRef.current.m.down > 0) &&
-                    <Box>
-                        <Legend a={zLegend.m.min} b={zLegend.m.max} />
-                        <Box><Typography variant='h6'></Typography></Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {nFeatRef.current.m.down > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                            {nFeatRef.current.m.up > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                        </Box>
-                    </Box>
-                }
-            </Box>
+                ))
+            }
         </Box>
     )
 }
@@ -76,3 +67,38 @@ const Legend = ({ a, b }) => {
 };
 
 export default HeatMapLegend;
+
+/*
+            <Box sx={{mr:0.5}}>
+                {(nFeatRef.current.q.up > 0 || nFeatRef.current.q.down > 0) &&
+                    <Box>
+                        <Legend a={zLegend.q.min} b={zLegend.q.max} />
+                        <Box><Typography variant='h6'></Typography></Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                            {nFeatRef.current.q.down > 0 &&
+                                <Box sx={{ width: 290 }}></Box>
+                            }
+                            {nFeatRef.current.q.up > 0 &&
+                                <Box sx={{ width: 290 }}></Box>
+                            }
+                        </Box>
+                    </Box>
+                }
+            </Box>
+            <Box sx={{mx:1}}>
+                {(nFeatRef.current.m.up > 0 || nFeatRef.current.m.down > 0) &&
+                    <Box>
+                        <Legend a={zLegend.m.min} b={zLegend.m.max} />
+                        <Box><Typography variant='h6'></Typography></Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                            {nFeatRef.current.m.down > 0 &&
+                                <Box sx={{ width: 290 }}></Box>
+                            }
+                            {nFeatRef.current.m.up > 0 &&
+                                <Box sx={{ width: 290 }}></Box>
+                            }
+                        </Box>
+                    </Box>
+                }
+            </Box>
+*/

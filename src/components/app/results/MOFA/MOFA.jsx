@@ -74,6 +74,14 @@ function MOFA() {
         setSelectedCell({ rowIndex: 0, colIndex: 0 });
     }
 
+    if (factorNames != null && rowNames != null && selectedPlot2D == null) {
+        setSelectedPlot2D({
+            x: factorNames[0],
+            y: factorNames.length > 1 ? factorNames[1] : factorNames[0],
+            g: 'No color'
+        });
+    }
+
     /*useEffect(() => {
         if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
             setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] });

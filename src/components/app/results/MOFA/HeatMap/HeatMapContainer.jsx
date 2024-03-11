@@ -8,22 +8,31 @@ import { useImmer } from 'use-immer';
 
 function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
 
-    const [zLegend, updateZLegend] = useImmer({'q':{min:0, max:0}, 'm':{min:0, max:0}});
+    const { omics } = useJob();
+    const [zLegend, updateZLegend] = useImmer(
+        omics.reduce((o, e) => ({ ...o, [e]: { min: 0, max: 0 } }), {})
+        //{'q':{min:0, max:0}, 'm':{min:0, max:0}}
+    );
     useEffect(() => {
-        updateZLegend({'q':{min:0, max:0}, 'm':{min:0, max:0}});
+        updateZLegend(
+            omics.reduce((o, e) => ({ ...o, [e]: { min: 0, max: 0 } }), {})
+            //{ 'q': { min: 0, max: 0 }, 'm': { min: 0, max: 0 } }
+        );
     }, [plotHM, updateZLegend]);
 
-    const { xq, xm } = useJob().user;
-    const myIndex = xq.index.filter(e => xm.index.includes(e));
+    // Get common indexes
+    const xi = useJob().norm;
+    let myIndex = omics.map(omic => xi[`x${omic}`].index);
+    myIndex = myIndex.reduce((a,b) => a.filter(c => b.includes(c)));
 
     return (
         <Box>
             <HeatMapHeader nFeatRef={nFeatRef} />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ width: '5%', display:'flex', justifyContent:'flex-end' }}>
+                <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
                     <HeatMapIndex myIndex={myIndex} mdataCol={mdataCol} />
                 </Box>
-                {['q', 'm'].map(omic => (
+                {omics.map(omic => (
                     <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>
                         {nFeatRef.current[omic].down > 0 &&
                             <MyHeatMap
@@ -52,7 +61,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
                     </Box>
                 ))}
             </Box>
-                <HeatMapLegend nFeatRef={nFeatRef} zLegend={zLegend} />
+            <HeatMapLegend nFeatRef={nFeatRef} zLegend={zLegend} />
         </Box>
     )
 }

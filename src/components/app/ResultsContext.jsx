@@ -201,10 +201,10 @@ const resultsTemplate = {
     'MOFA': {
         data: null, // {projections, loadings, explained_variance, anova}
         displayOpts: {
-            selectedCell: null,
-            selectedPlot: null,
+            selectedCell: null, // {rowIndex: 0, colIndex:0}
+            selectedPlot: null, // {mdataCol: rowNames[0], Factor: factorNames[0]}
             scatterMode: '1D',
-            selectedPlot2D: { x: 'Factor1', y: 'Factor2', g: 'No color' },
+            selectedPlot2D: null //{ x: 'Factor1', y: 'Factor2', g: 'No color' },
         }
     }
 }

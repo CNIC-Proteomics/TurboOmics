@@ -3,7 +3,16 @@ import React, { useEffect, useMemo } from 'react'
 import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas } from '@nivo/heatmap'
 import { Box, Typography } from '@mui/material';
 
-export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLegend }) {
+export function MyHeatMap({
+    omic,
+    myIndex,
+    myFeat,
+    mdataCol,
+    updateZLegend,
+    zLegend
+}) {
+
+    const nPlots = 2*useJob().omics.length;
 
     const xi = useJob().norm[`x${omic}`];
     const mdataColInfo = useJob().mdataType[mdataCol];
@@ -42,7 +51,7 @@ export function MyHeatMap({ omic, myIndex, myFeat, mdataCol, updateZLegend, zLeg
     /**/
 
     return (
-        <Box sx={{ height: 510, width: 290, marginRight:0.5, border: '2px solid #444444' }}>
+        <Box sx={{ height: 510, width: 1160/nPlots, marginRight: 0.5, border: '2px solid #444444' }}>
             <ResponsiveHeatMapCanvas
                 data={hmData}
                 margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -102,7 +111,7 @@ export const HeatMapIndex = ({ myIndex, mdataCol }) => {
                             borderBottom: '2px solid #444444',
                         }}
                     >
-                        <td style={{paddingRight:5}}><Typography variant='h7'>{value}</Typography></td>
+                        <td style={{ paddingRight: 5 }}><Typography variant='h7'>{value}</Typography></td>
                     </tr>
                 ))}
             </tbody>
