@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import GProfiler from './GProfiler'
@@ -8,15 +8,26 @@ import { useJob } from '@/components/app/JobContext';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/dist';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 
-function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
+function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
 
-    const { OS } = useJob()
+    const { OS } = useJob();
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
     const mdataColInfo = useJob().mdataType[mdataCol];
+
+    // Category enrichment
     const [category, setCategory] = useState(null); // Selected category
-    const [qCat, setQCat] = useState(null); // P^roteins of the selected category
+    const [qCat, setQCat] = useState(null); // Proteins of the selected category
     const [loadingPCTable, setLoadingPCTable] = useState(true);
 
+    // Selection of column containing protein/transcript ID
+    const f2i = useJob().user[`${omic}2i`];
+    const f2iColumns = useMemo(
+        () => f2i.columns.map(col => ({ label: col, id: col })),
+        [f2i]
+    );
+    const [colFid, setColFid] = useState(f2iColumns[0]);
+
+    // Fetch all proteins of selected category
     const fetchProteins = useCallback(async () => {
         setLoadingPCTable(true);
         const res = await fetch(
@@ -33,14 +44,20 @@ function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
         );
 
         const resJson = await res.json();
-        const myQ = Object.keys(f2MeanL); // All proteins of the experiment
+        
+        //const myQ = Object.keys(f2MeanL); // All proteins of the experiment
+        const myQ = [...new Set(f2i.column(colFid.id).values)];
+
         let myQCat = resJson.result.filter(
             e => myQ.includes(e.converted)
         ); // Get proteins category that are in the experiment
+        
         myQCat = myQCat.filter(
             (json, index, self) => index === self.findIndex((t) => t.converted === json.converted)
         ); //drop duplicates
+        
         setQCat(myQCat);
+        
         setTimeout(() => setLoadingPCTable(false), 500);
     }, [category, OS, f2MeanL]);
 
@@ -54,33 +71,73 @@ function EnrichmentQ({ fRef, f2MeanL, setLoadingEnrichment }) {
     }, [category, fetchProteins]);
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-            <Box sx={{ width: '45%' }}>
-                <GProfiler
-                    fRef={fRef}
-                    setCategory={setCategory}
-                    setLoadingEnrichment={setLoadingEnrichment}
-                />
-            </Box>
-            <Box sx={{ width: '45%' }}>
-                {
-                    mdataColInfo.type == 'categorical' &&
-                    mdataColInfo.levels.length > 1 &&
-                    qCat &&
-                    <>
-                        <GSEA
-                            f2MeanL={f2MeanL}
-                            fSet={qCat.map(e => e.converted)}
-                            omic='q'
-                        />
-                        <Box sx={{ pl: 2, mt: 1 }}>
-                            <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
-                                <ProteinCategoryTable qCat={qCat} fRef={fRef} />
+        <Box>
+            <FieldSelector
+                options={f2iColumns}
+                selectedField={colFid}
+                setSelectedField={setColFid}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                <Box sx={{ width: '45%' }}>
+                    <GProfiler
+                        fRef={fRef}
+                        setCategory={setCategory}
+                        setLoadingEnrichment={setLoadingEnrichment}
+                        colFid={colFid}
+                    />
+                </Box>
+                <Box sx={{ width: '45%' }}>
+                    {
+                        mdataColInfo.type == 'categorical' &&
+                        mdataColInfo.levels.length > 1 &&
+                        qCat &&
+                        <>
+                            {false && <GSEA
+                                f2MeanL={f2MeanL}
+                                fSet={qCat.map(e => e.converted)}
+                                omic='q'
+                            />}
+                            <Box sx={{ pl: 2, mt: 13 }}>
+                                <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
+                                    <ProteinCategoryTable qCat={qCat} fRef={fRef} />
+                                </Box>
                             </Box>
-                        </Box>
-                    </>
-                }
+                        </>
+                    }
+                </Box>
             </Box>
+        </Box>
+    )
+}
+
+const FieldSelector = ({ options, selectedField, setSelectedField }) => {
+
+    const handleInput = (e, newValue) => {
+        if (newValue)
+            setSelectedField(newValue);
+        else
+            setSelectedField(options[0]);
+    }
+
+    return (
+        <Box>
+            <Typography variant='h6'>Select Column Containing ID</Typography>
+            <Autocomplete
+                id="feature-id-field"
+                sx={{ width: 300, margin: 'auto', mt: 2 }}
+                disableListWrap
+                value={selectedField}
+                onChange={(e, newValue) => handleInput(e, newValue)}
+                options={options}
+                renderInput={(params) => <TextField {...params} label="Field" />}
+                renderOption={(props, option) => {
+                    return (
+                        <li {...props} key={option.label}>
+                            {option.label}
+                        </li>
+                    );
+                }}
+            />
         </Box>
     )
 }
@@ -186,7 +243,7 @@ const ProteinCategoryTable = ({ qCat, fRef }) => {
         enableHiding: false,
         enableColumnActions: false,
         rowPinningDisplayMode: 'select-sticky',
-        muiTableContainerProps: { sx: { maxHeight: '220px' } },
+        muiTableContainerProps: { sx: { maxHeight: '300px' } },
         enableRowVirtualization: true,
         enableColumnVirtualization: true,
         getRowId: (row) => row.converted,

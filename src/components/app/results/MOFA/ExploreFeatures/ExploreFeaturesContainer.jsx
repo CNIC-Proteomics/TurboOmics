@@ -6,6 +6,7 @@ import TopBarDialog from './TopBarDialog';
 import MainContent from './MainContent';
 import { Box } from '@mui/material';
 import "@splidejs/splide/dist/css/splide.min.css"
+import { useJob } from '@/components/app/JobContext';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -19,18 +20,15 @@ function ExploreFeaturesContainer({
     thrLRef
 }) {
 
-    const [selectedOmic, setSelectedOmic] = useState('q');
+    const { omics } = useJob();
+
+    const [selectedOmic, setSelectedOmic] = useState(omics[0]);
     const boxOmicRef = useRef(null);
 
     const scrollOmic = direction => {
         const container = boxOmicRef.current;
         const containerWidth = container.clientWidth
-
-        if (direction == 'right')
-            container.scrollLeft = container.scrollLeft + containerWidth;
-
-        if (direction == 'left')
-            container.scrollLeft = container.scrollLeft - containerWidth;
+        container.scrollLeft = container.scrollLeft + direction * containerWidth;
     }
 
     return (
@@ -50,26 +48,22 @@ function ExploreFeaturesContainer({
             />
             <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
                 <Box
-                    sx={{ display: 'flex', width: '200%' }}
+                    sx={{ display: 'flex', width: `${100 * omics.length}%` }}
                 >
-                    <Box
-                        sx={{
-                            width: '50%',
-                            opacity: selectedOmic == 'q' ? 1 : 0,
-                            transition: 'all ease 0.5s'
-                        }}
-                    >
-                        <MainContent omic='q' thrLRef={thrLRef} />
-                    </Box>
-                    <Box
-                        sx={{
-                            width: '50%',
-                            opacity: selectedOmic == 'm' ? 1 : 0,
-                            transition: 'all ease 0.5s'
-                        }}
-                    >
-                        <MainContent omic='m' thrLRef={thrLRef} />
-                    </Box>
+                    {
+                        omics.map(omic => (
+                            <Box
+                                key={omic}
+                                sx={{
+                                    width: `${100 / omics.length}%`,
+                                    opacity: selectedOmic == omic ? 1 : 0,
+                                    transition: 'all ease 0.5s'
+                                }}
+                            >
+                                <MainContent omic={omic} thrLRef={thrLRef} />
+                            </Box>
+                        ))
+                    }
                 </Box>
             </Box>
         </Dialog >

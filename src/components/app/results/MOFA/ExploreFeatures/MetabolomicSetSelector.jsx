@@ -27,7 +27,7 @@ function MetabolomicSetSelector({ setLoadingEnrichment, fRef, updateMCat }) {
                 selectedField={selectedField}
                 setSelectedField={setSelectedField}
             />
-            <Box sx={{opacity: selectedField?1:0, transition:'all ease 1s'}}>
+            <Box sx={{ opacity: selectedField ? 1 : 0, transition: 'all ease 1s' }}>
                 {selectedField && <CategoryTable
                     selectedField={selectedField}
                     fRef={fRef}
@@ -161,7 +161,7 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
             density: 'compact',
             showGlobalFilter: true,
         },
-        
+
         filterFns: {
             myCustomFilterFn: (row, id, filterValue) => {
                 if (row.getValue(id)) {
@@ -177,8 +177,8 @@ const CategoryTable = ({ selectedField, fRef, updateMCat }) => {
                     return false
                 }
             }
-          },
-          globalFilterFn: 'myCustomFilterFn',
+        },
+        globalFilterFn: 'myCustomFilterFn',
 
         renderTopToolbarCustomActions: ({ table }) => (
             <MyTopToolbarActions

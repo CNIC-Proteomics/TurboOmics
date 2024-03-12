@@ -11,7 +11,7 @@ const HeatMapLegend = ({ nFeatRef, zLegend }) => {
             <Box sx={{ width: '5%' }}></Box>
             {
                 omics.map(omic => (
-                    <Box sx={{ mr: 0.7 }}>
+                    <Box key={omic} sx={{ mr: 0.7 }}>
                         {(nFeatRef.current[omic].up > 0 || nFeatRef.current[omic].down > 0) &&
                             <Box>
                                 <Legend a={zLegend[omic].min} b={zLegend[omic].max} />

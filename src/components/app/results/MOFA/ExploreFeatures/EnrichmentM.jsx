@@ -22,7 +22,7 @@ function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
                     updateMCat={updateMCat}
                 />
             </Box>
-            <Box sx={{ width: '45%' }}>
+            {false && <Box sx={{ width: '45%' }}>
                 {
                     mdataColInfo.type == 'categorical' &&
                     mdataColInfo.levels.length > 1 &&
@@ -35,7 +35,7 @@ function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
                         />
                     </>
                 }
-            </Box>
+            </Box>}
         </Box>
     )
 }

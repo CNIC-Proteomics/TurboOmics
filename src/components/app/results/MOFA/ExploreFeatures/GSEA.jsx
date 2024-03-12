@@ -66,30 +66,6 @@ function GSEA({ f2MeanL, fSet, omic }) {
         getPvalue();
     }, [getPvalue]);
 
-    /*const nullZ = useMemo(() => {
-        const nullZ = [];
-        for (let i = 0; i < EMPIRICAL_PVALUE; i++) {
-            const randomSet = getRandomElements(Object.keys(f2MeanL), fSet.length);
-            const nullScore = calculateGSEA(dataZ, randomSet).score;
-            nullZ.push(nullScore);
-        }
-        return nullZ;
-    }, [dataZ, groups]);
-
-    const pvalue = useMemo(() => {
-        if (isNaN(score)) return 1
-
-        let pvalue = nullZ.filter(
-            e => Math.abs(e) > Math.abs(score)
-        ).length / EMPIRICAL_PVALUE;
-
-        pvalue = pvalue == 0 ? 1 / EMPIRICAL_PVALUE : pvalue;
-        console.log(pvalue)
-        return pvalue
-    }, [score, nullZ, EMPIRICAL_PVALUE]);*/
-
-    //console.log(nullZ, EMPIRICAL_PVALUE);
-
     return (
         <Box sx={{ mt: 3, height: 550 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -167,7 +143,7 @@ const GSEAplot = ({ ES, setBool, deltaZ, score, pvalue }) => {
 
     return (
         <Box>
-            <Typography>Score = {Math.round(score * 1000) / 1000} | Empirical p-value {'<'} {pvalue}</Typography>
+            <Typography>Score = {Math.round(score * 1000) / 1000} | Empirical p-value {'≤'} {pvalue}</Typography>
             <Box>
                 <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={ESdata} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>

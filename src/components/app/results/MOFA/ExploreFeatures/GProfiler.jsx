@@ -12,16 +12,26 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
-function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
+function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
 
     const BASE_URL = useVars().BASE_URL;
     const [qSet, setQSet] = useState([]); // Filtered proteins
     const [goRes, setGoRes] = useState(null); // All categories
 
     const q2i = useJob().user.q2i;
-    const { OS } = useJob()
-    const myBackg = useMemo(() => q2i.index, [q2i]); // All proteins in exp.
-    const mySet = fRef.map(e => e[q2i.columns[0]]); // Filtered proteins
+    const { OS } = useJob();
+    
+    //const myBackg = useMemo(() => q2i.index, [q2i]); // All proteins in exp.
+    const myBackg = useMemo(() => {
+        const q = q2i.column(colFid.id).values
+        return q.filter((item, pos) => q.indexOf(item) == pos) // drop duplicates
+    }, [q2i, colFid]); // All proteins in exp.
+    
+    //const mySet = fRef.map(e => e[q2i.columns[0]]); // Filtered proteins
+    const mySet = useMemo(() => {
+        const q = fRef.map(e => e[colFid.id]);
+        return q.filter((item, pos) => q.indexOf(item) == pos) // drop duplicates
+    }, [colFid, fRef]); // Filtered proteins
 
     if ( // If filtered proteins changes, set it.
         !mySet.map(e => qSet.includes(e)).every(e => e) ||
@@ -31,7 +41,7 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
     }
 
     const gProfiler = useCallback(async () => {
-        setLoadingEnrichment(true);
+        //setLoadingEnrichment(true);
         const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/gost/profile/',
             {
@@ -50,7 +60,7 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment }) {
         )
         const resJson = await res.json();
         setGoRes(resJson);
-        setTimeout(() => setLoadingEnrichment(false), 2000);
+        setTimeout(() => setLoadingEnrichment(false), 1000);
     }, [OS, qSet, myBackg, setLoadingEnrichment]);
 
     useEffect(() => {

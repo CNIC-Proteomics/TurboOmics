@@ -16,12 +16,11 @@ import { MySection, MySectionContainer } from '@/components/MySection';
 import EnrichmentQ from './EnrichmentQ';
 import EnrichmentM from './EnrichmentM';
 import MyMRTable from './MyMRTable';
-
-//Icons Imports
-
-//Mock Data
+import { useVars } from '@/components/VarsContext';
 
 function MainContent({ omic, thrLRef }) {
+
+    const { OMIC2NAME } = useVars()
 
     // Row filtered by the user
     const fRef = useRef({ up: [], down: [] });
@@ -35,7 +34,7 @@ function MainContent({ omic, thrLRef }) {
     }, [myReRender]);
 
     // Soft appearance of Enrichment section
-    const [loadingEnrichment, setLoadingEnrichment] = useState(true);
+    const [loadingEnrichment, setLoadingEnrichment] = useState(false);
 
     // Get mean of each feature per level
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
@@ -50,7 +49,9 @@ function MainContent({ omic, thrLRef }) {
         if (mdataColInfo.type == 'categorical') {
             mdataColInfo.levels.map(l => {
                 let xiL = new dfd.DataFrame(
-                    mdataColInfo.level2id[l].map(element => xiJson[element]).filter(i => i != undefined)
+                    mdataColInfo.level2id[l]
+                        .map(element => xiJson[element])
+                        .filter(i => i != undefined)
                 );
 
                 const fMeanSerie = xiL.mean({ axis: 0 }).round(4);
@@ -70,7 +71,7 @@ function MainContent({ omic, thrLRef }) {
                 <SplideSlide key={sign}>
                     <Box sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant='h5'>
-                            {sign == 'up' ? 'Positively' : 'Negatively'} Associated {omic == 'q' ? 'Proteins' : 'Metabolites'}
+                            {sign == 'up' ? 'Positively' : 'Negatively'} Associated {OMIC2NAME[omic]}
                         </Typography>
                         <MySectionContainer height='80vh'>
                             <MySection>
@@ -85,9 +86,10 @@ function MainContent({ omic, thrLRef }) {
                                 />
 
                                 {fRef.current[sign].length > 0 &&
-                                    <Box sx={{ opacity: loadingEnrichment?0:1, transition:'all ease 1s' }}>
-                                        {omic == 'q' ?
+                                    <Box sx={{ opacity: loadingEnrichment ? 0 : 1, transition: 'all ease 1s' }}>
+                                        {omic == 'q' || omic == 't' ?
                                             <EnrichmentQ
+                                                omic={omic}
                                                 fRef={fRef.current[sign]}
                                                 f2MeanL={f2MeanL}
                                                 setLoadingEnrichment={setLoadingEnrichment}

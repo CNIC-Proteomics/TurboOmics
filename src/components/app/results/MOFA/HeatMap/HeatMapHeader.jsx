@@ -16,27 +16,27 @@ function HeatMapHeader({ nFeatRef }) {
             textAlign: 'center',
         }}>
             <Box sx={{ width: '5%' }}></Box>
-            {omics.map(omic => (<>
-                {(nFeatRef.current[omic].up > 0 || nFeatRef.current[omic].down > 0) &&
-                    <Box sx={{ marginRight: 0.5 }}>
-                        <Box><Typography variant='h6'>{OMIC2NAME[omic]}</Typography></Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {nFeatRef.current[omic].down > 0 &&
-                                <Box sx={{width: 1160 / (2*omics.length),marginRight: 0.5}}>
-                                    <Box>Negatively Associated</Box>
-                                </Box>
-                            }
-                            {nFeatRef.current[omic].up > 0 &&
-                                <Box sx={{width: 1160 / (2*omics.length)}}>
-                                    <Box>Positively Associated</Box>
-                                </Box>
-                            }
+            {omics.map(omic => (
+                <Box key={omic}>
+                    {(nFeatRef.current[omic].up > 0 || nFeatRef.current[omic].down > 0) &&
+                        <Box key={omic} sx={{ marginRight: 0.5 }}>
+                            <Box><Typography variant='h6'>{OMIC2NAME[omic]}</Typography></Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+                                {nFeatRef.current[omic].down > 0 &&
+                                    <Box sx={{ width: 1160 / (2 * omics.length), marginRight: 0.5 }}>
+                                        <Box>Negatively Associated</Box>
+                                    </Box>
+                                }
+                                {nFeatRef.current[omic].up > 0 &&
+                                    <Box sx={{ width: 1160 / (2 * omics.length) }}>
+                                        <Box>Positively Associated</Box>
+                                    </Box>
+                                }
+                            </Box>
                         </Box>
-                    </Box>
-                }
-
-            </>))
-            }
+                    }
+                </Box>
+            ))}
 
         </Box>
     )

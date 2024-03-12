@@ -82,15 +82,27 @@ function MOFA() {
         });
     }
 
-    /*useEffect(() => {
-        if (factorNames != null && rowNames != null && savedSelectedPlot == null) {
-            setSelectedPlot({ mdataCol: rowNames[0], Factor: factorNames[0] });
-            setSelectedCell({ rowIndex: 0, colIndex: 0 });
-        }
-    }, [factorNames, rowNames, savedSelectedPlot]);*/
+    /*
+    Function to refresh heatmap
+    */
+    const [plotHM, setPlotHM] = useState(false);
+    const plotHeatMap = useCallback(() => {console.log('Refresh'); setPlotHM(e => !e)}, [setPlotHM]);
 
+    /*
+    Refresh to plot heatmap at first render
+    */
+    useEffect(() => {
+        const myTimeout = setTimeout(plotHeatMap, 1000);
+        return () => clearTimeout(myTimeout);
+    }, [setPlotHM]);
+    /**/
+
+    /*
+    Save changes in cell selection
+    */
     useEffect(() => {
         if (selectedPlot != null && selectedCell != null) {
+            plotHeatMap();
             dispatchResults({
                 type: 'set-selected-plot-cell-mofa',
                 rowIndex: selectedCell.rowIndex,
@@ -99,18 +111,15 @@ function MOFA() {
                 Factor: selectedPlot.Factor
             });
         }
-    }, [selectedPlot, selectedCell, dispatchResults])
+    }, [selectedPlot, selectedCell, dispatchResults, plotHeatMap]);
+    /**/
 
     /*
     Function to update this component when changing nFeatRef
     */
     const { omics } = useJob();
     const nFeatRef = useRef(omics.reduce((o, e) => ({ ...o, [e]: { down: 0, up: 0 } }), {}));
-    //const nFeatRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
     const thrLRef = useRef(omics.reduce((o, e) => ({ ...o, [e]: { down: 0, up: 0 } }), {}));
-    //const thrLRef = useRef({ q: { down: 0, up: 0 }, m: { down: 0, up: 0 } });
-    const [plotHM, setPlotHM] = useState(false);
-    const plotHeatMap = useCallback(() => setPlotHM(e => !e), []);
 
     /*
     Get arrays with sorted proteins and metabolites (loading and heatmap)
@@ -205,7 +214,6 @@ function MOFA() {
                             <Backdrop
                                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                                 open={EFLoading}
-                            //onClick={handleClose}
                             >
                                 <Box sx={{ textAlign: 'center' }}>
                                     <CircularProgress color="inherit" />

@@ -179,7 +179,7 @@ const MyRenderTopToolbar = ({
     const [rowsID, setRowsID] = useState([]);
 
     useEffect(() => {
-        const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 500);
+        const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 100);
         fRef.current[sign] = rows;
         const myTimeOut = setTimeout(() => { myReRender() }, 1000);
         return () => { clearTimeout(myTimeOut); clearTimeout(myTimeOut2) };

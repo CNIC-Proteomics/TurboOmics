@@ -1,6 +1,6 @@
 import { useJob } from '@/components/app/JobContext';
 import { Box, Button, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { MyHeatMap, HeatMapIndex } from './MyHeatMap';
 import HeatMapHeader from './HeatMapHeader';
 import HeatMapLegend from './HeatMapLegend';
@@ -10,20 +10,39 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
 
     const { omics } = useJob();
     const [zLegend, updateZLegend] = useImmer(
-        omics.reduce((o, e) => ({ ...o, [e]: { min: 0, max: 0 } }), {})
+        omics.reduce((o, e) => ({ ...o, [e]: { min: -2, max: 2 } }), {})
         //{'q':{min:0, max:0}, 'm':{min:0, max:0}}
     );
+    /*console.log(zLegend)
     useEffect(() => {
+        console.log('set to 0')
         updateZLegend(
             omics.reduce((o, e) => ({ ...o, [e]: { min: 0, max: 0 } }), {})
             //{ 'q': { min: 0, max: 0 }, 'm': { min: 0, max: 0 } }
         );
-    }, [plotHM, updateZLegend]);
+    }, [updateZLegend, plotHM]);*/
 
     // Get common indexes
     const xi = useJob().norm;
-    let myIndex = omics.map(omic => xi[`x${omic}`].index);
-    myIndex = myIndex.reduce((a,b) => a.filter(c => b.includes(c)));
+
+    const myIndex = useMemo(() => {
+        let myIndex = omics.map(omic => xi[`x${omic}`].index);
+        myIndex = myIndex.reduce((a, b) => a.filter(c => b.includes(c)));
+        return myIndex;
+    }, [omics, xi]);
+
+    const myFeat = useMemo(() => {
+        const myFeat = {}
+        omics.map(omic => {
+            myFeat[omic] = {
+                down: fLVec[omic].filter((e, i) => i < [nFeatRef.current[omic].down]).map(e => e[0]),
+                up: fLVec[omic].filter((e, i) => i >= (fLVec[omic].length - [nFeatRef.current[omic].up])).map(e => e[0])
+            }
+        })
+        return myFeat
+    }, [omics, nFeatRef, fLVec, plotHM]);
+
+    
 
     return (
         <Box>
@@ -38,9 +57,9 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
                             <MyHeatMap
                                 omic={omic}
                                 myIndex={myIndex}
-                                myFeat={fLVec[omic].filter(
+                                myFeat={myFeat[omic].down}/*{fLVec[omic].filter(
                                     (e, i) => i < [nFeatRef.current[omic].down]
-                                ).map(e => e[0])}
+                                ).map(e => e[0])}*/
                                 mdataCol={mdataCol}
                                 updateZLegend={updateZLegend}
                                 zLegend={zLegend[omic]}
@@ -50,9 +69,9 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
                             <MyHeatMap
                                 omic={omic}
                                 myIndex={myIndex}
-                                myFeat={fLVec[omic].filter(
+                                myFeat={myFeat[omic].up}/*{fLVec[omic].filter(
                                     (e, i) => i >= (fLVec[omic].length - [nFeatRef.current[omic].up])
-                                ).map(e => e[0])}
+                                ).map(e => e[0])}*/
                                 mdataCol={mdataCol}
                                 updateZLegend={updateZLegend}
                                 zLegend={zLegend[omic]}
