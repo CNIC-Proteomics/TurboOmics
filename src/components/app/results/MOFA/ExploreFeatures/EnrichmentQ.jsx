@@ -44,22 +44,22 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
         );
 
         const resJson = await res.json();
-        
+
         //const myQ = Object.keys(f2MeanL); // All proteins of the experiment
         const myQ = [...new Set(f2i.column(colFid.id).values)];
 
         let myQCat = resJson.result.filter(
             e => myQ.includes(e.converted)
         ); // Get proteins category that are in the experiment
-        
+
         myQCat = myQCat.filter(
             (json, index, self) => index === self.findIndex((t) => t.converted === json.converted)
         ); //drop duplicates
-        
+
         setQCat(myQCat);
-        
+
         setTimeout(() => setLoadingPCTable(false), 500);
-    }, [category, OS, f2MeanL]);
+    }, [category, OS, f2MeanL, colFid.id, f2i]);
 
     useEffect(() => {
         if (category == null) {

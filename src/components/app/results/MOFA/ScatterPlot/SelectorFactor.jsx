@@ -15,7 +15,8 @@ export function SelectorFactor2D({ factorNames, rowNames, selectedPlot2D, setSel
                     onChange={
                         e => {
                             setSelectedPlot2D(prev => ({ ...prev, x: e.value }));
-                            dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'x', value: e.value });
+                            dispatchResults({ type: 'set-selected-plot-2d-mofa', mode: {...selectedPlot2D, x:e.value} });
+                            //dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'x', value: e.value });
                         }
                     }
                     value={{ label: `${selectedPlot2D.x}`, value: selectedPlot2D.x }}
@@ -28,7 +29,8 @@ export function SelectorFactor2D({ factorNames, rowNames, selectedPlot2D, setSel
                     onChange={
                         e => {
                             setSelectedPlot2D(prev => ({ ...prev, y: e.value }));
-                            dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'y', value: e.value });
+                            dispatchResults({ type: 'set-selected-plot-2d-mofa', mode: {...selectedPlot2D, y:e.value} });
+                            //dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'y', value: e.value });
                         }
                     }
                     value={{ label: `${selectedPlot2D.y}`, value: selectedPlot2D.y }}
@@ -45,7 +47,8 @@ export function SelectorFactor2D({ factorNames, rowNames, selectedPlot2D, setSel
                     onChange={
                         e => {
                             setSelectedPlot2D(prev => ({ ...prev, g: e.value }));
-                            dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'g', value: e.value });
+                            dispatchResults({ type: 'set-selected-plot-2d-mofa', mode: {...selectedPlot2D, g:e.value} });
+                            //dispatchResults({ type: 'set-selected-plot-2d-mofa', option: 'g', value: e.value });
                         }
                     }
                     value={{ label: selectedPlot2D.g, value: selectedPlot2D.g }}

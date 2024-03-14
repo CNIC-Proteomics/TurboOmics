@@ -75,10 +75,15 @@ function MOFA() {
     }
 
     if (factorNames != null && rowNames != null && selectedPlot2D == null) {
-        setSelectedPlot2D({
+        const mySelectedPlot2d = {
             x: factorNames[0],
             y: factorNames.length > 1 ? factorNames[1] : factorNames[0],
             g: 'No color'
+        }
+        setSelectedPlot2D(mySelectedPlot2d);
+        dispatchResults({ 
+            type: 'set-selected-plot-2d-mofa', 
+            mode: mySelectedPlot2d
         });
     }
 
@@ -94,7 +99,7 @@ function MOFA() {
     useEffect(() => {
         const myTimeout = setTimeout(plotHeatMap, 1000);
         return () => clearTimeout(myTimeout);
-    }, [setPlotHM]);
+    }, [setPlotHM,plotHeatMap]);
     /**/
 
     /*

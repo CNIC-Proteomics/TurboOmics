@@ -142,7 +142,8 @@ function resultsReducer(draft, action) {
         }
 
         case 'set-selected-plot-2d-mofa': {
-            draft.MOFA.displayOpts.selectedPlot2D[action.option] = action.value;
+            //draft.MOFA.displayOpts.selectedPlot2D[action.option] = action.value;
+            draft.MOFA.displayOpts.selectedPlot2D = action.mode;
             break;
         }
 

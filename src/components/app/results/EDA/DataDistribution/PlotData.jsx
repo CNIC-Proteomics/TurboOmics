@@ -94,8 +94,15 @@ export default function PlotData({
         Object.keys(myData).map(
             g => {
                 dataHist[g] = myData[g].filter(x => minimum <= x && x <= maximum)
+
+                const step = Math.max(1, Math.floor(dataHist[g].length/50_000));
+                const sample = []
+                for (let i=0; i<dataHist[g].length; i+=step)
+                    sample.push(dataHist[g][i])
+                sample.push(dataHist[g].slice(-1));
+                dataHist[g] = sample;
             }
-        )
+        );
 
         Object.keys(dataHist).map(
             g => {
@@ -113,7 +120,7 @@ export default function PlotData({
                     console.error(error);
                 }
             }
-        )
+        );
 
         // Generate Object for each data value
         dataHist = Object.keys(dataHist).map(

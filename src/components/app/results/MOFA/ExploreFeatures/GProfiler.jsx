@@ -12,6 +12,9 @@ import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
+
+const DATABASES = ['GO:MF', 'GO:BP', 'GO:CC', 'KEGG', 'REAC']
+
 function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
 
     const BASE_URL = useVars().BASE_URL;
@@ -54,7 +57,7 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
                     "background": myBackg,
                     "user_threshold": 1e-1,
                     "significance_threshold_method": "bonferroni",
-                    'sources': ['GO:MF', 'GO:BP', 'GO:CC']//, 'GO:CC', 'KEGG', 'REAC']
+                    'sources': DATABASES
                 })
             }
         )
@@ -187,7 +190,9 @@ const CustomLegend = () => {
         { value: 'GO:MF', color: myPalette[0] },
         { value: 'GO:BP', color: myPalette[1] },
         { value: 'GO:CC', color: myPalette[2] },
-    ];
+        { value: 'KEGG', color: myPalette[3] },
+        { value: 'REAC', color: myPalette[4] },
+    ].filter(e => DATABASES.includes(e.value));
     return (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
             {legendData.map((entry, index) => (
@@ -210,6 +215,12 @@ const getColor = (category) => {
         }
         case 'GO:CC': {
             return myPalette[2]
+        }
+        case 'KEGG': {
+            return myPalette[3]
+        }
+        case 'REAC': {
+            return myPalette[4]
         }
     }
 }
