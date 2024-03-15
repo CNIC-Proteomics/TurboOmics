@@ -1,8 +1,9 @@
 import { useJob } from '@/components/app/JobContext';
-import { Box, Typography } from '@mui/material';
-import React from 'react';
+import { useDispatchResults } from '@/components/app/ResultsContext';
+import { Box, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 
-const HeatMapLegend = ({ nFeatRef, zLegend }) => {
+const HeatMapLegend = ({ nFeatRef, zLegend, updateZLegend, plotHeatMap }) => {
 
     const omics = useJob().omics
 
@@ -14,13 +15,19 @@ const HeatMapLegend = ({ nFeatRef, zLegend }) => {
                     <Box key={omic} sx={{ mr: 0.7 }}>
                         {(nFeatRef.current[omic].up > 0 || nFeatRef.current[omic].down > 0) &&
                             <Box>
-                                <Legend a={zLegend[omic].min} b={zLegend[omic].max} />
+                                <Legend
+                                    a={zLegend[omic].min}
+                                    b={zLegend[omic].max}
+                                    updateZLegend={updateZLegend}
+                                    omic={omic}
+                                    plotHeatMap={plotHeatMap}
+                                />
                                 <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
                                     {nFeatRef.current[omic].down > 0 &&
-                                        <Box sx={{ width: 1160/(2*omics.length) }}></Box>
+                                        <Box sx={{ width: 1160 / (2 * omics.length) }}></Box>
                                     }
                                     {nFeatRef.current[omic].up > 0 &&
-                                        <Box sx={{ width: 1160/(2*omics.length) }}></Box>
+                                        <Box sx={{ width: 1160 / (2 * omics.length) }}></Box>
                                     }
                                 </Box>
                             </Box>
@@ -32,7 +39,14 @@ const HeatMapLegend = ({ nFeatRef, zLegend }) => {
     )
 }
 
-const Legend = ({ a, b }) => {
+const Legend = ({ a, b, updateZLegend, omic, plotHeatMap }) => {
+
+    // User inserted values
+    const [usrVal, setUsrVal] = useState({ min: a, max: b });
+
+    // save user changes
+    const dispatchResults = useDispatchResults();
+
     // Calcular el valor medio
     const media = (a + b) / 2;
 
@@ -57,48 +71,42 @@ const Legend = ({ a, b }) => {
         height: '15px'
     };
 
+    const handleInput = (minmax, value) => {
+
+        const numValue = Number(value);
+
+        setUsrVal(prev => ({ ...prev, [minmax]: value }));
+
+        if (typeof numValue == 'number' && (!isNaN(numValue))) {
+            updateZLegend(draft => {
+                draft[omic][minmax] = numValue
+            });
+            dispatchResults({type:'update-zlegend', omic, minmax, numValue});
+            plotHeatMap();
+        }
+    }
+
     return (
         <div style={estilo}>
-            <div>{a}</div>
+            <div>
+                <input
+                    type='text'
+                    style={{ width: 30, height: 20, textAlign: 'center' }}
+                    value={usrVal.min}
+                    onChange={e => handleInput('min', e.target.value)}
+                />
+            </div>
             <div style={{ color: 'black' }}>{media.toFixed(0)}</div>
-            <div>{b}</div>
+            <div>
+                <input
+                    type='text'
+                    style={{ width: 30, height: 20, textAlign: 'center' }}
+                    value={usrVal.max}
+                    onChange={e => handleInput('max', e.target.value)}
+                />
+            </div>
         </div>
     );
 };
 
 export default HeatMapLegend;
-
-/*
-            <Box sx={{mr:0.5}}>
-                {(nFeatRef.current.q.up > 0 || nFeatRef.current.q.down > 0) &&
-                    <Box>
-                        <Legend a={zLegend.q.min} b={zLegend.q.max} />
-                        <Box><Typography variant='h6'></Typography></Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {nFeatRef.current.q.down > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                            {nFeatRef.current.q.up > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                        </Box>
-                    </Box>
-                }
-            </Box>
-            <Box sx={{mx:1}}>
-                {(nFeatRef.current.m.up > 0 || nFeatRef.current.m.down > 0) &&
-                    <Box>
-                        <Legend a={zLegend.m.min} b={zLegend.m.max} />
-                        <Box><Typography variant='h6'></Typography></Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {nFeatRef.current.m.down > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                            {nFeatRef.current.m.up > 0 &&
-                                <Box sx={{ width: 290 }}></Box>
-                            }
-                        </Box>
-                    </Box>
-                }
-            </Box>
-*/

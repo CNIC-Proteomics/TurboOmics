@@ -197,6 +197,7 @@ function MOFA() {
                                 fLVec={fLVec}
                                 mdataCol={selectedPlot.mdataCol}
                                 plotHM={plotHM}
+                                plotHeatMap={plotHeatMap}
                             />
                         </MySection>
                         <MySection>

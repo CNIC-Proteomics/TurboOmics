@@ -7,6 +7,8 @@ import { useResults } from '@/components/app/ResultsContext';
 import { useJob } from '@/components/app/JobContext';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/dist';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
+import { GPTarget } from '@/utils/GPTarget';
+
 
 function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
 
@@ -27,6 +29,12 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
     );
     const [colFid, setColFid] = useState(f2iColumns[0]);
 
+    // Selection of column indicating ID type
+    const GPTargetOptions = useMemo(
+        () => GPTarget.map(e => ({ id: e, label: e })), []
+        );
+    const [typeID, setTypeID] = useState(omic == 'q' ? GPTargetOptions[97] : GPTargetOptions[42]);
+
     // Fetch all proteins of selected category
     const fetchProteins = useCallback(async () => {
         setLoadingPCTable(true);
@@ -38,14 +46,14 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
                 body: JSON.stringify({
                     "organism": OS.id,
                     "query": category.native,
-                    "target": "UNIPROT_GN_ACC"
+                    "target": typeID.id
                 })
             }
         );
 
         const resJson = await res.json();
 
-        //const myQ = Object.keys(f2MeanL); // All proteins of the experiment
+        // All proteins of the experiment
         const myQ = [...new Set(f2i.column(colFid.id).values)];
 
         let myQCat = resJson.result.filter(
@@ -59,7 +67,7 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
         setQCat(myQCat);
 
         setTimeout(() => setLoadingPCTable(false), 500);
-    }, [category, OS, f2MeanL, colFid.id, f2i]);
+    }, [category, OS, colFid.id, f2i, typeID]);
 
     useEffect(() => {
         if (category == null) {
@@ -72,14 +80,27 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
 
     return (
         <Box>
-            <FieldSelector
-                options={f2iColumns}
-                selectedField={colFid}
-                setSelectedField={setColFid}
-            />
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <FieldSelector
+                    options={f2iColumns}
+                    selectedField={colFid}
+                    setSelectedField={setColFid}
+                >
+                    Select Column Containing ID
+                </FieldSelector>
+                <Box sx={{ width: 10 }} />
+                <FieldSelector
+                    options={GPTargetOptions}
+                    selectedField={typeID}
+                    setSelectedField={setTypeID}
+                >
+                    Select ID Format
+                </FieldSelector>
+            </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
                 <Box sx={{ width: '45%' }}>
                     <GProfiler
+                        omic={omic}
                         fRef={fRef}
                         setCategory={setCategory}
                         setLoadingEnrichment={setLoadingEnrichment}
@@ -99,7 +120,12 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
                             />}
                             <Box sx={{ pl: 2, mt: 13 }}>
                                 <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
-                                    <ProteinCategoryTable qCat={qCat} fRef={fRef} />
+                                    <ProteinCategoryTable
+                                        qCat={qCat}
+                                        fRef={fRef}
+                                        omic={omic}
+                                        colFid={colFid}
+                                    />
                                 </Box>
                             </Box>
                         </>
@@ -110,7 +136,7 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
     )
 }
 
-const FieldSelector = ({ options, selectedField, setSelectedField }) => {
+const FieldSelector = ({ options, selectedField, setSelectedField, children }) => {
 
     const handleInput = (e, newValue) => {
         if (newValue)
@@ -121,7 +147,7 @@ const FieldSelector = ({ options, selectedField, setSelectedField }) => {
 
     return (
         <Box>
-            <Typography variant='h6'>Select Column Containing ID</Typography>
+            <Typography variant='h6'>{children}</Typography>
             <Autocomplete
                 id="feature-id-field"
                 sx={{ width: 300, margin: 'auto', mt: 2 }}
@@ -142,9 +168,9 @@ const FieldSelector = ({ options, selectedField, setSelectedField }) => {
     )
 }
 
-const ProteinCategoryTable = ({ qCat, fRef }) => {
+const ProteinCategoryTable = ({ qCat, fRef, omic, colFid }) => {
 
-    const idCol = useJob().user.q2i.columns[0];
+    const idCol = colFid.id; // useJob().user.q2i.columns[0];
 
     const mySet = useMemo(() => {
         const mySet = {};

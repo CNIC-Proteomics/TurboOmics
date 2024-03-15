@@ -22,13 +22,18 @@ export default function PlotData({
     // Get data matrices
     const mdata = useJob().user.mdata;
 
-    const xi_all = {
+    /*const xi_all = {
         norm: useJob().norm[fileType],
         user: useJob().user[fileType]
     }
-    const xi = showNorm ? xi_all.norm : xi_all.user;
+    const xi = showNorm ? xi_all.norm : xi_all.user;*/
+
+    const xi = useJob().norm[fileType];
+
+    const xiJson = useMemo( () => danfo2RowColJson(xi), [xi]);
 
     const { myData, gValues, idx2g } = useMemo(() => {
+        console.log('getting myData')
         // From index to group
         const idx2g = {}
         for (let i = 0; i < mdata.shape[0]; i++) {
@@ -53,7 +58,19 @@ export default function PlotData({
         gValues.map(e => myData[e] = []);
 
         // Get values from xi dataframe and add to data divided by groups
-        let xiJson = danfo2RowColJson(xi);
+        const step = Math.floor(Math.max(1, filteredID.length/500));
+        const postFilteredID = [];
+        for (let i=0; i<filteredID.length; i+=step) {
+            postFilteredID.push(filteredID[i]);
+        }
+
+        // filter xiJson with posdtFilteredID and change only with filteredID...
+        /*const postXiJson = {}
+        Object.keys(xiJson).map(idx => {
+                postFilteredID.map(feature => {
+                xiJson[idx]
+            })
+            })*/
 
         Object.keys(xiJson).map(
             idx => {
@@ -62,7 +79,7 @@ export default function PlotData({
                         feature => {
                             if (
                                 xiJson[idx][feature] != null &&
-                                filteredID.includes(feature)
+                                postFilteredID.includes(feature)
                             ) {
                                 myData[idx2g[idx]].push(xiJson[idx][feature]);
                             }
@@ -70,11 +87,13 @@ export default function PlotData({
                     )
                 }
             })
+        console.log('myData got')
         return { myData, gValues, idx2g };
     }, [groupby, mdata, xi, filteredID]);
 
     // Get maximum and minimum 
     const { xrange, xTicks, minimum, maximum } = useMemo(e => {
+        console.log('getting range')
         const values = Object.keys(myData).map(g => myData[g]).flat();
         const minimum = calculateQuantile(values, 0.0001);
         const maximum = calculateQuantile(values, 0.9999);
@@ -83,7 +102,7 @@ export default function PlotData({
             maximum + Math.abs(0.05 * maximum)
         ];
         const xTicks = calculateXTicks(minimum, maximum, 6);
-
+        console.log('range got')
         return { xrange, xTicks, minimum, maximum };
 
     }, [myData]);

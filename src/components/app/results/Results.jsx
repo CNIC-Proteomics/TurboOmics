@@ -104,6 +104,13 @@ export default function Results() {
                         />
 
                         <Tab
+                            label={<TabComponent text='GSEA' status='' />}
+                            value={0.2}
+                            sx={{ fontSize: 12, m: 0, p: 0 }}
+                            disabled={true}
+                        />
+
+                        <Tab
                             label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
                             value={1.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
@@ -131,12 +138,12 @@ export default function Results() {
                             disabled={true}
                         />}
 
-                        <Tab
+                        {false && <Tab
                             label={<TabComponent text='ELASTIC NET' status='' />}
                             value={5.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
                             disabled={true}
-                        />
+                        />}
 
                     </Tabs>
                 </Box>

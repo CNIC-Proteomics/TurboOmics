@@ -5,22 +5,18 @@ import { MyHeatMap, HeatMapIndex } from './MyHeatMap';
 import HeatMapHeader from './HeatMapHeader';
 import HeatMapLegend from './HeatMapLegend';
 import { useImmer } from 'use-immer';
+import { useResults } from '@/components/app/ResultsContext';
 
-function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
+function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
 
     const { omics } = useJob();
+
+    const savedZLegend = useResults().MOFA.displayOpts.zLegend;
     const [zLegend, updateZLegend] = useImmer(
-        omics.reduce((o, e) => ({ ...o, [e]: { min: -2, max: 2 } }), {})
-        //{'q':{min:0, max:0}, 'm':{min:0, max:0}}
+        omics.reduce((o, e) => ({
+            ...o, [e]: { min: savedZLegend[e].min, max: savedZLegend[e].max }
+        }), {})
     );
-    /*console.log(zLegend)
-    useEffect(() => {
-        console.log('set to 0')
-        updateZLegend(
-            omics.reduce((o, e) => ({ ...o, [e]: { min: 0, max: 0 } }), {})
-            //{ 'q': { min: 0, max: 0 }, 'm': { min: 0, max: 0 } }
-        );
-    }, [updateZLegend, plotHM]);*/
 
     // Get common indexes
     const xi = useJob().norm;
@@ -42,7 +38,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
         return myFeat
     }, [omics, nFeatRef, fLVec, plotHM]);
 
-    
+
 
     return (
         <Box>
@@ -80,7 +76,12 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM }) {
                     </Box>
                 ))}
             </Box>
-            <HeatMapLegend nFeatRef={nFeatRef} zLegend={zLegend} />
+            <HeatMapLegend
+                nFeatRef={nFeatRef}
+                zLegend={zLegend}
+                updateZLegend={updateZLegend}
+                plotHeatMap={plotHeatMap}
+            />
         </Box>
     )
 }

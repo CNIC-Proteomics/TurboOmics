@@ -61,8 +61,8 @@ export function MyHeatMap({
                 colors={{
                     type: 'diverging',
                     scheme: 'red_blue',
-                    minValue: -2,//zLegend.min,
-                    maxValue: 2//zLegend.max,
+                    minValue: zLegend.min,
+                    maxValue: zLegend.max,
                     //divergeAt: 0
                 }}
                 emptyColor="#555555"

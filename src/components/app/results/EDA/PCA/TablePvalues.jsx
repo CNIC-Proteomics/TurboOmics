@@ -199,7 +199,7 @@ export default function TablePvalues({ omic, data, rowNames, colNames, expVar, s
                                                         { ...classes.cell, ...calculateBackgroundColor(value) }
                                                 }
                                                 >
-                                                    {value.toFixed(3)}
+                                                    {value<0.001 ? value.toExponential(3) : value.toFixed(3)}
                                                 </Box>
                                             </TableCell>
                                         ))}

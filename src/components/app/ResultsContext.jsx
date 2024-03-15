@@ -147,6 +147,11 @@ function resultsReducer(draft, action) {
             break;
         }
 
+        case 'update-zlegend': {
+            draft.MOFA.displayOpts.zLegend[action.omic][action.minmax] = action.numValue
+            break;
+        }
+
     }
 }
 
@@ -205,7 +210,10 @@ const resultsTemplate = {
             selectedCell: null, // {rowIndex: 0, colIndex:0}
             selectedPlot: null, // {mdataCol: rowNames[0], Factor: factorNames[0]}
             scatterMode: '1D',
-            selectedPlot2D: null //{ x: 'Factor1', y: 'Factor2', g: 'No color' },
+            selectedPlot2D: null, //{ x: 'Factor1', y: 'Factor2', g: 'No color' },
+            zLegend: ['m', 'q', 't'].reduce(
+                (o, e) => ({ ...o, [e]: { min: -2, max: 2 } }), {}
+            )
         }
     }
 }

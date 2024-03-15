@@ -188,7 +188,7 @@ export default function TablePvalues({
                                                         sx={{
                                                             padding: 0.5,
                                                             border: `1px solid ${myGridColor}`,
-                                                            borderBottom: i == 1 && `1px solid rgba(10,10,10,1)`,
+                                                            borderBottom: i == omics.length - 1 && `1px solid rgba(10,10,10,1)`, //i == 1 && `1px solid rgba(10,10,10,1)`,
                                                             fontSize: myFontSize,
                                                             textAlign: 'center',
                                                             backgroundColor: calculateBackgroundColorExpVar(e),
@@ -216,7 +216,7 @@ export default function TablePvalues({
                                                         { ...classes.cell, ...calculateBackgroundColor(value) }
                                                 }
                                                 >
-                                                    {value.toFixed(3)}
+                                                    {value<0.001 ? value.toExponential(3) : value.toFixed(3)}
                                                 </Box>
                                             </TableCell>
                                         ))}

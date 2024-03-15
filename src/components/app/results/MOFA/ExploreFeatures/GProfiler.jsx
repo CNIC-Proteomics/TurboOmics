@@ -15,32 +15,31 @@ import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
 const DATABASES = ['GO:MF', 'GO:BP', 'GO:CC', 'KEGG', 'REAC']
 
-function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
+function GProfiler({ omic, fRef, setCategory, setLoadingEnrichment, colFid }) {
 
     const BASE_URL = useVars().BASE_URL;
-    const [qSet, setQSet] = useState([]); // Filtered proteins
+    const [fSet, setFSet] = useState([]); // Filtered proteins
     const [goRes, setGoRes] = useState(null); // All categories
 
-    const q2i = useJob().user.q2i;
+    const f2i = useJob().user[`${omic}2i`];
     const { OS } = useJob();
     
-    //const myBackg = useMemo(() => q2i.index, [q2i]); // All proteins in exp.
     const myBackg = useMemo(() => {
-        const q = q2i.column(colFid.id).values
-        return q.filter((item, pos) => q.indexOf(item) == pos) // drop duplicates
-    }, [q2i, colFid]); // All proteins in exp.
+        const f = f2i.column(colFid.id).values
+        return f.filter((item, pos) => f.indexOf(item) == pos) // drop duplicates
+    }, [f2i, colFid]); // All proteins in exp.
     
     //const mySet = fRef.map(e => e[q2i.columns[0]]); // Filtered proteins
     const mySet = useMemo(() => {
-        const q = fRef.map(e => e[colFid.id]);
-        return q.filter((item, pos) => q.indexOf(item) == pos) // drop duplicates
+        const f = fRef.map(e => e[colFid.id]);
+        return f.filter((item, pos) => f.indexOf(item) == pos) // drop duplicates
     }, [colFid, fRef]); // Filtered proteins
 
     if ( // If filtered proteins changes, set it.
-        !mySet.map(e => qSet.includes(e)).every(e => e) ||
-        !qSet.map(e => mySet.includes(e)).every(e => e)
+        !mySet.map(e => fSet.includes(e)).every(e => e) ||
+        !fSet.map(e => mySet.includes(e)).every(e => e)
     ) {
-        setQSet(mySet);
+        setFSet(mySet);
     }
 
     const gProfiler = useCallback(async () => {
@@ -52,7 +51,7 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     "organism": OS.id,
-                    "query": qSet,
+                    "query": fSet,
                     "domain_scope": "custom",
                     "background": myBackg,
                     "user_threshold": 1e-1,
@@ -60,16 +59,16 @@ function GProfiler({ fRef, setCategory, setLoadingEnrichment, colFid }) {
                     'sources': DATABASES
                 })
             }
-        )
+        );
         const resJson = await res.json();
         setGoRes(resJson);
         setTimeout(() => setLoadingEnrichment(false), 1000);
-    }, [OS, qSet, myBackg, setLoadingEnrichment]);
+    }, [OS, fSet, myBackg, setLoadingEnrichment]);
 
     useEffect(() => {
         const myTimeOut = setTimeout(gProfiler, 100);
         return () => clearTimeout(myTimeOut);
-    }, [qSet, myBackg, gProfiler]);
+    }, [fSet, myBackg, gProfiler]);
 
     const myData = useMemo(() => {
         if (goRes == null) return null;
