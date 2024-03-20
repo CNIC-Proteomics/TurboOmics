@@ -1,10 +1,9 @@
 import { MySection } from '@/components/MySection'
 import { useVars } from '@/components/VarsContext'
 import { Box, CircularProgress, Grid, IconButton, Typography } from '@mui/material'
-import ImageIcon from '@mui/icons-material/Image'
+import DownloadIcon from '@mui/icons-material/Download';
 
-
-import React from 'react'
+import React, { useState } from 'react'
 import downloadImage from './downloadImage'
 import PlotData from './PlotData'
 import FilterFeatures from './FilterFeatures'
@@ -14,11 +13,13 @@ function OmicView({
     figRef,
     showPlot,
     showNorm,
-    filteredID,
-    setFilteredID,
+    //filteredID,
+    //setFilteredID,
     updatePlot,
-    groupby }) {
+    groupby
+}) {
 
+    const [filteredID, setFilteredID] = useState();
     const { OMIC2NAME } = useVars();
 
     return (
@@ -28,7 +29,7 @@ function OmicView({
                 justifyContent: 'space-evenly',
                 alignItems: 'flex-start'
             }}>
-                <Box sx={{ width: '45%', height:'600px', pt:4 }}>
+                <Box sx={{ width: '45%', height: '600px', pt: 4 }}>
                     <Typography
                         variant='h6'
                         sx={{ textAlign: 'center', color: '#555555' }}
@@ -48,11 +49,11 @@ function OmicView({
                                 paddingBottom: 1
                             }}
                         >
-                            <ImageIcon />
+                            <DownloadIcon />
                         </IconButton>
                     </Typography>
                     {showPlot[omic] ?
-                        <Box sx={{ height: 500, overflow: 'hidden', mt:3 }}>
+                        <Box sx={{ height: 500, overflow: 'hidden', mt: 3 }}>
                             <PlotData
                                 omic={omic}
                                 fileType={`x${omic}`}
@@ -68,7 +69,7 @@ function OmicView({
                         </Box>
                     }
                 </Box>
-                <Box sx={{ width: '45%', height:'600px' }}>
+                <Box sx={{ width: '45%', height: '600px' }}>
                     <FilterFeatures
                         omic={omic}
                         fileType={`${omic}2i`}

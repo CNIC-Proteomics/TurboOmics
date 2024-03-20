@@ -156,6 +156,11 @@ function jobReducer(draft, action) {
             break;
         }
 
+        case 'set-job-id': {
+            draft.f2x = action.f2x;
+            break;
+        }
+
         case 'set-ann-params': {
             draft.annParams = action.annParams;
             break;
@@ -196,6 +201,11 @@ const jobTemplate = {
         "xq": null,
         "xm": null,
         "xt": null
+    },
+    "f2x": { // Boolean array indicating which
+        "q": [],
+        "m": [],
+        "t": []
     },
     "mdataType": {}, // {mdata_columns} --> {categorical, numeric}
 

@@ -45,13 +45,6 @@ export function MySelectGroupby({ options, handleSelect, label }) {
         setGroupby({ label: e.value, value: e.value });
         setTimeout(() => handleSelect(e), 100);
     }
-    
-    // Save state to be restored !!!!!! CHECK THIS
-    const dispatchResults = useDispatchResults();
-    useEffect(() => {
-        dispatchResults({ type: 'set-eda-dd-groupby', groupby: groupby });
-    }, [groupby, dispatchResults]);
-
 
     return (
         <Box>

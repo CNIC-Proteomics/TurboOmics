@@ -21,19 +21,12 @@ export default function PlotData({
 
     // Get data matrices
     const mdata = useJob().user.mdata;
-
-    /*const xi_all = {
-        norm: useJob().norm[fileType],
-        user: useJob().user[fileType]
-    }
-    const xi = showNorm ? xi_all.norm : xi_all.user;*/
-
     const xi = useJob().norm[fileType];
 
     const xiJson = useMemo( () => danfo2RowColJson(xi), [xi]);
 
     const { myData, gValues, idx2g } = useMemo(() => {
-        console.log('getting myData')
+        console.log('Log0')
         // From index to group
         const idx2g = {}
         for (let i = 0; i < mdata.shape[0]; i++) {
@@ -58,6 +51,7 @@ export default function PlotData({
         gValues.map(e => myData[e] = []);
 
         // Get values from xi dataframe and add to data divided by groups
+        console.log('Log1')
         const step = Math.floor(Math.max(1, filteredID.length/500));
         const postFilteredID = [];
         for (let i=0; i<filteredID.length; i+=step) {
@@ -71,7 +65,7 @@ export default function PlotData({
                 xiJson[idx]
             })
             })*/
-
+        console.log('Log2')
         Object.keys(xiJson).map(
             idx => {
                 if (Object.keys(idx2g).includes(idx)) {
@@ -87,7 +81,7 @@ export default function PlotData({
                     )
                 }
             })
-        console.log('myData got')
+        console.log('Log3')
         return { myData, gValues, idx2g };
     }, [groupby, mdata, xi, filteredID]);
 

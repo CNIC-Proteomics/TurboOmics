@@ -30,11 +30,30 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
 
         // Get and set jobID
         const jobID = DEV_MODE ? '123456' : generateIdentifier(10);
-        //const jobID =  generateIdentifier(10);
+
         console.log(`Creating job: ${jobID}`);
         dispatchJob({
             type: 'set-job-id',
             jobID: jobID
+        });
+
+        // Generate boolean array with size of f2i indicating 
+        // features that will be contained in xi_norm
+        const f2x = {}
+        job.omics.map(omic => {
+            const xi = job.user[`x${omic}`];
+            const f2i = job.user[`${omic}2i`];
+            const mvthr = job.results.PRE.MVThr[`x${omic}`]
+            const xfSerie = xi.isNa().sum({ axis: 0 }).div(xi.shape[0]).le(mvthr);
+            f2x[omic] = f2i.index.map(f => {
+                if (!xfSerie.index.includes(f)) return false;
+                else return xfSerie.values[xfSerie.index.indexOf(f)];
+            });
+        });
+
+        dispatchJob({
+            type: 'set-f2x',
+            f2x
         });
 
         // Create job in back-end
@@ -43,7 +62,7 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ ...danfo2Json(job), jobID: jobID })
+            body: JSON.stringify({ ...danfo2Json(job), f2x, jobID })
         });
 
         // Set jobContext received by back-end

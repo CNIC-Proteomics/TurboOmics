@@ -18,6 +18,14 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
     const [filterCol, setFilterCol] = useState(savedFilterCol);
 
     const f2i = useJob().user[fileType];
+    const f2x = useJob().f2x[omic];
+
+    const fx2i = useMemo( () => {
+        let fx2i = dfd.toJSON(f2i).filter((e,i) => f2x[i]);
+        fx2i = new dfd.DataFrame(fx2i);
+        fx2i.setIndex({ column: fx2i.columns[0], inplace: true });
+        return fx2i
+    }, [f2i]);
 
     const { filteredFeatures, columns } = useMemo(() => {
         console.log('calculating filteredFeatures');
@@ -29,27 +37,27 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
             size: 60,
         }];
 
-        if (f2i.columns.includes(filterCol)) {
+        if (fx2i.columns.includes(filterCol)) {
 
-            filteredFeatures = f2i.column(filterCol);
+            filteredFeatures = fx2i.column(filterCol);
             filteredFeatures = filteredFeatures.values.map(
                 (value, i) => ({
                     ' ': filteredFeatures.index[i],
                     [filterCol]: value
                 })
-            )
+            );
+
+            // Create regex to filter
+            let regex = new RegExp('');
+            try {
+                regex = new RegExp(filterText);
+
+            } catch (err) {
+                regex = new RegExp('')
+            } 
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
-                    
-                    let regex = new RegExp('');
-                    try {
-                        regex = new RegExp(filterText);
-
-                    } catch (err) {
-                        regex = new RegExp('')
-                    }
-
                     return (
                         featureObj[filterCol] != null && 
                         regex.test(featureObj[filterCol])
@@ -61,10 +69,10 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
                 accessorKey: filterCol,
                 header: filterCol,
                 //size: 170,
-            })
+            });
 
         } else {
-            filteredFeatures = f2i.index
+            filteredFeatures = fx2i.index
             filteredFeatures = filteredFeatures.map(
                 (value, i) => ({
                     ' ': value,
@@ -73,41 +81,34 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
         }
 
         return { filteredFeatures, columns }
-    }, [filterText, filterCol, f2i]);
+    }, [filterText, filterCol, fx2i]);
 
     useEffect(() => {
         console.log('useEffect: Recalculating features');
 
         const myTimeout = setTimeout(() => {
-            setFilteredID(prevState => ({
-                ...prevState, [fileType]: filteredFeatures.map(feature => feature[' '])
-            }));
+            setFilteredID(filteredFeatures.map(feature => feature[' ']));
             updatePlot([omic]);
             console.log('Features recalculated');
-        }, 500);
+        }, 1000);
 
         return () => clearTimeout(myTimeout);
-    }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
 
-    // Save data !!! CHECK THIS
-    useEffect(() => {
-        dispatchResults({ type: 'set-eda-dd-filter', filterCol: filterCol, fileType: fileType });
-        dispatchResults({ type: 'set-eda-dd-filter-text', filterText: filterText, fileType: fileType });
-    }, [filterCol, filterText, fileType, dispatchResults])
+    }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
             <Box sx={{ display: 'flex', height: '10vh' }}>
                 <Box sx={{ width: '40%', pt: 1 }}>
                     <MySelect
-                        options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
+                        options={[{ label: 'All features', value: 'All features' }, ...fx2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={
                             e => setFilterCol(e.value)
                         }
                         value={{ label: filterCol, value: filterCol }}
                     />
                 </Box>
-                {f2i.columns.includes(filterCol) &&
+                {fx2i.columns.includes(filterCol) &&
                     <MyMotion><Box sx={{ mt: 3, ml: 3 }}>
                         <TextField
                             id="standard-name"

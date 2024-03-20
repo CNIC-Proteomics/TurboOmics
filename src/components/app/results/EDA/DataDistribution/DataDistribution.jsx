@@ -17,8 +17,8 @@ import OmicSelector from './OmicSelector';
 
 export default function DataDistribution() {
 
-    const omicViewRef = useRef()
-
+    // useRef to change omic view
+    const omicViewRef = useRef();
     const { omics } = useJob();
     const [selOmic, setSelOmic] = useState(omics[0]);
 
@@ -28,15 +28,13 @@ export default function DataDistribution() {
     );
 
     // Display options (norm & groupby mdata & feature filtration) 
+    const dispatchResults = useDispatchResults();
+
     const savedShowNorm = useResults().EDA.DD.showNorm;
     const [showNorm, setShowNorm] = useState(savedShowNorm);
 
     const savedGroupby = useResults().EDA.DD.groupby;
     const [groupby, setGroupby] = useState(savedGroupby);
-
-    const [filteredID, setFilteredID] = useState(
-        omics.reduce((obj, omic) => ({ ...obj, [`${omic}2i`]: [] }), {})
-    );
 
     // Extract categorical mdata columns (adding a generic one)
     const { mdataType } = useJob();
@@ -65,7 +63,9 @@ export default function DataDistribution() {
 
     // Handle change in groupby
     const handleSelect = useCallback(e => {
-        setGroupby({ label: e.value, value: e.value })
+        const newGroupby =  { label: e.value, value: e.value }
+        setGroupby(newGroupby);
+        dispatchResults({ type: 'set-eda-dd-groupby', groupby: newGroupby });
         updatePlot(omics);
     }, [updatePlot, omics])
 
@@ -117,8 +117,6 @@ export default function DataDistribution() {
                                 figRef={figRef}
                                 showPlot={showPlot}
                                 showNorm={showNorm}
-                                filteredID={filteredID[`${omic}2i`]}
-                                setFilteredID={setFilteredID}
                                 updatePlot={updatePlot}
                                 groupby={groupby.value}
                             />
