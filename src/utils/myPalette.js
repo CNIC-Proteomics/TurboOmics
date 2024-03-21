@@ -1,4 +1,4 @@
-export const myPalette = [
+/*export const myPalette = [
     '#636EFA',
     '#EF553B',
     '#00CC96',
@@ -9,4 +9,29 @@ export const myPalette = [
     '#B6E880',
     '#FF97FF',
     '#FECB52'
-];
+];*/
+
+export const myPalette = ['#2E91E5',
+ '#E15F99',
+ '#1CA71C',
+ '#FB0D0D',
+ '#DA16FF',
+ '#222A2A',
+ '#B68100',
+ '#750D86',
+ '#EB663B',
+ '#511CFB',
+ '#00A08B',
+ '#FB00D1',
+ '#FC0080',
+ '#B2828D',
+ '#6C7C32',
+ '#778AAE',
+ '#862A16',
+ '#A777F1',
+ '#620042',
+ '#1616A7',
+ '#DA60CA',
+ '#6C4516',
+ '#0D2A63',
+ '#AF0038']

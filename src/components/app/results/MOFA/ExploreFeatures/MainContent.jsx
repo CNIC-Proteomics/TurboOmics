@@ -25,6 +25,25 @@ function MainContent({ omic, thrLRef }) {
     // Row filtered by the user
     const fRef = useRef({ up: [], down: [] });
 
+    // Features associated to factor
+    const f2i = useJob().user[`${omic}2i`];
+    const factor = useResults().MOFA.displayOpts.selectedPlot.Factor;
+    const myLoadings = useResults().MOFA.data.loadings[omic][factor];
+    const fFact = useMemo(() => {
+        const f2iJson = danfo2RowColJson(f2i);
+        const fFact = { up: [], down: [] };
+
+        Object.keys(myLoadings).map(e => {
+            if (myLoadings[e] > thrLRef.up)
+                fFact.up.push(f2iJson[e]);
+
+            if (myLoadings[e] < thrLRef.down)
+                fFact.down.push(f2iJson[e]);
+        });
+
+        return fFact
+    }, [f2i, myLoadings]);
+
     // When user modify the main table, a re-render is produced
     const [reRender, setReRender] = useState(false);
     const myReRender = useCallback(() => setReRender(prev => !prev), []);
@@ -78,25 +97,25 @@ function MainContent({ omic, thrLRef }) {
                                 <MyMRTable
                                     omic={omic}
                                     sign={sign}
-                                    thr={thrLRef[omic][sign]}
+                                    thr={thrLRef[sign]}
                                     fRef={fRef}
                                     myReRender={myReRender}
                                     f2MeanL={f2MeanL}
                                     setLoadingEnrichment={setLoadingEnrichment}
                                 />
 
-                                {fRef.current[sign].length > 0 &&
+                                {fFact[sign].length > 0 && //fRef.current[sign].length > 0 &&
                                     <Box sx={{ opacity: loadingEnrichment ? 0 : 1, transition: 'all ease 1s' }}>
                                         {omic == 'q' || omic == 't' ?
                                             <EnrichmentQ
                                                 omic={omic}
-                                                fRef={fRef.current[sign]}
+                                                fRef={fFact[sign]}//{fRef.current[sign]}
                                                 f2MeanL={f2MeanL}
                                                 setLoadingEnrichment={setLoadingEnrichment}
                                             />
                                             :
                                             <EnrichmentM
-                                                fRef={fRef.current[sign]}
+                                                fRef={fFact[sign]}//{fRef.current[sign]}
                                                 f2MeanL={f2MeanL}
                                                 setLoadingEnrichment={setLoadingEnrichment}
                                             />

@@ -50,6 +50,7 @@ const MyMRTable = ({
                 muiTableBodyCellProps: {
                     align: 'left',
                 },
+                filterFn: 'contains'
                 //size= 100
             }))
         );
@@ -65,6 +66,7 @@ const MyMRTable = ({
                     muiTableBodyCellProps: {
                         align: 'center',
                     },
+                    filterFn: 'greaterThan'
 
                 }))
             );
@@ -92,14 +94,18 @@ const MyMRTable = ({
         let f2iJson = danfo2RowColJson(f2i.fillNa(''));
         let data = {};
 
-        Object.keys(myLoadings)./*filter(
-            f => sign == 'up' ? myLoadings[f] > 0 : myLoadings[f] < 0
-        ).*/map(
+        Object.keys(myLoadings).map(
             f => {
-                data[f] = {
-                    ...f2iJson[f],
-                    ...f2MeanL[f],
-                    [factor]: Math.round(myLoadings[f] * 10000) / 10000
+                if (
+                    (sign == 'up' && myLoadings[f] > thr) ||
+                    (sign == 'down' && myLoadings[f] < thr)
+                ) {
+
+                    data[f] = {
+                        ...f2iJson[f],
+                        ...f2MeanL[f],
+                        [factor]: Math.round(myLoadings[f] * 10000) / 10000
+                    }
                 }
             })
 
@@ -171,28 +177,31 @@ const MyRenderTopToolbar = ({
     myReRender,
     setLoadingEnrichment
 }) => {
-    const myFlatRows = table.getFilteredRowModel().flatRows;
+
+
+
+    /*const myFlatRows = table.getFilteredRowModel().flatRows;
     const myRows = myFlatRows.map(e => e.original);
     const myRowsID = myFlatRows.map(e => e.id);
 
-    const [rows, setRows] = useState([]);
-    const [rowsID, setRowsID] = useState([]);
+    const [rows, setRows] = useState(myRows);
+    const [rowsID, setRowsID] = useState(myRowsID);*/
 
-    useEffect(() => {
+    /*useEffect(() => {
         const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 100);
         fRef.current[sign] = rows;
         const myTimeOut = setTimeout(() => { myReRender() }, 1000);
         return () => { clearTimeout(myTimeOut); clearTimeout(myTimeOut2) };
-    }, [rows, fRef, sign, myReRender, setLoadingEnrichment]);
+    }, [rows, fRef, sign, myReRender, setLoadingEnrichment]);*/
 
     // if new elements, set them and reRender
-    if (
+    /*if (
         !myRowsID.map(i => rowsID.includes(i)).every(e => e) ||
         !rowsID.map(i => myRowsID.includes(i)).every(e => e)
     ) {
         setRowsID(myRowsID);
         setRows(myRows);
-    }
+    }*/
 
     const handleExportRows = (rows) => {
         const csvConfig = mkConfig({

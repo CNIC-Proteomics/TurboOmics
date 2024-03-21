@@ -3,7 +3,7 @@ import { Box, IconButton, Typography } from '@mui/material';
 import ImageIcon from '@mui/icons-material/Image';
 import { myPalette } from "@/utils/myPalette";
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
     ScatterChart,
@@ -14,10 +14,12 @@ import {
     Tooltip,
     ResponsiveContainer,
     Label,
-    Legend
+    Legend,
+    LabelList
 } from "recharts";
 import downloadSVG from '@/utils/downloadSVG';
 import { DownloadComponent } from '@/utils/DownloadRechartComponent';
+import { ShowLabels } from '../../EDA/PCA/MyScatter';
 
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -33,7 +35,7 @@ const CustomTooltip = ({ active, payload }) => {
                 }}
             >
                 <Typography variant='h8' sx={{ display: 'block' }}>{`${payload[0].payload.element}`}</Typography>
-                {true && <Typography variant='h9' sx={{ display: 'block' }}>{`${payload[0].name}: ${typeof(payload[0].value)=='string' ? payload[0].value: payload[0].value.toFixed(3)}`}</Typography>}
+                {true && <Typography variant='h9' sx={{ display: 'block' }}>{`${payload[0].name}: ${typeof (payload[0].value) == 'string' ? payload[0].value : payload[0].value.toFixed(3)}`}</Typography>}
                 {true && <Typography variant='h9' sx={{ display: 'block' }}>{`${payload[1].name}: ${payload[1].value.toFixed(3)}`}</Typography>}
             </Box>
         );
@@ -42,31 +44,9 @@ const CustomTooltip = ({ active, payload }) => {
     return null;
 };
 
-/*const DownloadComponent = ({ scatterRef }) => {
-    const downloadScatter = () => {
-        const scatterComp = scatterRef.current.container.cloneNode(true);
-        const fullFig = window.document.createElement('div');
-        fullFig.appendChild(scatterComp);
-        downloadSVG(fullFig, 'MOFA_Scatter');
-    }
-
-    return (
-        <Box sx={{ height: 0 }}>
-            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 500 }}>
-                <IconButton
-                    aria-label="download"
-                    size='small'
-                    onClick={downloadScatter}
-                    sx={{ opacity: 0.5 }}
-                >
-                    <ImageIcon />
-                </IconButton>
-            </Box>
-        </Box>
-    )
-}*/
-
 export function MyScatter({ scatterData, mdataCol, Factor }) {
+
+    const [showLabels, setShowLabels] = useState(false);
 
     const scatterRef = useRef();
     const mdataColType = useJob()['mdataType'][mdataCol].type;
@@ -76,12 +56,13 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
 
     return (
         <Box>
+            <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
             <DownloadComponent scatterRef={scatterRef} fileName={'MOFA_Scatter_1D'} />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
                     margin={{
-                        top: 20,
+                        top: 5,
                         right: 20,
                         bottom: 20,
                         left: 20
@@ -100,7 +81,11 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
                         <Label value={`${Factor}`} offset={20} position="insideLeft" angle={-90} />
                     </YAxis>
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-                    <Scatter data={scatterData} fill="#8884d8" />
+                    <Scatter data={scatterData} fill={myPalette[0]}>
+                        {showLabels &&
+                            <LabelList dataKey="element" position='right' />
+                        }
+                    </Scatter>
                 </ScatterChart>
             </ResponsiveContainer>
         </Box>
@@ -109,16 +94,18 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
 
 export function MyScatter2D({ scatterData, selectedPlot2D }) {
 
+    const [showLabels, setShowLabels] = useState(false);
     const scatterRef = useRef();
 
     return (
         <Box>
+            <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
             <DownloadComponent scatterRef={scatterRef} fileName='MOFA_Scatter_2D' />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
                     margin={{
-                        top: 20,
+                        top: 5,
                         right: 20,
                         bottom: 20,
                         left: 20
@@ -140,7 +127,7 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                         <Label value={`${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
                     </YAxis>
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-                    {Object.keys(scatterData).length>1 && <Legend verticalAlign="top" />}
+                    {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
                     {
                         Object.keys(scatterData).map((level, i) => {
                             return (
@@ -149,7 +136,11 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                                     data={scatterData[level]}
                                     fill={myPalette[i % myPalette.length]}
                                     name={level}
-                                />
+                                >
+                                    {showLabels &&
+                                        <LabelList dataKey="element" position='top' />
+                                    }
+                                </Scatter>
                             )
                         })
                     }

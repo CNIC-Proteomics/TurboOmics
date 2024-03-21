@@ -5,27 +5,21 @@ import { MySelect } from './MyFormComponents';
 import FilterTable from './FilterTable';
 import MyMotion from '@/components/MyMotion';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
+import useFx2i from '@/hooks/useFx2i';
 
-export default function FilterFeatures({ omic, fileType, setFilteredID, updatePlot }) {
+export default function FilterFeatures({ omic, setFilteredID, updatePlot }) {
 
-    const dispatchResults = useDispatchResults();
-    
+    //const dispatchResults = useDispatchResults();
+
     // Component states to filter features
-    const savedFilterText = useResults().EDA.DD.filterText[fileType];
+    const savedFilterText = useResults().EDA.DD.filterText[`${omic}2i`];
     const [filterText, setFilterText] = useState(savedFilterText);
-    
-    const savedFilterCol = useResults().EDA.DD.filterCol[fileType];
+
+    const savedFilterCol = useResults().EDA.DD.filterCol[`${omic}2i`];
     const [filterCol, setFilterCol] = useState(savedFilterCol);
 
-    const f2i = useJob().user[fileType];
-    const f2x = useJob().f2x[omic];
-
-    const fx2i = useMemo( () => {
-        let fx2i = dfd.toJSON(f2i).filter((e,i) => f2x[i]);
-        fx2i = new dfd.DataFrame(fx2i);
-        fx2i.setIndex({ column: fx2i.columns[0], inplace: true });
-        return fx2i
-    }, [f2i]);
+    // get f2i with features in xi
+    const [fx2i] = useFx2i(omic);
 
     const { filteredFeatures, columns } = useMemo(() => {
         console.log('calculating filteredFeatures');
@@ -54,14 +48,14 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
 
             } catch (err) {
                 regex = new RegExp('')
-            } 
+            }
 
             filteredFeatures = filteredFeatures.filter(
                 featureObj => {
                     return (
-                        featureObj[filterCol] != null && 
+                        featureObj[filterCol] != null &&
                         regex.test(featureObj[filterCol])
-                        )
+                    )
                 }
             );
 
@@ -94,7 +88,7 @@ export default function FilterFeatures({ omic, fileType, setFilteredID, updatePl
 
         return () => clearTimeout(myTimeout);
 
-    }, [filteredFeatures, fileType, setFilteredID, updatePlot, omic]);
+    }, [filteredFeatures, setFilteredID, updatePlot, omic]);
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>

@@ -64,7 +64,7 @@ function ScatterPlotContainer({
 
             <Grid item xs={6}>
                 {scatterData &&
-                    <Box sx={{ height: 400 }}>
+                    <Box sx={{ height: 470 }}>
                         {scatterMode == '1D' ?
                             <MyScatter
                                 scatterData={scatterData}

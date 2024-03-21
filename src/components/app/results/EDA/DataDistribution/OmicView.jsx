@@ -72,7 +72,6 @@ function OmicView({
                 <Box sx={{ width: '45%', height: '600px' }}>
                     <FilterFeatures
                         omic={omic}
-                        fileType={`${omic}2i`}
                         setFilteredID={setFilteredID}
                         updatePlot={updatePlot}
                     />

@@ -10,12 +10,12 @@ import { myPalette } from '@/utils/myPalette';
 import { danfo2RowColJson } from "@/utils/jobDanfoJsonConverter";
 import MyMotion from '@/components/MyMotion';
 
-export default function PlotData({ 
+export default function PlotData({
     omic,
-    fileType, 
-    filteredID, 
-    groupby, 
-    showNorm, 
+    fileType,
+    filteredID,
+    groupby,
+    showNorm,
     figRef
 }) {
 
@@ -23,10 +23,28 @@ export default function PlotData({
     const mdata = useJob().user.mdata;
     const xi = useJob().norm[fileType];
 
-    const xiJson = useMemo( () => danfo2RowColJson(xi), [xi]);
+    const xiJson = useMemo(() => {
+
+        // Extract a sample from filteredID
+        const step = Math.floor(Math.max(1, filteredID.length / 10000));
+        const postFilteredID = [];
+        for (let i = 0; i < filteredID.length; i += step)
+            postFilteredID.push(filteredID[i]);
+
+        // Filter xi from the sample
+        const xiTJsonFilt = [];
+        const xiTJson = danfo2RowColJson(xi.T);
+        for (let i = 0; i < postFilteredID.length; i++)
+            xiTJsonFilt.push(xiTJson[postFilteredID[i]]);
+
+        const xiTFilt = new dfd.DataFrame(xiTJsonFilt);
+        xiTFilt.setIndex({ index: postFilteredID, inplace: true })
+        let xiJson = danfo2RowColJson(xiTFilt.T);
+
+        return xiJson
+    }, [xi, filteredID]);
 
     const { myData, gValues, idx2g } = useMemo(() => {
-        console.log('Log0')
         // From index to group
         const idx2g = {}
         for (let i = 0; i < mdata.shape[0]; i++) {
@@ -50,44 +68,21 @@ export default function PlotData({
         let myData = {};
         gValues.map(e => myData[e] = []);
 
-        // Get values from xi dataframe and add to data divided by groups
-        console.log('Log1')
-        const step = Math.floor(Math.max(1, filteredID.length/500));
-        const postFilteredID = [];
-        for (let i=0; i<filteredID.length; i+=step) {
-            postFilteredID.push(filteredID[i]);
-        }
-
-        // filter xiJson with posdtFilteredID and change only with filteredID...
-        /*const postXiJson = {}
-        Object.keys(xiJson).map(idx => {
-                postFilteredID.map(feature => {
-                xiJson[idx]
-            })
-            })*/
-        console.log('Log2')
         Object.keys(xiJson).map(
             idx => {
                 if (Object.keys(idx2g).includes(idx)) {
                     Object.keys(xiJson[idx]).map(
-                        feature => {
-                            if (
-                                xiJson[idx][feature] != null &&
-                                postFilteredID.includes(feature)
-                            ) {
-                                myData[idx2g[idx]].push(xiJson[idx][feature]);
-                            }
-                        }
+                        feature => myData[idx2g[idx]].push(xiJson[idx][feature])
                     )
                 }
-            })
-        console.log('Log3')
+            }
+        )
+
         return { myData, gValues, idx2g };
-    }, [groupby, mdata, xi, filteredID]);
+    }, [groupby, mdata, xiJson]);
 
     // Get maximum and minimum 
     const { xrange, xTicks, minimum, maximum } = useMemo(e => {
-        console.log('getting range')
         const values = Object.keys(myData).map(g => myData[g]).flat();
         const minimum = calculateQuantile(values, 0.0001);
         const maximum = calculateQuantile(values, 0.9999);
@@ -96,7 +91,6 @@ export default function PlotData({
             maximum + Math.abs(0.05 * maximum)
         ];
         const xTicks = calculateXTicks(minimum, maximum, 6);
-        console.log('range got')
         return { xrange, xTicks, minimum, maximum };
 
     }, [myData]);
@@ -108,9 +102,9 @@ export default function PlotData({
             g => {
                 dataHist[g] = myData[g].filter(x => minimum <= x && x <= maximum)
 
-                const step = Math.max(1, Math.floor(dataHist[g].length/50_000));
+                const step = Math.max(1, Math.floor(dataHist[g].length / 50_000));
                 const sample = []
-                for (let i=0; i<dataHist[g].length; i+=step)
+                for (let i = 0; i < dataHist[g].length; i += step)
                     sample.push(dataHist[g][i])
                 sample.push(dataHist[g].slice(-1));
                 dataHist[g] = sample;

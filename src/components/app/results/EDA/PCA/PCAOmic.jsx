@@ -1,6 +1,6 @@
 import { useVars } from '@/components/VarsContext'
 import { useJob } from '@/components/app/JobContext'
-import { Box, CircularProgress, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Box, CircularProgress, FormControlLabel, FormLabel, Switch, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import TablePvalues from './TablePvalues';
 import { MyScatter, MyScatter2D } from './MyScatter';
@@ -17,11 +17,13 @@ export default function PCAOmic({ omic }) {
 
     // Data used for plots
     const dispatchResults = useDispatchResults();
-    const savedStatus = useResults().EDA.PCA[omic].status;
-    const savedData = useResults().EDA.PCA[omic].data;
 
+    const savedStatus = useResults().EDA.PCA[omic].status;
     const [status, setStatus] = useState(savedStatus);
+
+    const savedData = useResults().EDA.PCA[omic].data;
     const [data, setData] = useState(savedData);
+
 
     const { projections, loadings, explained_variance, anova } = data;
 
@@ -82,7 +84,7 @@ export default function PCAOmic({ omic }) {
         <Box>
             {status.status == 'ok' ? (
                 <Box sx={{ padding: 0.2, transition: 'all 1s ease' }}>
-                    <Box sx={{ margin:'auto', pt: 3, width:'90%' }}>
+                    <Box sx={{ margin: 'auto', pt: 3, width: '90%' }}>
                         <TablePvalues
                             omic={omic}
                             data={pvTable}
@@ -112,6 +114,7 @@ export default function PCAOmic({ omic }) {
                                     </ToggleButtonGroup>
                                 </Box>
                             </Box>
+
                             <Box sx={{ textAlign: 'center' }}>
                                 {scatterMode == '1D' ?
                                     <Box sx={{ height: 75, pt: 3 }}>

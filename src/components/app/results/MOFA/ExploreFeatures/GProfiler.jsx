@@ -20,7 +20,6 @@ function GProfiler({ omic, fRef, setCategory, setLoadingEnrichment, colFid }) {
     const BASE_URL = useVars().BASE_URL;
     const [fSet, setFSet] = useState([]); // Filtered proteins
     const [goRes, setGoRes] = useState(null); // All categories
-
     const f2i = useJob().user[`${omic}2i`];
     const { OS } = useJob();
     
@@ -142,7 +141,7 @@ const MyBarChart = ({ myData }) => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <YAxis type='category' dataKey="native" />
                     <XAxis type='number'>
-                        <Label value={`-Log10(pvalue)`} offset={-10} position="insideBottom" />
+                        <Label value={`-Log10(FDR)`} offset={-10} position="insideBottom" />
                     </XAxis>
                     <Tooltip
                         content={<CustomTooltip />}
@@ -261,7 +260,8 @@ const CategoryTable = ({ myData, setCategory }) => {
         {
             header: 'FDR',
             accessorKey: 'FDR',
-            size: 70
+            size: 70,
+            filterFn: 'lessThan'
         },
     ]), []);
 
@@ -302,7 +302,7 @@ const CategoryTable = ({ myData, setCategory }) => {
         enableRowSelection: true,
         enableMultiRowSelection: false,
         enableDensityToggle: false,
-        enableColumnFilters: false,
+        enableColumnFilters: true,
         enableFullScreenToggle: false,
         enableHiding: false,
         enableColumnActions: false,
@@ -311,7 +311,8 @@ const CategoryTable = ({ myData, setCategory }) => {
         initialState: {
             density: 'compact',
             showGlobalFilter: true,
-            showColumnFilters: false,
+            showColumnFilters: true,
+            columnFilters: [{ id: 'FDR', value: 0.1 }],
             rowSelection: { initialSelectedRow }
         },
         positionToolbarAlertBanner: 'bottom', //move the alert banner to the bottom
@@ -342,6 +343,8 @@ const CategoryTable = ({ myData, setCategory }) => {
             </Box>
         )
     });
+
+    //console.log(table.getAllColumns()[4].getFilterValue())
 
     return (
         <>

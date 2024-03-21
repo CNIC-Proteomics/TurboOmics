@@ -67,7 +67,7 @@ export default function DataDistribution() {
         setGroupby(newGroupby);
         dispatchResults({ type: 'set-eda-dd-groupby', groupby: newGroupby });
         updatePlot(omics);
-    }, [updatePlot, omics])
+    }, [updatePlot, omics, dispatchResults])
 
 
     // Handle change in norm
