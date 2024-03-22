@@ -74,24 +74,26 @@ function MOFA() {
         setSelectedCell({ rowIndex: 0, colIndex: 0 });
     }
 
-    if (factorNames != null && rowNames != null && selectedPlot2D == null) {
-        const mySelectedPlot2d = {
-            x: factorNames[0],
-            y: factorNames.length > 1 ? factorNames[1] : factorNames[0],
-            g: 'No color'
+    useEffect(() => {
+        if (factorNames != null && rowNames != null && selectedPlot2D == null) {
+            const mySelectedPlot2d = {
+                x: factorNames[0],
+                y: factorNames.length > 1 ? factorNames[1] : factorNames[0],
+                g: 'No color'
+            }
+            setSelectedPlot2D(mySelectedPlot2d);
+            dispatchResults({
+                type: 'set-selected-plot-2d-mofa',
+                mode: mySelectedPlot2d
+            });
         }
-        setSelectedPlot2D(mySelectedPlot2d);
-        dispatchResults({ 
-            type: 'set-selected-plot-2d-mofa', 
-            mode: mySelectedPlot2d
-        });
-    }
+    }, [factorNames, rowNames, selectedPlot2D])
 
     /*
     Function to refresh heatmap
     */
     const [plotHM, setPlotHM] = useState(false);
-    const plotHeatMap = useCallback(() => {console.log('Refresh'); setPlotHM(e => !e)}, [setPlotHM]);
+    const plotHeatMap = useCallback(() => { console.log('Refresh'); setPlotHM(e => !e) }, [setPlotHM]);
 
     /*
     Refresh to plot heatmap at first render
@@ -99,7 +101,7 @@ function MOFA() {
     useEffect(() => {
         const myTimeout = setTimeout(plotHeatMap, 1000);
         return () => clearTimeout(myTimeout);
-    }, [setPlotHM,plotHeatMap]);
+    }, [setPlotHM, plotHeatMap]);
     /**/
 
     /*

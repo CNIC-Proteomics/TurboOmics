@@ -6,7 +6,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { download, generateCsv, mkConfig } from 'export-to-csv';
 
-function MetabolomicSetSelector({ setLoadingEnrichment, fRef, updateMCat }) {
+function MetabolomicSetSelector({ fRef, updateMCat }) {
 
     const { m2i } = useJob().user;
     const options = useMemo(
@@ -15,10 +15,10 @@ function MetabolomicSetSelector({ setLoadingEnrichment, fRef, updateMCat }) {
     );
     const [selectedField, setSelectedField] = useState(options[0]);
 
-    useEffect(() => {
+    /*useEffect(() => {
         const myTimeOut = setTimeout(() => setLoadingEnrichment(false), 2000);
         return () => clearTimeout(myTimeOut);
-    }, [fRef, setLoadingEnrichment])
+    }, [fRef, setLoadingEnrichment])*/
 
     return (
         <Box sx={{ textAlign: 'center' }}>

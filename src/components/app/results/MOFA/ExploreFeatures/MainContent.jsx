@@ -22,9 +22,6 @@ function MainContent({ omic, thrLRef }) {
 
     const { OMIC2NAME } = useVars()
 
-    // Row filtered by the user
-    const fRef = useRef({ up: [], down: [] });
-
     // Features associated to factor
     const f2i = useJob().user[`${omic}2i`];
     const factor = useResults().MOFA.displayOpts.selectedPlot.Factor;
@@ -42,18 +39,7 @@ function MainContent({ omic, thrLRef }) {
         });
 
         return fFact
-    }, [f2i, myLoadings]);
-
-    // When user modify the main table, a re-render is produced
-    const [reRender, setReRender] = useState(false);
-    const myReRender = useCallback(() => setReRender(prev => !prev), []);
-    useEffect(() => { // Execute reRender after the first rendering
-        const myTimeOut = setTimeout(myReRender, 2000);
-        return () => clearTimeout(myTimeOut);
-    }, [myReRender]);
-
-    // Soft appearance of Enrichment section
-    const [loadingEnrichment, setLoadingEnrichment] = useState(false);
+    }, [f2i, myLoadings, thrLRef.up, thrLRef.down]);
 
     // Get mean of each feature per level
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
@@ -63,13 +49,26 @@ function MainContent({ omic, thrLRef }) {
     const f2MeanL = useMemo(() => {
         const f2MeanL = {};
         const xiJson = danfo2RowColJson(xi);
-        xi.columns.map(i => { f2MeanL[i] = {} });
+
+        // Calculate mean only for factor filtered
+        const allF = [
+            ...fFact.up.map(f => Object.values(f)[0]),
+            ...fFact.down.map(f => Object.values(f)[0])
+        ];
+
+        const xiJsonF = {};
+        Object.keys(xiJson).map(i => {
+            xiJsonF[i] = {};
+            allF.map(f => xiJsonF[i][f] = xiJson[i][f])
+        });
+
+        allF.map(f => { f2MeanL[f] = {} });
 
         if (mdataColInfo.type == 'categorical') {
             mdataColInfo.levels.map(l => {
                 let xiL = new dfd.DataFrame(
                     mdataColInfo.level2id[l]
-                        .map(element => xiJson[element])
+                        .map(element => xiJsonF[element])
                         .filter(i => i != undefined)
                 );
 
@@ -82,7 +81,15 @@ function MainContent({ omic, thrLRef }) {
         }
 
         return f2MeanL
-    }, [xi, mdataColInfo]);
+    }, [xi, mdataColInfo, fFact.down, fFact.up]);
+
+
+    // Selection of column containing protein/transcript ID
+    const [colFid, setColFid] = useState({ label: f2i.columns[0], id: f2i.columns[0] });
+
+    // Array containing enriched categories filtered by user
+    // They will be downloadable from main table
+    const [q2cat, setQ2cat] = useState({ up: {}, down: {} });
 
     return (
         <Splide aria-label="My Favorite Images">
@@ -98,26 +105,28 @@ function MainContent({ omic, thrLRef }) {
                                     omic={omic}
                                     sign={sign}
                                     thr={thrLRef[sign]}
-                                    fRef={fRef}
-                                    myReRender={myReRender}
                                     f2MeanL={f2MeanL}
-                                    setLoadingEnrichment={setLoadingEnrichment}
+                                    q2cat={q2cat[sign]}
+                                    colFid={colFid}
                                 />
 
-                                {fFact[sign].length > 0 && //fRef.current[sign].length > 0 &&
-                                    <Box sx={{ opacity: loadingEnrichment ? 0 : 1, transition: 'all ease 1s' }}>
+                                {fFact[sign].length > 0 &&
+                                    <Box>
                                         {omic == 'q' || omic == 't' ?
                                             <EnrichmentQ
                                                 omic={omic}
-                                                fRef={fFact[sign]}//{fRef.current[sign]}
+                                                fRef={fFact[sign]}
                                                 f2MeanL={f2MeanL}
-                                                setLoadingEnrichment={setLoadingEnrichment}
+                                                colFid={colFid}
+                                                setColFid={setColFid}
+                                                setQ2cat={(catArr) => {
+                                                    setQ2cat(prev => ({ ...prev, [sign]: catArr }))
+                                                }}
                                             />
                                             :
                                             <EnrichmentM
-                                                fRef={fFact[sign]}//{fRef.current[sign]}
+                                                fRef={fFact[sign]}
                                                 f2MeanL={f2MeanL}
-                                                setLoadingEnrichment={setLoadingEnrichment}
                                             />
                                         }
                                     </Box>

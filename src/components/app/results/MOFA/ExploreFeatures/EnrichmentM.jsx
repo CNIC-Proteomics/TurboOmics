@@ -5,7 +5,7 @@ import GSEA from './GSEA'
 import { useResults } from '@/components/app/ResultsContext'
 import { useJob } from '@/components/app/JobContext'
 
-function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
+function EnrichmentM({ fRef, f2MeanL }) {
 
     const [mCat, setMCat] = useState(null);
     const updateMCat = (myMCat) => setMCat(myMCat);
@@ -17,7 +17,6 @@ function EnrichmentM({ fRef, f2MeanL, setLoadingEnrichment }) {
         <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
             <Box sx={{ width: '45%' }}>
                 <MetabolomicSetSelector
-                    setLoadingEnrichment={setLoadingEnrichment}
                     fRef={fRef}
                     updateMCat={updateMCat}
                 />

@@ -15,34 +15,36 @@ import { DownloadComponent } from '@/utils/DownloadRechartComponent';
 
 const DATABASES = ['GO:MF', 'GO:BP', 'GO:CC', 'KEGG', 'REAC']
 
-function GProfiler({ omic, fRef, setCategory, setLoadingEnrichment, colFid }) {
+function GProfiler({
+    omic,
+    fRef,
+    setCategory,
+    colFid,
+    setQ2cat
+}) {
 
     const BASE_URL = useVars().BASE_URL;
-    const [fSet, setFSet] = useState([]); // Filtered proteins
-    const [goRes, setGoRes] = useState(null); // All categories
+
     const f2i = useJob().user[`${omic}2i`];
     const { OS } = useJob();
-    
+
+    // Save result of gProfiler
+    const [goRes, setGoRes] = useState(null); // All categories
+
+    // Background genes to be sent to gProfiler
     const myBackg = useMemo(() => {
         const f = f2i.column(colFid.id).values
         return f.filter((item, pos) => f.indexOf(item) == pos) // drop duplicates
     }, [f2i, colFid]); // All proteins in exp.
-    
-    //const mySet = fRef.map(e => e[q2i.columns[0]]); // Filtered proteins
-    const mySet = useMemo(() => {
+
+    // Target genes
+    const fSet = useMemo(() => {
         const f = fRef.map(e => e[colFid.id]);
         return f.filter((item, pos) => f.indexOf(item) == pos) // drop duplicates
     }, [colFid, fRef]); // Filtered proteins
 
-    if ( // If filtered proteins changes, set it.
-        !mySet.map(e => fSet.includes(e)).every(e => e) ||
-        !fSet.map(e => mySet.includes(e)).every(e => e)
-    ) {
-        setFSet(mySet);
-    }
-
+    // gProfiler fetch
     const gProfiler = useCallback(async () => {
-        //setLoadingEnrichment(true);
         const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/gost/profile/',
             {
@@ -60,24 +62,70 @@ function GProfiler({ omic, fRef, setCategory, setLoadingEnrichment, colFid }) {
             }
         );
         const resJson = await res.json();
+
+        // Find features per category
+        const myid2ensgs = resJson.meta.genes_metadata.query.query_1.mapping
+        resJson.ensgs2myid = {};
+        Object.keys(myid2ensgs).map((e, i) => {
+            resJson.ensgs2myid[Object.values(myid2ensgs)[i][0]] = e;
+        });
+
+        resJson.myid = resJson.meta.genes_metadata.query.query_1.ensgs.map(
+            e => resJson.ensgs2myid[e]
+        );
+
+        resJson.result = resJson.result.map(e => ({
+            ...e,
+            myid: resJson.myid.filter((f, i) => e.intersections[i].length > 0)
+        }));
+
         setGoRes(resJson);
-        setTimeout(() => setLoadingEnrichment(false), 1000);
-    }, [OS, fSet, myBackg, setLoadingEnrichment]);
+
+        // Create 
+
+    }, [OS, fSet, myBackg]);
 
     useEffect(() => {
         const myTimeOut = setTimeout(gProfiler, 100);
         return () => clearTimeout(myTimeOut);
     }, [fSet, myBackg, gProfiler]);
 
+    // Extract gProfiler result
     const myData = useMemo(() => {
         if (goRes == null) return null;
         const myData = goRes.result.map(e => ({
             ...e,
             '-Log10(pvalue)': Math.round(-Math.log10(e.p_value) * 10000) / 10000,
-            'FDR': Number.parseFloat(e.p_value).toExponential(2)
+            'FDR': Number.parseFloat(e.p_value).toExponential(2),
+            'labelName': e.name.split(' ').slice(0, 4).join(' ') + (e.name.split(' ').length > 4 ? '...' : '')
         }));
         return myData
     }, [goRes]);
+
+    // Filter myData using FDR
+    const [myfdr, setMyfdr] = useState(0.1);
+
+    const myDataF = useMemo(() => {
+        if (myData === null) return null;
+        const myDataF = myData.filter(e => parseFloat(e.FDR) < parseFloat(myfdr));
+        return myDataF
+    }, [myData, myfdr]);
+
+
+    // Build object matching protein to category
+    useEffect(() => {
+        if (myDataF === null) return;
+
+        const q2cat = {};
+        goRes.myid.map(f => {
+            q2cat[f] = [];
+        });
+        myDataF.map(e => {
+            e.myid.map(f => q2cat[f].push(e))
+        });
+        setQ2cat(q2cat);
+        
+    }, [myDataF, goRes])
 
     return (
         <Box sx={{ mt: 3 }}>
@@ -101,10 +149,15 @@ function GProfiler({ omic, fRef, setCategory, setLoadingEnrichment, colFid }) {
                         maxWidth: 700,
                         m: 'auto'
                     }}>
-                        <MyBarChart myData={myData} />
+                        <MyBarChart myData={myDataF} />
                     </Box>
                     <Box sx={{ pl: 2, mt: 1 }}>
-                        <CategoryTable myData={myData} setCategory={setCategory} />
+                        <CategoryTable
+                            myData={myData}
+                            setCategory={setCategory}
+                            myfdr={myfdr}
+                            setMyfdr={setMyfdr}
+                        />
                     </Box>
                 </>}
             </Box>
@@ -124,24 +177,26 @@ const MyBarChart = ({ myData }) => {
                 width: 550,
                 m: 'auto',
             }}>
-                <DownloadComponent scatterRef={plotRef} fileName='GO_Enrichment' />
+                <Box sx={{ width: 0, position: 'relative', left: 50 }}>
+                    <DownloadComponent scatterRef={plotRef} fileName='GO_Enrichment' />
+                </Box>
                 <BarChart
                     ref={plotRef}
                     width={530}
-                    height={Math.max(480, 35 * myData.length)}
+                    height={Math.max(480, 80 * myData.length)}
                     data={myData}
                     margin={{
                         top: 0,
                         right: 0,
-                        left: 50,
+                        left: 150,
                         bottom: 20,
                     }}
                     layout='vertical'
                 >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <YAxis type='category' dataKey="native" />
+                    <YAxis type='category' dataKey="labelName" minTickGap={30} />
                     <XAxis type='number'>
-                        <Label value={`-Log10(FDR)`} offset={-10} position="insideBottom" />
+                        <Label value={`-Log10 (FDR)`} offset={-10} position="insideBottom" />
                     </XAxis>
                     <Tooltip
                         content={<CustomTooltip />}
@@ -164,7 +219,7 @@ const CustomTooltip = ({ active, payload }) => {
             <Box
                 className="custom-tooltip"
                 sx={{
-                    width: 400,
+                    width: 350,
                     backgroundColor: 'rgba(255,255,255,0.8)',
                     border: '1px solid rgba(50, 50, 50, 0.8)',
                     padding: 1,
@@ -223,7 +278,7 @@ const getColor = (category) => {
     }
 }
 
-const CategoryTable = ({ myData, setCategory }) => {
+const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
     const handleExportData = () => {
         const csvConfig = mkConfig({
             fieldSeparator: ',',
@@ -266,14 +321,14 @@ const CategoryTable = ({ myData, setCategory }) => {
     ]), []);
 
     // Row selection for GSEA
-    const [rowSelection, setRowSelection] = useState({});
-
     const initialSelectedRow = useMemo(() => {
         return myData.length > 0 ? { [myData[0].native]: true } : {}
     }, [myData]);
-    useEffect(() => {
+    const [rowSelection, setRowSelection] = useState(initialSelectedRow);
+
+    /*useEffect(() => {
         setRowSelection(initialSelectedRow);
-    }, [initialSelectedRow]);
+    }, [initialSelectedRow]);*/
 
     useEffect(() => {
         if (Object.keys(rowSelection).length == 0) {
@@ -344,7 +399,18 @@ const CategoryTable = ({ myData, setCategory }) => {
         )
     });
 
-    //console.log(table.getAllColumns()[4].getFilterValue())
+    // Capture user FDR
+    const [savedFdr, setSavedFdr] = useState(0.1);
+    const newFdr = table.getAllColumns()[4].getFilterValue();
+    if (savedFdr != newFdr) {
+        setSavedFdr(newFdr)
+    }
+
+    useEffect(() => {
+        if (myfdr != savedFdr) {
+            setMyfdr(savedFdr)
+        }
+    }, [savedFdr]);
 
     return (
         <>

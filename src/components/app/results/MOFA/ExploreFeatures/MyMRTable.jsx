@@ -23,10 +23,9 @@ const MyMRTable = ({
     omic,
     sign,
     thr,
-    fRef,
-    myReRender,
     f2MeanL,
-    setLoadingEnrichment
+    q2cat,
+    colFid
 }) => {
 
     const f2i = useJob().user[`${omic}2i`];
@@ -94,7 +93,7 @@ const MyMRTable = ({
         let f2iJson = danfo2RowColJson(f2i.fillNa(''));
         let data = {};
 
-        Object.keys(myLoadings).map(
+        Object.keys(f2MeanL).map(
             f => {
                 if (
                     (sign == 'up' && myLoadings[f] > thr) ||
@@ -111,7 +110,7 @@ const MyMRTable = ({
 
         data = Object.values(data);
         return data;
-    }, [f2i, f2MeanL, factor, myLoadings]);
+    }, [f2i, f2MeanL, factor, myLoadings, sign, thr]);
 
 
     /*
@@ -155,10 +154,8 @@ const MyMRTable = ({
         renderTopToolbar: ({ table }) => (
             <MyRenderTopToolbar
                 table={table}
-                fRef={fRef}
-                sign={sign}
-                myReRender={myReRender}
-                setLoadingEnrichment={setLoadingEnrichment}
+                q2cat={q2cat}
+                colFid={colFid}
             />
         ),
     })
@@ -170,38 +167,7 @@ const MyMRTable = ({
     )
 }
 
-const MyRenderTopToolbar = ({
-    table,
-    fRef,
-    sign,
-    myReRender,
-    setLoadingEnrichment
-}) => {
-
-
-
-    /*const myFlatRows = table.getFilteredRowModel().flatRows;
-    const myRows = myFlatRows.map(e => e.original);
-    const myRowsID = myFlatRows.map(e => e.id);
-
-    const [rows, setRows] = useState(myRows);
-    const [rowsID, setRowsID] = useState(myRowsID);*/
-
-    /*useEffect(() => {
-        const myTimeOut2 = setTimeout(() => setLoadingEnrichment(true), 100);
-        fRef.current[sign] = rows;
-        const myTimeOut = setTimeout(() => { myReRender() }, 1000);
-        return () => { clearTimeout(myTimeOut); clearTimeout(myTimeOut2) };
-    }, [rows, fRef, sign, myReRender, setLoadingEnrichment]);*/
-
-    // if new elements, set them and reRender
-    /*if (
-        !myRowsID.map(i => rowsID.includes(i)).every(e => e) ||
-        !rowsID.map(i => myRowsID.includes(i)).every(e => e)
-    ) {
-        setRowsID(myRowsID);
-        setRows(myRows);
-    }*/
+const MyRenderTopToolbar = ({ table, q2cat, colFid }) => {
 
     const handleExportRows = (rows) => {
         const csvConfig = mkConfig({
@@ -210,19 +176,23 @@ const MyRenderTopToolbar = ({
             useKeysAsHeaders: true,
             filename: 'Feature_Table'//`${omic}_${factor}_vs_${mdataCol}_filtered`
         });
-        const rowData = rows.map((row) => row.original);
-        const csv = generateCsv(csvConfig)(rowData);
-        download(csvConfig)(csv);
-    };
 
-    const handleExportData = () => {
-        const csvConfig = mkConfig({
-            fieldSeparator: ',',
-            decimalSeparator: '.',
-            useKeysAsHeaders: true,
-            filename: 'Feature_Table'//`${omic}_${factor}_vs_${mdataCol}`
-        });
-        const csv = generateCsv(csvConfig)(data);
+        let rowData = rows.map((row) => row.original);
+
+        // Add categories
+        if (Object.keys(q2cat).length > 0) {
+            rowData = rowData.map(row => ({
+                ...row,
+                Category_ID: q2cat[row[colFid.id]] === undefined || q2cat[row[colFid.id]].length == 0 ?
+                    '' :
+                    q2cat[row[colFid.id]].map(e => e.native).join(';'),
+                Category_Name: q2cat[row[colFid.id]] === undefined || q2cat[row[colFid.id]].length == 0 ?
+                    '' :
+                    q2cat[row[colFid.id]].map(e => e.name).join(';'),
+            }))
+        }
+
+        const csv = generateCsv(csvConfig)(rowData);
         download(csvConfig)(csv);
     };
 
@@ -238,15 +208,6 @@ const MyRenderTopToolbar = ({
             <Box>
                 <MRT_ShowHideColumnsButton table={table} />
             </Box>
-            {false && (
-                <Button
-                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                    onClick={handleExportData}
-                    startIcon={<FileDownloadIcon />}
-                >
-                    Export All Data
-                </Button>
-            )}
             <Button
                 disabled={table.getFilteredRowModel().rows.length === 0}
                 //export all rows, including from the next page, (still respects filtering and sorting)
@@ -255,7 +216,7 @@ const MyRenderTopToolbar = ({
                 }
                 startIcon={<FileDownloadIcon />}
             >
-                Export Filtered Rows
+                Export Table
             </Button>
         </Box>
     )

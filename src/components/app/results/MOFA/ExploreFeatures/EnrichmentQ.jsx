@@ -10,7 +10,14 @@ import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { GPTarget } from '@/utils/GPTarget';
 
 
-function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
+function EnrichmentQ({ 
+    omic, 
+    fRef, 
+    f2MeanL, 
+    setQ2cat,
+    colFid,
+    setColFid
+}) {
 
     const { OS } = useJob();
     const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
@@ -27,7 +34,7 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
         () => f2i.columns.map(col => ({ label: col, id: col })),
         [f2i]
     );
-    const [colFid, setColFid] = useState(f2iColumns[0]);
+    //const [colFid, setColFid] = useState(f2iColumns[0]);
 
     // Selection of column indicating ID type
     const GPTargetOptions = useMemo(
@@ -103,8 +110,8 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
                         omic={omic}
                         fRef={fRef}
                         setCategory={setCategory}
-                        setLoadingEnrichment={setLoadingEnrichment}
                         colFid={colFid}
+                        setQ2cat={setQ2cat}
                     />
                 </Box>
                 <Box sx={{ width: '45%' }}>
@@ -119,7 +126,7 @@ function EnrichmentQ({ omic, fRef, f2MeanL, setLoadingEnrichment }) {
                                 omic='q'
                             />}
                             <Box sx={{ pl: 2, mt: 13 }}>
-                                <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.5s' }}>
+                                <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.2s' }}>
                                     <ProteinCategoryTable
                                         qCat={qCat}
                                         fRef={fRef}
@@ -163,6 +170,7 @@ const FieldSelector = ({ options, selectedField, setSelectedField, children }) =
                         </li>
                     );
                 }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
             />
         </Box>
     )
