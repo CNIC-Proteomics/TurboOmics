@@ -8,7 +8,6 @@ export function MyHeatMap({
     myIndex,
     myFeat,
     mdataCol,
-    updateZLegend,
     zLegend
 }) {
 
@@ -26,25 +25,6 @@ export function MyHeatMap({
     )
     /**/
 
-    /*
-    Set Legend values
-    */
-    useEffect(() => {
-        const Zarr = Object.keys(hmData).map(idx => (
-            hmData[idx].data.map(e => e.y)
-        )).flat();
-
-        Zarr.sort((a, b) => a - b);
-
-        /*updateZLegend(draft => {
-            draft[omic].min = Math.floor(Zarr[Math.floor(0.1 * Zarr.length)]);
-            draft[omic].max = Math.ceil(Math.max(
-                draft[omic].max,
-                Zarr[Math.floor(0.9 * Zarr.length)]
-            ));
-        });*/
-    }, [omic, updateZLegend, hmData]) //[hmData, omic, updateZLegend])
-    /**/
     return (
         <Box sx={{ height: 510, width: 1160/nPlots, marginRight: 0.5, border: '2px solid #444444' }}>
             <ResponsiveHeatMapCanvas

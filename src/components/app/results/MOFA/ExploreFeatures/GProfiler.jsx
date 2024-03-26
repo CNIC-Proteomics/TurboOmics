@@ -103,13 +103,13 @@ function GProfiler({
     }, [goRes]);
 
     // Filter myData using FDR
-    const [myfdr, setMyfdr] = useState(0.1);
+    const [myUsrFilt, setMyUsrFilt] = useState([]);
 
     const myDataF = useMemo(() => {
         if (myData === null) return null;
-        const myDataF = myData.filter(e => parseFloat(e.FDR) < parseFloat(myfdr));
+        const myDataF = myData.filter(e => myUsrFilt.includes(e.native))
         return myDataF
-    }, [myData, myfdr]);
+    }, [myData, myUsrFilt]);
 
 
     // Build object matching protein to category
@@ -124,8 +124,8 @@ function GProfiler({
             e.myid.map(f => q2cat[f].push(e))
         });
         setQ2cat(q2cat);
-        
-    }, [myDataF, goRes])
+
+    }, [myDataF, goRes, setQ2cat])
 
     return (
         <Box sx={{ mt: 3 }}>
@@ -138,7 +138,8 @@ function GProfiler({
                         height={30}
                         className="d-inline-block align-top"
                         alt="g:Profiler"
-                    /></Box>
+                    />
+                </Box>
             </Box>
             <Box>
                 {myData && <>
@@ -151,12 +152,12 @@ function GProfiler({
                     }}>
                         <MyBarChart myData={myDataF} />
                     </Box>
-                    <Box sx={{ pl: 2, mt: 1 }}>
+                    <Box sx={{ pl: 2, mt: 1, width:"206%" }}>
                         <CategoryTable
                             myData={myData}
                             setCategory={setCategory}
-                            myfdr={myfdr}
-                            setMyfdr={setMyfdr}
+                            myUsrFilt={myUsrFilt}
+                            setMyUsrFilt={setMyUsrFilt}
                         />
                     </Box>
                 </>}
@@ -278,7 +279,7 @@ const getColor = (category) => {
     }
 }
 
-const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
+const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
     const handleExportData = () => {
         const csvConfig = mkConfig({
             fieldSeparator: ',',
@@ -301,21 +302,23 @@ const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
         {
             header: 'GO',
             accessorKey: 'native',
-            size: 70
+            size: 100,
         },
         {
             header: 'Type',
             accessorKey: 'source',
-            size: 50
+            size: 170,
+            filterVariant: 'multi-select'
         },
         {
             header: 'Name',
-            accessorKey: 'name'
+            accessorKey: 'name',
+            size: 220,
         },
         {
             header: 'FDR',
             accessorKey: 'FDR',
-            size: 70,
+            size: 50,
             filterFn: 'lessThan'
         },
     ]), []);
@@ -325,10 +328,6 @@ const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
         return myData.length > 0 ? { [myData[0].native]: true } : {}
     }, [myData]);
     const [rowSelection, setRowSelection] = useState(initialSelectedRow);
-
-    /*useEffect(() => {
-        setRowSelection(initialSelectedRow);
-    }, [initialSelectedRow]);*/
 
     useEffect(() => {
         if (Object.keys(rowSelection).length == 0) {
@@ -363,6 +362,7 @@ const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
         enableColumnActions: false,
         muiTableContainerProps: { sx: { maxHeight: '250px' } },
         //onSortingChange: setSorting,
+        enableFacetedValues: true,
         initialState: {
             density: 'compact',
             showGlobalFilter: true,
@@ -399,18 +399,26 @@ const CategoryTable = ({ myData, setCategory, myfdr, setMyfdr }) => {
         )
     });
 
-    // Capture user FDR
-    const [savedFdr, setSavedFdr] = useState(0.1);
-    const newFdr = table.getAllColumns()[4].getFilterValue();
-    if (savedFdr != newFdr) {
-        setSavedFdr(newFdr)
+    // Capture user filter
+    const [usrFilt, setUsrFilt] = useState(myData.map(e => e.native));
+    const newUsrFilt = table.getFilteredRowModel().rows.map(e => e.id);
+
+    if (
+        !usrFilt.every(e => newUsrFilt.includes(e)) ||
+        !newUsrFilt.every(e => usrFilt.includes(e))
+    ) {
+        setUsrFilt(newUsrFilt);
     }
 
     useEffect(() => {
-        if (myfdr != savedFdr) {
-            setMyfdr(savedFdr)
+        console.log('Setting ID')
+        if (
+            !myUsrFilt.every(e => usrFilt.includes(e)) ||
+            !usrFilt.every(e => myUsrFilt.includes(e))
+        ) {
+            setMyUsrFilt(usrFilt)
         }
-    }, [savedFdr]);
+    }, [usrFilt, setMyUsrFilt, myUsrFilt]);
 
     return (
         <>

@@ -87,7 +87,7 @@ function MOFA() {
                 mode: mySelectedPlot2d
             });
         }
-    }, [factorNames, rowNames, selectedPlot2D])
+    }, [factorNames, rowNames, selectedPlot2D, dispatchResults])
 
     /*
     Function to refresh heatmap

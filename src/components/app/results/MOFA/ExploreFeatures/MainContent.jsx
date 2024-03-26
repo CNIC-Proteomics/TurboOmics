@@ -91,6 +91,13 @@ function MainContent({ omic, thrLRef }) {
     // They will be downloadable from main table
     const [q2cat, setQ2cat] = useState({ up: {}, down: {} });
 
+    const setQ2cat_sign = useMemo(() => {
+        const setQ2cat_sign = {};
+        setQ2cat_sign['up'] = (arr) => setQ2cat(prev => ({ ...prev, up: arr }));
+        setQ2cat_sign['down'] = (arr) => setQ2cat(prev => ({ ...prev, down: arr }));
+        return setQ2cat_sign;
+    }, [setQ2cat]);
+
     return (
         <Splide aria-label="My Favorite Images">
             {['up', 'down'].map(sign => (
@@ -119,9 +126,7 @@ function MainContent({ omic, thrLRef }) {
                                                 f2MeanL={f2MeanL}
                                                 colFid={colFid}
                                                 setColFid={setColFid}
-                                                setQ2cat={(catArr) => {
-                                                    setQ2cat(prev => ({ ...prev, [sign]: catArr }))
-                                                }}
+                                                setQ2cat={setQ2cat_sign[sign]}
                                             />
                                             :
                                             <EnrichmentM

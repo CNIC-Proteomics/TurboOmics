@@ -29,13 +29,18 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
 
     const myFeat = useMemo(() => {
         console.log(plotHM);
-        const myFeat = {}
+        const myFeat = {};
+        console.log(fLVec)
         omics.map(omic => {
             myFeat[omic] = {
-                down: fLVec[omic].filter((e, i) => i < [nFeatRef.current[omic].down]).map(e => e[0]),
-                up: fLVec[omic].filter((e, i) => i >= (fLVec[omic].length - [nFeatRef.current[omic].up])).map(e => e[0])
+                down: fLVec[omic].filter(
+                    (e, i) => i < nFeatRef.current[omic].down
+                ).map(e => e[0]),
+                up: fLVec[omic].filter(
+                    (e, i) => i >= (fLVec[omic].length - nFeatRef.current[omic].up)
+                ).map(e => e[0])
             }
-        })
+        });
         return myFeat
     }, [omics, nFeatRef, fLVec, plotHM]);
 
@@ -54,11 +59,8 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
                             <MyHeatMap
                                 omic={omic}
                                 myIndex={myIndex}
-                                myFeat={myFeat[omic].down}/*{fLVec[omic].filter(
-                                    (e, i) => i < [nFeatRef.current[omic].down]
-                                ).map(e => e[0])}*/
+                                myFeat={myFeat[omic].down}
                                 mdataCol={mdataCol}
-                                updateZLegend={updateZLegend}
                                 zLegend={zLegend[omic]}
                             />
                         }
@@ -66,11 +68,8 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
                             <MyHeatMap
                                 omic={omic}
                                 myIndex={myIndex}
-                                myFeat={myFeat[omic].up}/*{fLVec[omic].filter(
-                                    (e, i) => i >= (fLVec[omic].length - [nFeatRef.current[omic].up])
-                                ).map(e => e[0])}*/
+                                myFeat={myFeat[omic].up}
                                 mdataCol={mdataCol}
-                                updateZLegend={updateZLegend}
                                 zLegend={zLegend[omic]}
                             />
                         }

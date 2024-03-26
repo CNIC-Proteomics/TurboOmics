@@ -10,10 +10,10 @@ import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { GPTarget } from '@/utils/GPTarget';
 
 
-function EnrichmentQ({ 
-    omic, 
-    fRef, 
-    f2MeanL, 
+function EnrichmentQ({
+    omic,
+    fRef,
+    f2MeanL,
     setQ2cat,
     colFid,
     setColFid
@@ -39,7 +39,7 @@ function EnrichmentQ({
     // Selection of column indicating ID type
     const GPTargetOptions = useMemo(
         () => GPTarget.map(e => ({ id: e, label: e })), []
-        );
+    );
     const [typeID, setTypeID] = useState(omic == 'q' ? GPTargetOptions[97] : GPTargetOptions[42]);
 
     // Fetch all proteins of selected category
@@ -105,7 +105,7 @@ function EnrichmentQ({
                 </FieldSelector>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                <Box sx={{ width: '45%' }}>
+                <Box sx={{ width: "45%", mt: 3 }}>
                     <GProfiler
                         omic={omic}
                         fRef={fRef}

@@ -27,8 +27,17 @@ const downloadImage = async (histComp, boxComp, omic) => {
     fullFig.appendChild(histDiv);
     fullFig.appendChild(box1Div);
     fullFig.appendChild(box2Div);
+    //downloadSVG(fullFig, `DataDistribution_${omic}`);
 
-    downloadSVG(fullFig, `DataDistribution_${omic}`);
+    const densityDiv = window.document.createElement('div');
+    densityDiv.appendChild(histDiv);
+    console.log(densityDiv)
+
+    const boxplotDiv = window.document.createElement('div');
+    boxplotDiv.appendChild(box1Div)
+  
+    downloadSVG(densityDiv, `DensityPlot_${omic}`);
+    downloadSVG(boxplotDiv, `BoxPlot_${omic}`);
 }
 
 module.exports = downloadImage;
