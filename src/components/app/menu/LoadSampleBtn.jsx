@@ -1,5 +1,5 @@
 import { useVars } from '@/components/VarsContext'
-import { Box, Button } from '@mui/material'
+import { Box, Button, Link } from '@mui/material'
 import React from 'react'
 import { useDispatchJob } from '../JobContext'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
@@ -28,15 +28,43 @@ export default function LoadSampleBtn() {
         })
     }
 
+    const handleDownload = () => {
+        fetch(`${API_URL}/download_sample_data`)
+            .then((res) => {
+                console.log(res)
+                return res.blob();
+            })
+            .then((blob) => {
+                const href = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.setAttribute('download', 'TurboOmics-SampleData.zip'); //or any other extension
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch((err) => {
+                return Promise.reject({ Error: 'Something Went Wrong', err });
+            })
+    }
+
     return (
         <Box sx={{ alignSelf: 'center', position: 'absolute', left: '10%' }}>
-            <Button
-                variant='outlined'
-                startIcon={<CloudDownloadIcon />}
-                onClick={handleClick}
-            >
-                Load Sample Data
-            </Button>
+            <Box>
+
+                <Button
+                    variant='outlined'
+                    startIcon={<CloudDownloadIcon />}
+                    onClick={handleClick}
+                >
+                    Load Sample Data
+                </Button>
+            </Box>
+            <Box sx={{ textAlign: 'center', mt: 1 }}>
+                <Link href='#' onClick={handleDownload}>
+                    Download Sample Data
+                </Link>
+            </Box>
         </Box>
     )
 }
