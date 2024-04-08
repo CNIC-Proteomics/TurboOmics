@@ -11,6 +11,7 @@ import { CircularProgress, Grid } from '@mui/material';
 import { useVars } from '@/components/VarsContext';
 import MOFA from './MOFA/MOFA';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
+import GSEA from './GSEA/GSEA';
 
 export default function Results() {
 
@@ -104,13 +105,6 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='GSEA' status='' />}
-                            value={0.2}
-                            sx={{ fontSize: 12, m: 0, p: 0 }}
-                            disabled={true}
-                        />
-
-                        <Tab
                             label={<TabComponent text='MULTIOMICS FACTOR ANALYSIS' status={status.MOFA.status} />}
                             value={1.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
@@ -118,11 +112,18 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='NETWORK ANALYSIS' status='' />}
+                            label={<TabComponent text='GSEA' status='' />}
                             value={2.1}
+                            sx={{ fontSize: 12, m: 0, p: 0 }}
+                            disabled={false}
+                        />
+
+                        {false && <Tab
+                            label={<TabComponent text='NETWORK ANALYSIS' status='' />}
+                            value={3.1}
                             sx={{ fontSize: 12, mt: 2, p: 0 }}
                             disabled={true}
-                        />
+                        />}
 
                         {false && <Tab
                             label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
@@ -152,7 +153,8 @@ export default function Results() {
                     {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
                     {value == 0.2 && <Box sx={{ p: 1 }}><PCA /></Box>}
                     {value == 1.1 && <Box sx={{ p: 1 }}><MOFA /></Box>}
-                    {value == 2.1 && <Box sx={{ p: 1 }}>Community Analysis</Box>}
+                    {value == 2.1 && <Box sx={{ p: 1 }}><GSEA /></Box>}
+
                     {value == 3.1 && <Box sx={{ p: 1 }}>rCCA</Box>}
                     {value == 4.1 && <Box sx={{ p: 1 }}>Differential Correlation Analysis</Box>}
                     {value == 5.1 && <Box sx={{ p: 1 }}>Elastic Net</Box>}
