@@ -23,6 +23,7 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
 
     const handleCreateJob = async () => {
 
+        // Reset (if necessary) annotations of CMM
         setAnnotating(false);
 
         // Set loading state

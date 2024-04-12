@@ -51,7 +51,7 @@ export default function Results() {
 
         // If there is no waiting status, clear interval
         if (
-            Object.keys(resJson).map(e => resJson[e].status != 'waiting').every(e => e)
+            Object.keys(resJson).every(e => resJson[e].status != 'waiting')
         ) {
             clearInterval(fetchRef.current);
         }
@@ -118,34 +118,6 @@ export default function Results() {
                             disabled={false}
                         />
 
-                        {false && <Tab
-                            label={<TabComponent text='NETWORK ANALYSIS' status='' />}
-                            value={3.1}
-                            sx={{ fontSize: 12, mt: 2, p: 0 }}
-                            disabled={true}
-                        />}
-
-                        {false && <Tab
-                            label={<TabComponent text='REGULARIZED CANONICAL CORRELATION ANALYSIS' status='' />}
-                            value={3.1}
-                            sx={{ fontSize: 12, mt: 2, p: 0 }}
-                            disabled={true}
-                        />}
-
-                        {false && <Tab
-                            label={<TabComponent text='DIFFERENTIAL CORRELATION ANALYSIS' status='' />}
-                            value={4.1}
-                            sx={{ fontSize: 12, mt: 2, p: 0 }}
-                            disabled={true}
-                        />}
-
-                        {false && <Tab
-                            label={<TabComponent text='ELASTIC NET' status='' />}
-                            value={5.1}
-                            sx={{ fontSize: 12, mt: 2, p: 0 }}
-                            disabled={true}
-                        />}
-
                     </Tabs>
                 </Box>
 
@@ -154,10 +126,6 @@ export default function Results() {
                     {value == 0.2 && <Box sx={{ p: 1 }}><PCA /></Box>}
                     {value == 1.1 && <Box sx={{ p: 1 }}><MOFA /></Box>}
                     {value == 2.1 && <Box sx={{ p: 1 }}><GSEA /></Box>}
-
-                    {value == 3.1 && <Box sx={{ p: 1 }}>rCCA</Box>}
-                    {value == 4.1 && <Box sx={{ p: 1 }}>Differential Correlation Analysis</Box>}
-                    {value == 5.1 && <Box sx={{ p: 1 }}>Elastic Net</Box>}
                 </Box>
             </Box>
         </>

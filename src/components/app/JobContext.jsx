@@ -202,7 +202,7 @@ const jobTemplate = {
         "xm": null,
         "xt": null
     },
-    "f2x": { // Boolean array indicating which
+    "f2x": { // Boolean array indicating which f2i elements are in xi_norm
         "q": [],
         "m": [],
         "t": []
