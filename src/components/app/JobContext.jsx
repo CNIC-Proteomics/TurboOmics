@@ -42,19 +42,20 @@ function jobReducer(draft, action) {
             break;
         }
         case 'user-upload': {
-            const omic = action.fileType.slice(-1)
-
+            
             let df = new dfd.DataFrame(action.dfJson);
-
+            
             df.setIndex({ column: df.columns[0], inplace: true });
-
+            
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
+                const omic = action.fileType.slice(-1)
+                
                 df.drop({ columns: [df.columns[0]], inplace: true });
 
                 // Missing values calculations
                 let dfMV = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
                 let thr = generateArray(0, 1.05, 0.05);
-                thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }))
+                thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }));
                 draft.results.PRE.MV[action.fileType] = thr;
 
                 // Create omic2i in case it was not uploaded

@@ -94,13 +94,11 @@ function TPPSection({ name, attr, annParams, setAnnParams }) {
                                 },
                                 // More context menu items...
                             },
-                            // Ajusta el zIndex aquí
-                            zIndex: 5000 // Puedes ajustar este valor según tus necesidades
+                            zIndex: 5000 
                         }}
                     />
                 </Box>
             </Box>
-
         </Box>
     )
 }

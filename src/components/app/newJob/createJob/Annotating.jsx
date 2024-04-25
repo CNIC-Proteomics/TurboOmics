@@ -85,12 +85,12 @@ function Annotating() {
                 dfJson: resJson.m2i,
                 fileType: 'm2i',
                 userFileName: m2i_fileName
-            })
+            });
         }
 
         if (resJson.status == 'error') {
             setLoadText('Putative Annotation Error');
-            setStatus('error')
+            setStatus('error');
             clearInterval(getTPRef.current);
             console.log(resJson);
         }
@@ -140,7 +140,7 @@ function Annotating() {
 
     // Loop all mz batches
     const requestCMM = useCallback(async () => {
-        console.log('Startinng request to CMM');
+        console.log('Starting request to CMM');
 
         const fullResCMM = { 'pos': [], 'neg': [] };
 

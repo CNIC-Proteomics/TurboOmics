@@ -31,14 +31,13 @@ export default function LoadSampleBtn() {
     const handleDownload = () => {
         fetch(`${API_URL}/download_sample_data`)
             .then((res) => {
-                console.log(res)
                 return res.blob();
             })
             .then((blob) => {
                 const href = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = href;
-                link.setAttribute('download', 'TurboOmics-SampleData.zip'); //or any other extension
+                link.setAttribute('download', 'TurboOmics-SampleData.zip');
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -51,7 +50,6 @@ export default function LoadSampleBtn() {
     return (
         <Box sx={{ alignSelf: 'center', position: 'absolute', left: '10%' }}>
             <Box>
-
                 <Button
                     variant='outlined'
                     startIcon={<CloudDownloadIcon />}
