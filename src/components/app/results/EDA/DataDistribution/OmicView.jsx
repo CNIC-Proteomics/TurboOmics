@@ -1,4 +1,3 @@
-import { MySection } from '@/components/MySection'
 import { useVars } from '@/components/VarsContext'
 import { Box, CircularProgress, Grid, IconButton, Typography } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download';

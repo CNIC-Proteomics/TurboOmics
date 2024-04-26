@@ -26,7 +26,7 @@ export default function OmicSelector({ selOmic, setSelOmic, omicViewRef }) {
 
 const OmicButton = ({ selOmic, id, title, setSelOmic, omicViewRef }) => {
 
-    const { omics } = useJob()
+    const { omics } = useJob();
 
     const [isHover, setIsHover] = useState(false);
 
