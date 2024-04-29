@@ -1,29 +1,30 @@
-import React, { useMemo, useState } from 'react'
-import { Box, Autocomplete, TextField, Typography } from "@mui/material"
+import React, { useCallback, useMemo, useState, useRef } from 'react'
+import { Box, Autocomplete, TextField, Typography, Button, Divider } from "@mui/material"
+import SendIcon from '@mui/icons-material/Send';
 import useFx2i from '@/hooks/useFx2i';
 import { useVars } from '@/components/VarsContext';
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useJob } from '../../JobContext';
 import MyMotion from '@/components/MyMotion';
+import ParamSelector from './ParamSelector';
+import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
 
 
 /*
 Constants
 */
-const TEXT = {
-    't-test': {
-        text1: 'Select metadata variable',
-        text2: 'Metadata Variable'
-    },
-    'PCA': {
-        text1: 'Select Principal Component',
-        text2: 'Principal Component'
-    },
-    'MOFA': {
-        text1: 'Select MOFA Factor',
-        text2: 'MOFA Factor'
-    }
-}
+const DB = {
+    t: [
+        { db: 'Custom', status: 'ok', show: true },
+        { db: 'HALLMARK', status: 'waiting', show: false },
+        { db: 'REACTOME', status: 'waiting', show: false },
+        { db: 'KEGG', status: 'waiting', show: false }
+    ],
+    m: [
+        { db: 'Custom', status: 'ok', show: true }
+    ]
+};
+
 
 /*
 Main Component
@@ -33,7 +34,7 @@ function GSEAomic({ omic }) {
     // check if this is a metabolomics section
     const isM = omic == 'm';
 
-    const { OMIC2NAME, API_URL } = useVars();
+    const { API_URL } = useVars();
     const { OS } = useJob();
     const { jobID } = useJob();
 
@@ -41,281 +42,184 @@ function GSEAomic({ omic }) {
     const results = useResults();
     const dispatchResults = useDispatchResults();
 
-    // Get mdata
-    const { mdata } = useJob().user;
-    const { mdataType } = useJob();
-
     // Data used for GSEA
-    const [gseaData, setGseaData] = useState(null);
+    const [g2info, setG2info] = useState(null);
 
     // Get fx2i 
     const [fx2i] = useFx2i(omic);
 
-    // Generate column options for feature id (protein or transcript)
-    const gidColOpts = useMemo(
-        () => fx2i.columns.map(e => ({ label: e, id: e })),
-        [fx2i]);
+    // Get quantifications
+    const xi = useJob().norm[`x${omic}`];
 
+    // Get mdata
+    const { mdataType } = useJob();
+
+    // Generate column options for feature id (protein or transcript)
     const [gidCol, setGidCol] = useState(null);
 
-    const handleGidColOpts = async (e, newValue) => {
-        if (newValue == null) return;
-        setGidCol(newValue);
+    // GSEA ranking metric
+    const [rankCol, setRankCol] = useState(null);
+    const [subRankCol, setSubRankCol] = useState(null);
+    const [groups, setGroups] = useState({ 'g1': null, 'g2': null });
 
-        // Get ENTREZ values
-        const gidColSerie = fx2i.column(newValue.id);
-        const g2i = {};
-        gidColSerie.values.map((g, i) => {
-            Object.keys(g2i).includes(g) ?
-                g2i[g].f.push(gidColSerie.index[i]) : g2i[g] = { f: [gidColSerie.index[i]] };
-        });
+    // DataBases
+    const [db, setDb] = useState(isM ? DB.m : DB.t);
+    const selDb = db.filter(e => e.show)[0].db;
 
-        // Fetch from gProfiler only for Proteomics and Transcriptomics
-        if (!isM) {
-            const res = await fetch(
-                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        "organism": OS.id,
-                        "target": "ENTREZGENE_ACC",
-                        "query": Object.keys(g2i)
-                    })
-                }
-            );
+    // Run GSEA
+    const [gseaData, setGseaData] = useState(null);
+    const [showGsea, setShowGsea] = useState(false);
+    const [titleGsea, setTitleGsea] = useState('');
 
-            const resJson = await res.json();
+    const handleRunGSEA = useCallback(() => {
+        console.log('Run GSEA');
 
-            const _g = [];
-            resJson.result.map(e => {
-                if (_g.includes(e.incoming) || e.converted == 'None') return;
-                _g.push(e.incoming);
-                g2i[e.incoming].gn = e.name;
-                g2i[e.incoming].egn = e.name.toUpperCase();
-                g2i[e.incoming].eid = e.converted;
+        // get rank
+        const preData = g2info;
+        if (rankCol.label == 'PCA') {
+            const ranks = results.EDA.PCA[omic].data.loadings;
+            const pcakey = subRankCol.id.replace(/PCA/, '');
+            Object.keys(preData).map(e => {
+                preData[e].fRank = preData[e].f.map(f => ranks[f][pcakey])
             });
         }
 
-        setGseaData(g2i);
-    }
-
-    // GSEA ranking metric
-    const resStatus = useResults().status;
-
-    const rankColOpts = useMemo(() => ([
-        {
-            label: 't-test',
-            disabled: !mdata.columns.some(e =>
-                mdataType[e].type == 'categorical'
-            )
-        },
-        {
-            label: 'PCA',
-            disabled: resStatus.EDA_PCA.status != 'ok'
-        },
-        {
-            label: 'MOFA',
-            disabled: resStatus.MOFA.status != 'ok'
+        if (rankCol.label == 'MOFA') {
+            const ranks = results.MOFA.data.loadings[omic][subRankCol.id];
+            Object.keys(preData).map(e => {
+                preData[e].fRank = preData[e].f.map(f => ranks[f])
+            });
         }
-    ]), [resStatus]);
-
-    const [rankCol, setRankCol] = useState(null);
-
-    const [subRankColOpts, setSubRankColOpts] = useState([]); // Number of component or metavariable
-    const [subRankCol, setSubRankCol] = useState(null);
-    const [showSubSection, setShowSubSection] = useState(false);
-    const [groupColOpts, setGroupColOpts] = useState([]);
-    const [groups, setGroups] = useState({ 'g1': null, 'g2': null });
-
-    const handleRankColOpts = async (e, newValue) => {
-        if (!newValue) return;
-        setRankCol(newValue);
-        setSubRankCol(null);
-        setShowSubSection(false)
-        setTimeout(e => setShowSubSection(true), 100)
-
-        if (newValue.label == 'PCA') {
-            let expVar = results.EDA.PCA[omic].data.explained_variance
-            if (expVar == null) {
-                const res = await fetch(`${API_URL}/get_eda_pca/${jobID}/${omic}`);
-                const { resStatus, dataPCA } = await res.json();
-                dispatchResults({ type: 'set-eda-pca-data', data: dataPCA, omic: omic });
-                dispatchResults({ type: 'set-eda-pca-status', status: resStatus, omic: omic });
-                expVar = dataPCA.explained_variance;
-            }
-            setSubRankColOpts(
-                Object.keys(expVar).map(e => ({ label: `PCA${e}`, id: `PCA${e}` }))
-            );
-        }
-
-        if (newValue.label == 'MOFA') {
-            let expVar;
-            if (results.MOFA.data == null) {
-                const res = await fetch(`${API_URL}/get_mofa/${jobID}`);
-                const resJson = await res.json(); // {dataMofa, resStatus}
-                dispatchResults({ type: 'set-mofa-data', data: resJson.dataMOFA });
-                expVar = resJson.dataMOFA.explained_variance[omic];
-            } else {
-                expVar = results.MOFA.data.explained_variance[omic];
-            }
-            setSubRankColOpts(
-                Object.keys(expVar).map(e => ({ label: e, id: e }))
-            );
-        }
-
-        if (newValue.label == 't-test') {
-            setSubRankColOpts(
-                Object.keys(mdataType).filter(
-                    e => mdataType[e].type == 'categorical'
-                ).map(e => ({ label: e, id: e }))
-            );
-        }
-    }
-
-    const handleSubRankColOpts = (e, newValue) => {
-        if (newValue == null) return;
-        setSubRankCol(newValue);
-        setGroups({ g1: null, g2: null });
 
         if (rankCol.label == 't-test') {
-            setGroupColOpts(
-                mdataType[newValue.id].levels.map(e => ({ label: e, id: e }))
-            );
+            const xiJson = danfo2RowColJson(xi);
+            const g1Id = mdataType[subRankCol.id].level2id[groups.g1.id]
+                .filter(e => xi.index.includes(e));
+            const g2Id = mdataType[subRankCol.id].level2id[groups.g2.id]
+                .filter(e => xi.index.includes(e));
+
+            Object.keys(preData).map(e => {
+                preData[e].f.map(f => {
+                    const g1v = g1Id.map(myid => xiJson[myid][f]);
+                    const g2v = g2Id.map(myid => xiJson[myid][f]);
+                    // CALCULA TTEST
+                })
+            })
         }
-    }
+        
+
+        console.log(preData);
+        // dispatchResults
+
+        // send to backend
+        setTitleGsea(
+            `GSEA: ${gidCol.label} | 
+            ${rankCol.label} | 
+            ${subRankCol.label}
+            ${rankCol.label == 't-test' ? ' | ' + groups.g1.label + ' vs ' + groups.g2.label : ''}`
+        );
+        setShowGsea(false);
+        setTimeout(() => setShowGsea(true), 500);
+
+
+    }, [gidCol, rankCol, subRankCol, groups]);
 
     return (
-        <Box sx={{ mt: 5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>Select column containing {OMIC2NAME[omic]} ID</Typography>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Autocomplete
-                            options={gidColOpts}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => <TextField {...params} label={`${OMIC2NAME[omic]} ID column`} />}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            value={gidCol}
-                            onChange={handleGidColOpts}
-                            renderOption={(props, option) => {
-                                return (
-                                    <li {...props} key={option.label}>
-                                        {option.label}
-                                    </li>
-                                );
-                            }}
-                        />
-                    </Box>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>Select GSEA Ranking Metric</Typography>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Autocomplete
-                            options={rankColOpts}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => <TextField {...params} label='GSEA Ranking Metric' />}
-                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                            getOptionDisabled={(option) => option.disabled}
-                            value={rankCol}
-                            onChange={handleRankColOpts}
-                            renderOption={(props, option) => {
-                                return (
-                                    <li {...props} key={option.label}>
-                                        {option.label}
-                                    </li>
-                                );
-                            }}
-                        />
-                    </Box>
-                </Box>
-            </Box>
-            {showSubSection &&
+        <Box>
+            <ParamSelector
+                omic={omic}
+                setG2info={setG2info}
+                gidCol={gidCol}
+                setGidCol={setGidCol}
+                rankCol={rankCol}
+                setRankCol={setRankCol}
+                subRankCol={subRankCol}
+                setSubRankCol={setSubRankCol}
+                groups={groups}
+                setGroups={setGroups}
+                handleRunGSEA={handleRunGSEA}
+            />
+            {showGsea &&
                 <MyMotion>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'space-evenly',
-                        textAlign: 'center',
-                        mt: 5,
-                    }}>
-                        <Box sx={{}}>
-                            <Typography type='body2'>{TEXT[rankCol.label].text1}</Typography>
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                <Autocomplete
-                                    options={subRankColOpts}
-                                    sx={{ width: 300 }}
-                                    renderInput={
-                                        (params) => <TextField {...params} label={TEXT[rankCol.label].text2} />
-                                    }
-                                    isOptionEqualToValue={(option, value) => option.label === value.label}
-                                    value={subRankCol}
-                                    onChange={handleSubRankColOpts}
-                                    renderOption={(props, option) => {
-                                        return (
-                                            <li {...props} key={option.label}>
-                                                {option.label}
-                                            </li>
-                                        );
-                                    }}
-                                />
-                            </Box>
+                    <Divider sx={{ my: 4 }}>
+                        <Typography variant='body2'>{titleGsea}</Typography>
+                    </Divider>
+                    <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <DbSelector db={db} selDb={selDb} setDb={setDb} />
                         </Box>
-                        {rankCol.label == 't-test' &&
-                            <Box sx={{ display: 'flex' }}>
-                                <Box>
-                                    <Typography type='body2'>Select 1st group</Typography>
-                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                        <Autocomplete
-                                            options={groupColOpts}
-                                            sx={{ width: 200 }}
-                                            renderInput={
-                                                (params) => <TextField {...params} label='1st Group' />
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                                            value={groups.g1}
-                                            onChange={(e, newValue) => setGroups(prev => ({ ...prev, g1: newValue }))}
-                                            renderOption={(props, option) => {
-                                                return (
-                                                    <li {...props} key={option.label}>
-                                                        {option.label}
-                                                    </li>
-                                                );
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-                                <Box sx={{ width: '20%', mx: 2, display: 'flex', alignItems: 'flex-end' }}>
-                                    <Typography type='body1' sx={{ py: 2 }}>vs</Typography>
-                                </Box>
-                                <Box sx={{}}>
-                                    <Typography type='body2'>Select 2nd group</Typography>
-                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                        <Autocomplete
-                                            options={groupColOpts}
-                                            sx={{ width: 200 }}
-                                            renderInput={
-                                                (params) => <TextField {...params} label='2nd Group' />
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                                            value={groups.g2}
-                                            onChange={(e, newValue) => setGroups(prev => ({ ...prev, g2: newValue }))}
-                                            renderOption={(props, option) => {
-                                                return (
-                                                    <li {...props} key={option.label}>
-                                                        {option.label}
-                                                    </li>
-                                                );
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-                            </Box>
-                        }
+                        <Box>
+                            {selDb == 'Custom' ?
+                                <Box>Custom Table</Box>
+                                :
+                                <Box>{selDb}</Box>
+                            }
+                        </Box>
                     </Box>
                 </MyMotion>
             }
+        </Box>
+    )
+}
+
+const DbSelector = ({ db, selDb, setDb }) => {
+
+    //const [selDb, setSelDb] = useState(DB[0]);
+
+    return (
+        <Box sx={{ display: 'flex' }}>
+            {db.map(e => (
+                <SetButton
+                    key={e.db}
+                    selDb={selDb}
+                    setDb={setDb}
+                    dbid={e.db}
+                />
+            ))}
+        </Box>
+    )
+}
+
+const SetButton = ({ selDb, setDb, dbid }) => {
+
+    const selected = selDb == dbid;
+    const [isHover, setIsHover] = useState(false);
+
+    const handleClick = () => {
+        setDb(prev => prev.map(e =>
+            e.db == dbid ? { ...e, show: true } : { ...e, show: false }
+        ));
+    }
+
+    let bgColor = '#00000015';
+    let textColor = '#000000aa';
+
+    if (selected) {
+        bgColor = '#006633ff';
+        textColor = '#ffffff';
+    } else if (isHover) {
+        bgColor = '#00000033';
+        textColor = '#000000aa'//'#ffffff';
+    }
+
+    return (
+        <Box
+            sx={{
+                px: 1,
+                py: 0.5,
+                mx: 0.5,
+                fontSize: '1em',
+                color: textColor,
+                backgroundColor: bgColor,
+                userSelect: 'none',
+                cursor: 'pointer',
+                transition: 'ease 1s'
+            }}
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => setIsHover(false)}
+            onClick={handleClick}
+        >
+            {dbid}
         </Box>
     )
 }
