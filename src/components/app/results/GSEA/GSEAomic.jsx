@@ -60,13 +60,15 @@ function GSEAomic({ omic }) {
     // GSEA ranking metric
     const [rankCol, setRankCol] = useState(null);
     const [subRankCol, setSubRankCol] = useState(null);
-    const [groups, setGroups] = useState({ 'g1': null, 'g2': null });
+    const [groups, setGroups] = useState({ 'g1': null, 'g2': null }); // only for t-test
 
     // DataBases
     const [db, setDb] = useState(isM ? DB.m : DB.t);
     const selDb = db.filter(e => e.show)[0].db;
 
     // Run GSEA
+    const [gseaID, setGseaID] = useState(null);
+    const [gseaStatus, setGseaStatus] = useState(null);
     const [gseaData, setGseaData] = useState(null);
     const [showGsea, setShowGsea] = useState(false);
     const [titleGsea, setTitleGsea] = useState('');
@@ -99,19 +101,29 @@ function GSEAomic({ omic }) {
                 .filter(e => xi.index.includes(e));
 
             Object.keys(preData).map(e => {
-                preData[e].f.map(f => {
+                preData[e].fRank = preData[e].f.map(f => {
                     const g1v = g1Id.map(myid => xiJson[myid][f]);
                     const g2v = g2Id.map(myid => xiJson[myid][f]);
-                    // CALCULA TTEST
-                })
-            })
+                    return getTvalue(g1v, g2v);
+                });
+            });
         }
-        
 
-        console.log(preData);
-        // dispatchResults
+        // combine ranks
+        Object.keys(preData).map(e => {
+            preData[e].rank = getMedian(preData[e].fRank);
+        });
+
+        // Set data for GSEA
+        setGseaData(preData);
 
         // send to backend
+        /*const gseaID = 
+        fetch(
+            `${API_URL}/run_gsea/${jobID}/`
+        )*/
+
+        // Show results section
         setTitleGsea(
             `GSEA: ${gidCol.label} | 
             ${rankCol.label} | 
@@ -222,6 +234,41 @@ const SetButton = ({ selDb, setDb, dbid }) => {
             {dbid}
         </Box>
     )
+}
+
+const getTvalue = (x, y) => {
+    const nx = x.length;
+    const ny = y.length;
+    const dfx = nx - 1;
+    const dfy = ny - 1;
+
+    const meanX = x.reduce((prev, curr) => prev + curr) / nx;
+    const meanY = y.reduce((prev, curr) => prev + curr) / ny;
+
+    const varX = x.map(e => (e - meanX) ^ 2)
+        .reduce((prev, curr) => prev + curr) / dfx;
+
+    const varY = y.map(e => (e - meanY) ^ 2)
+        .reduce((prev, curr) => prev + curr) / dfy;
+
+    const sp2 = (varX * dfx + varY * dfy) / (dfx + dfy);
+    const tval = (meanX - meanY) / (Math.sqrt(sp2 * (1 / nx + 1 / ny)));
+
+    return tval;
+}
+
+const getMedian = (values) => {
+
+    // Sorting values, preventing original array
+    // from being mutated.
+    values = [...values].sort((a, b) => a - b);
+
+    const half = Math.floor(values.length / 2);
+
+    return (values.length % 2
+        ? values[half]
+        : (values[half - 1] + values[half]) / 2
+    );
 }
 
 export default GSEAomic
