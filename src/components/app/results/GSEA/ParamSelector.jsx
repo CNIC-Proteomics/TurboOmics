@@ -31,16 +31,16 @@ const TEXT = {
 
 function ParamSelector({
     omic,
-    setG2info,
-    gidCol,
-    setGidCol,
-    rankCol,
-    setRankCol,
-    subRankCol,
-    setSubRankCol,
-    groups,
-    setGroups,
-    handleRunGSEA
+    g2info, setG2info,
+    gidCol, setGidCol,
+    rtCol, setRtCol,
+    ionCol, setIonCol,
+    ionVal, setIonVal,
+    rankCol, setRankCol,
+    subRankCol, setSubRankCol,
+    groups, setGroups,
+    handleRunGSEA,
+    changeID
 }) {
 
     // check if this is a metabolomics section
@@ -48,8 +48,7 @@ function ParamSelector({
 
     // 
     const { OMIC2NAME, API_URL } = useVars();
-    const { OS } = useJob();
-    const { jobID } = useJob();
+    const { OS, jobID } = useJob();
 
     // Get results
     const results = useResults();
@@ -70,16 +69,17 @@ function ParamSelector({
         if (newValue == null) return;
         setGidCol(newValue);
 
-        // Get ENTREZ values
-        const gidColSerie = fx2i.column(newValue.id);
         const g2i = {};
-        gidColSerie.values.map((g, i) => {
-            Object.keys(g2i).includes(g) ?
-                g2i[g].f.push(gidColSerie.index[i]) : g2i[g] = { f: [gidColSerie.index[i]] };
-        });
+        const gidColSerie = fx2i.column(newValue.id);
 
         // Fetch from gProfiler only for Proteomics and Transcriptomics
         if (!isM) {
+
+            gidColSerie.values.map((g, i) => {
+                Object.keys(g2i).includes(g) ?
+                    g2i[g].f.push(gidColSerie.index[i]) : g2i[g] = { f: [gidColSerie.index[i]] };
+            });
+
             console.log('Fetch ENTREZ identifiers');
             const res = await fetch(
                 'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
@@ -106,6 +106,12 @@ function ParamSelector({
                 g2i[e.incoming].egn = e.name.toUpperCase();
                 g2i[e.incoming].eid = e.converted;
             });
+
+        } else {
+            // Metabolomics
+            gidColSerie.index.map((e, i) => {
+                g2i[e] = { f: [e], mz: gidColSerie.values[i] }
+            })
         }
 
         setG2info(g2i);
@@ -193,7 +199,7 @@ function ParamSelector({
                 dtypeSerie.index.filter(
                     (e, i) => dtypeSerie.values[i].includes('int') ||
                         dtypeSerie.values[i].includes('float')
-                ).map(e => ({label: e, id: e}))
+                ).map(e => ({ label: e, id: e }))
             );
         }
     }
@@ -210,16 +216,40 @@ function ParamSelector({
         }
     }
 
+    // Set ion values
+    const [ionValOpts, setIonValOpts] = useState([]);
+    const handleIonCol = (e, newValue) => {
+        setIonCol(newValue);
+        setIonVal({ pos: null, neg: null });
+
+        if (!newValue) return;
+
+        setIonValOpts(
+            [...new Set(fx2i.column(newValue.id).values)].map(
+                e => ({ label: e, id: e })
+            )
+        );
+    }
+
     return (
         <Box sx={{ mt: 5 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
                 <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>Select column containing {OMIC2NAME[omic]} ID</Typography>
+                    <Typography type='body2'>
+                        {!isM ?
+                            `Select column containing ${OMIC2NAME[omic]} ID` :
+                            'Select column containing Apex m/z'
+                        }
+                    </Typography>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                         <Autocomplete
                             options={gidColOpts}
                             sx={{ width: 300 }}
-                            renderInput={(params) => <TextField {...params} label={`${OMIC2NAME[omic]} ID column`} />}
+                            renderInput={(params) => (
+                                <TextField {...params} label={!isM ?
+                                    `${OMIC2NAME[omic]} ID column` : 'Apex m/z Column'}
+                                />
+                            )}
                             isOptionEqualToValue={(option, value) => option.id === value.id}
                             value={gidCol}
                             onChange={handleGidColOpts}
@@ -233,6 +263,29 @@ function ParamSelector({
                         />
                     </Box>
                 </Box>
+                {isM &&
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography type='body2'>Select Retention Time Column (min)</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={gidColOpts}
+                                sx={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} label='RT column (min)' />}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                getOptionDisabled={(option) => option.disabled}
+                                value={rtCol}
+                                onChange={(e, newValue) => setRtCol(newValue)}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                }
                 <Box sx={{ textAlign: 'center' }}>
                     <Typography type='body2'>Select GSEA Ranking Metric</Typography>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
@@ -255,6 +308,73 @@ function ParamSelector({
                     </Box>
                 </Box>
             </Box>
+            {isM &&
+                <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mt: 2 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography type='body2'>Select Ion Mode Column</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={gidColOpts}
+                                sx={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} label='Ion Mode Column' />}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                getOptionDisabled={(option) => option.disabled}
+                                value={ionCol}
+                                onChange={handleIonCol}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography type='body2'>Positive Ion Value</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={ionValOpts}
+                                sx={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} label='Positive Ion' />}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                getOptionDisabled={(option) => option.disabled}
+                                value={ionVal.pos}
+                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, pos: newValue }))}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography type='body2'>Negative Ion Value</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={ionValOpts}
+                                sx={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} label='Negative Ion' />}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                getOptionDisabled={(option) => option.disabled}
+                                value={ionVal.neg}
+                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, neg: newValue }))}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                </Box>
+            }
             {showSubSection &&
                 <MyMotion>
                     <Box sx={{
@@ -343,7 +463,7 @@ function ParamSelector({
                             color='primary'
                             endIcon={<SendIcon />}
                             disabled={!(
-                                gidCol && rankCol && subRankCol &&
+                                changeID && gidCol && rankCol && subRankCol && g2info &&
                                 (rankCol.label != 't-test' || (groups.g1 && groups.g2))
                             )}
                             onClick={handleRunGSEA}

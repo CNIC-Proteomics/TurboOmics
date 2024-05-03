@@ -72,7 +72,9 @@ export default function Results() {
 
     return (
         <>
-            <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>Job ID: {jobID}</Typography>
+            <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>
+                Job ID: {jobID}
+            </Typography>
             <Box
                 sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}
             >

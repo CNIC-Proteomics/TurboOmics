@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useRef } from 'react'
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react'
 import { Box, Autocomplete, TextField, Typography, Button, Divider } from "@mui/material"
 import SendIcon from '@mui/icons-material/Send';
 import useFx2i from '@/hooks/useFx2i';
@@ -8,6 +8,8 @@ import { useJob } from '../../JobContext';
 import MyMotion from '@/components/MyMotion';
 import ParamSelector from './ParamSelector';
 import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
+import DbSelector from './utils/DbSelector';
+import { getMedian, getTvalue } from './utils/stats';
 
 
 /*
@@ -21,7 +23,9 @@ const DB = {
         { db: 'KEGG', status: 'waiting', show: false }
     ],
     m: [
-        { db: 'Custom', status: 'ok', show: true }
+        { db: 'Custom', status: 'ok', show: true },
+        { db: 'Mummichog (P)', status: '', show: false },
+        { db: 'Mummichog (N)', status: '', show: false }
     ]
 };
 
@@ -54,8 +58,13 @@ function GSEAomic({ omic }) {
     // Get mdata
     const { mdataType } = useJob();
 
-    // Generate column options for feature id (protein or transcript)
+    // Generate column options for feature id (protein or transcript) or mz (untargeted metab.)
     const [gidCol, setGidCol] = useState(null);
+
+    // Mummichog Untargeted metabolomic enrichment
+    const [rtCol, setRtCol] = useState(null);
+    const [ionCol, setIonCol] = useState(null);
+    const [ionVal, setIonVal] = useState({ pos: null, neg: null });
 
     // GSEA ranking metric
     const [rankCol, setRankCol] = useState(null);
@@ -67,8 +76,28 @@ function GSEAomic({ omic }) {
     const selDb = db.filter(e => e.show)[0].db;
 
     // Run GSEA
-    const [gseaID, setGseaID] = useState(null);
-    const [gseaStatus, setGseaStatus] = useState(null);
+    const getGseaId = () => {
+        if (
+            !(gidCol && rankCol && subRankCol &&
+                (rankCol.label != 't-test' || (groups.g1 && groups.g2)))
+        ) return '';
+
+        let myGseaID = `${OS.id}-${gidCol.id}-${rankCol.label}-${subRankCol.id}`;
+        myGseaID += rankCol.label == 't-test' ?
+            `${groups.g1.id}vs${groups.g2.id}` : '';
+
+        if (isM) {
+            myGseaID += rtCol ? '_' + rtCol.id : '';
+            myGseaID += ionVal.pos ? '_' + ionVal.pos.id : '';
+            myGseaID += ionVal.neg ? '_' + ionVal.neg.id : '';
+        }
+
+        myGseaID = myGseaID.replace(/[^a-zA-Z0-9]/g, '_');
+        return myGseaID
+    }
+
+    const [gseaID, setGseaID] = useState('');
+    const [waitingGsea, setWaitingGsea] = useState([]);
     const [gseaData, setGseaData] = useState(null);
     const [showGsea, setShowGsea] = useState(false);
     const [titleGsea, setTitleGsea] = useState('');
@@ -78,6 +107,7 @@ function GSEAomic({ omic }) {
 
         // get rank
         const preData = g2info;
+        console.log(g2info)
         if (rankCol.label == 'PCA') {
             const ranks = results.EDA.PCA[omic].data.loadings;
             const pcakey = subRankCol.id.replace(/PCA/, '');
@@ -109,19 +139,33 @@ function GSEAomic({ omic }) {
             });
         }
 
+        if (rankCol.label == 'Custom') {
+            const fx2iJson = danfo2RowColJson(fx2i);
+            Object.keys(preData).map(e => {
+                preData[e].fRank = preData[e].f.map(f => fx2iJson[f][subRankCol.id]);
+            });
+        }
+
         // combine ranks
         Object.keys(preData).map(e => {
             preData[e].rank = getMedian(preData[e].fRank);
         });
 
+
         // Set data for GSEA
         setGseaData(preData);
 
-        // send to backend
-        /*const gseaID = 
-        fetch(
-            `${API_URL}/run_gsea/${jobID}/`
-        )*/
+        // Create identifier
+        const myGseaID = getGseaId();
+        setGseaID(myGseaID);
+
+        // Add GSEA job to waiting list
+        if (!isM || (isM && rtCol && (ionVal.pos || ionVal.neg))) {
+            setWaitingGsea(
+                prev => prev.length < 2 ?
+                    [...prev, { id: myGseaID }] : [...prev.slice(0, 1), { id: myGseaID }]
+            );
+        }
 
         // Show results section
         setTitleGsea(
@@ -133,23 +177,68 @@ function GSEAomic({ omic }) {
         setShowGsea(false);
         setTimeout(() => setShowGsea(true), 500);
 
+    }, [g2info, gidCol, rankCol, subRankCol, groups, rtCol, ionVal]);
 
-    }, [gidCol, rankCol, subRankCol, groups]);
+    // Fetch GSEA controlling by previous jobs
+    const fetchRunGsea = useCallback(async () => {
+
+        let res;
+        const myos = OS.scientific_name.replace(' ', '_');
+
+        if (!isM) {
+
+            const gseaScriptData = getDataQT(gseaData);
+
+            res = await fetch(
+                `${API_URL}/run_gsea/${jobID}/${omic}/${gseaID}/${myos}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(gseaScriptData)
+                }
+            );
+        } else {
+            res = await fetch(
+                `${API_URL}/run_mummichog/${jobID}/${omic}/${gseaID}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(gseaData)
+                }
+            );
+        }
+
+        const resJson = await res.json();
+
+        console.log(resJson);
+
+    }, [API_URL, jobID, gseaID, gseaData]);
+
+    useEffect(() => {
+        // only fetch when there is one waiting job
+        if (waitingGsea.length != 1) return;
+        const myTimeout = setTimeout(fetchRunGsea, 500);
+        return () => clearTimeout(myTimeout);
+    }, [waitingGsea]);
 
     return (
         <Box>
             <ParamSelector
                 omic={omic}
-                setG2info={setG2info}
-                gidCol={gidCol}
-                setGidCol={setGidCol}
-                rankCol={rankCol}
-                setRankCol={setRankCol}
-                subRankCol={subRankCol}
-                setSubRankCol={setSubRankCol}
-                groups={groups}
-                setGroups={setGroups}
+                g2info={g2info} setG2info={setG2info}
+                gidCol={gidCol} setGidCol={setGidCol}
+                rtCol={rtCol} setRtCol={setRtCol}
+                ionCol={ionCol} setIonCol={setIonCol}
+                ionVal={ionVal} setIonVal={setIonVal}
+                rankCol={rankCol} setRankCol={setRankCol}
+                subRankCol={subRankCol} setSubRankCol={setSubRankCol}
+                groups={groups} setGroups={setGroups}
                 handleRunGSEA={handleRunGSEA}
+                changeID={gseaID != getGseaId()}
             />
             {showGsea &&
                 <MyMotion>
@@ -174,101 +263,25 @@ function GSEAomic({ omic }) {
     )
 }
 
-const DbSelector = ({ db, selDb, setDb }) => {
+const getDataQT = (gseaData) => {
 
-    //const [selDb, setSelDb] = useState(DB[0]);
+    let gseaScriptData = Object.keys(gseaData).map(e => ({
+        GeneName: gseaData[e].egn,
+        EntrezGene: gseaData[e].eid,
+        RankStat: gseaData[e].rank
+    }));
 
-    return (
-        <Box sx={{ display: 'flex' }}>
-            {db.map(e => (
-                <SetButton
-                    key={e.db}
-                    selDb={selDb}
-                    setDb={setDb}
-                    dbid={e.db}
-                />
-            ))}
-        </Box>
-    )
-}
+    gseaScriptData = gseaScriptData.filter(e => e.GeneName && e.EntrezGene && e.RankStat);
 
-const SetButton = ({ selDb, setDb, dbid }) => {
+    // remove duplicates
+    const _g = [];
+    gseaScriptData.filter(e => {
+        let filter = true;
+        _g.includes(e.egn) ? filter = false : _g.push(e.egn);
+        return filter;
+    });
 
-    const selected = selDb == dbid;
-    const [isHover, setIsHover] = useState(false);
-
-    const handleClick = () => {
-        setDb(prev => prev.map(e =>
-            e.db == dbid ? { ...e, show: true } : { ...e, show: false }
-        ));
-    }
-
-    let bgColor = '#00000015';
-    let textColor = '#000000aa';
-
-    if (selected) {
-        bgColor = '#006633ff';
-        textColor = '#ffffff';
-    } else if (isHover) {
-        bgColor = '#00000033';
-        textColor = '#000000aa'//'#ffffff';
-    }
-
-    return (
-        <Box
-            sx={{
-                px: 1,
-                py: 0.5,
-                mx: 0.5,
-                fontSize: '1em',
-                color: textColor,
-                backgroundColor: bgColor,
-                userSelect: 'none',
-                cursor: 'pointer',
-                transition: 'ease 1s'
-            }}
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={() => setIsHover(false)}
-            onClick={handleClick}
-        >
-            {dbid}
-        </Box>
-    )
-}
-
-const getTvalue = (x, y) => {
-    const nx = x.length;
-    const ny = y.length;
-    const dfx = nx - 1;
-    const dfy = ny - 1;
-
-    const meanX = x.reduce((prev, curr) => prev + curr) / nx;
-    const meanY = y.reduce((prev, curr) => prev + curr) / ny;
-
-    const varX = x.map(e => (e - meanX) ^ 2)
-        .reduce((prev, curr) => prev + curr) / dfx;
-
-    const varY = y.map(e => (e - meanY) ^ 2)
-        .reduce((prev, curr) => prev + curr) / dfy;
-
-    const sp2 = (varX * dfx + varY * dfy) / (dfx + dfy);
-    const tval = (meanX - meanY) / (Math.sqrt(sp2 * (1 / nx + 1 / ny)));
-
-    return tval;
-}
-
-const getMedian = (values) => {
-
-    // Sorting values, preventing original array
-    // from being mutated.
-    values = [...values].sort((a, b) => a - b);
-
-    const half = Math.floor(values.length / 2);
-
-    return (values.length % 2
-        ? values[half]
-        : (values[half - 1] + values[half]) / 2
-    );
+    return gseaScriptData;
 }
 
 export default GSEAomic
