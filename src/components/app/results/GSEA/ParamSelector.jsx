@@ -67,6 +67,7 @@ function ParamSelector({
 
     const handleGidColOpts = async (e, newValue) => {
         if (newValue == null) return;
+        setG2info(null);
         setGidCol(newValue);
 
         const g2i = {};
@@ -111,7 +112,7 @@ function ParamSelector({
             // Metabolomics
             gidColSerie.index.map((e, i) => {
                 g2i[e] = { f: [e], mz: gidColSerie.values[i] }
-            })
+            });
         }
 
         setG2info(g2i);
@@ -227,7 +228,7 @@ function ParamSelector({
         setIonValOpts(
             [...new Set(fx2i.column(newValue.id).values)].map(
                 e => ({ label: e, id: e })
-            )
+            ).slice(0,10) // Take only first ten elements
         );
     }
 

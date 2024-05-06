@@ -18,14 +18,14 @@ Constants
 const DB = {
     t: [
         { db: 'Custom', status: 'ok', show: true },
-        { db: 'HALLMARK', status: 'waiting', show: false },
-        { db: 'REACTOME', status: 'waiting', show: false },
-        { db: 'KEGG', status: 'waiting', show: false }
+        { db: 'HALLMARK', status: '', show: false, gseaRes: null },
+        { db: 'REACTOME', status: '', show: false, gseaRes: null },
+        { db: 'KEGG', status: '', show: false, gseaRes: null }
     ],
     m: [
         { db: 'Custom', status: 'ok', show: true },
-        { db: 'Mummichog (P)', status: '', show: false },
-        { db: 'Mummichog (N)', status: '', show: false }
+        { db: 'Mummichog (+)', status: '', show: false, gseaRes: null },
+        { db: 'Mummichog (-)', status: '', show: false, gseaRes: null }
     ]
 };
 
@@ -59,12 +59,15 @@ function GSEAomic({ omic }) {
     const { mdataType } = useJob();
 
     // Generate column options for feature id (protein or transcript) or mz (untargeted metab.)
-    const [gidCol, setGidCol] = useState(null);
+    const [gidCol, setGidCol] = useState(isM ? {id:'Apex m/z', label:'Apex m/z'} : null);
 
     // Mummichog Untargeted metabolomic enrichment
-    const [rtCol, setRtCol] = useState(null);
-    const [ionCol, setIonCol] = useState(null);
-    const [ionVal, setIonVal] = useState({ pos: null, neg: null });
+    const [rtCol, setRtCol] = useState(isM ? {id:'RT [min]', label:'RT [min]'} : null);
+    const [ionCol, setIonCol] = useState(isM ? {id:'Mode', label:'Mode'} : null);
+    const [ionVal, setIonVal] = useState({ 
+        pos: isM ? {id:'POS', label:'POS'} : null, 
+        neg: isM ? {id:'NEG', label:'NEG'} : null, 
+    }); // HANDLE RUN GSEA FOR METABOLOMICS
 
     // GSEA ranking metric
     const [rankCol, setRankCol] = useState(null);
@@ -107,7 +110,7 @@ function GSEAomic({ omic }) {
 
         // get rank
         const preData = g2info;
-        console.log(g2info)
+
         if (rankCol.label == 'PCA') {
             const ranks = results.EDA.PCA[omic].data.loadings;
             const pcakey = subRankCol.id.replace(/PCA/, '');
@@ -161,6 +164,14 @@ function GSEAomic({ omic }) {
 
         // Add GSEA job to waiting list
         if (!isM || (isM && rtCol && (ionVal.pos || ionVal.neg))) {
+            if (waitingGsea.length == 0) {
+                // If nothing is in waitingGsea --> change status to waiting
+                // If there is something in waitingGsea --> useEffect will change it after finished
+                setDb(prev => [
+                    ...prev.filter(e => e.db == 'Custom'),
+                    ...prev.filter(e => e.db != 'Custom').map(e => ({ ...e, status: 'waiting' }))
+                ]);
+            }
             setWaitingGsea(
                 prev => prev.length < 2 ?
                     [...prev, { id: myGseaID }] : [...prev.slice(0, 1), { id: myGseaID }]
@@ -179,9 +190,43 @@ function GSEAomic({ omic }) {
 
     }, [g2info, gidCol, rankCol, subRankCol, groups, rtCol, ionVal]);
 
-    // Fetch GSEA controlling by previous jobs
-    const fetchRunGsea = useCallback(async () => {
 
+    /*
+    BACK-END INTERACTION
+    */
+
+    const [backendStatus, setBackendStatus] = useState('ready'); // ready; sendJob
+
+    // Ask back-end for Gsea results
+    const fetchResultsRef = useRef();
+
+    const fetchResults = useCallback(async (mydb) => {
+        console.log('fetchResults: Getting GSEA results for ', mydb);
+
+        if (!isM) {
+            const res = await fetch(
+                `${API_URL}/get_gsea/${jobID}/${omic}/${gseaID}/${mydb}`
+            );
+            const resJson = await res.json();
+
+            if (resJson.status != 'waiting') {
+                setDb(prev => prev.map( e => {
+                    return e.db == mydb ? {...e, status: resJson.status, gseaID, gseaRes: resJson.gseaRes} : e;
+                }));
+                clearInterval(fetchResultsRef.current[mydb]);
+            }
+        } else {
+            console.log('for metabolomics')
+        }
+
+    }, [db, jobID, omic, gseaID, API_URL, fetchResultsRef]);
+
+    // Run GSEA in the back-end when there is one waiting job
+    // useEffect look at waitingGsea and run fetchRunGsea
+    const fetchRunGsea = useCallback(async () => {
+        console.log('fetchRunGsea');
+        setBackendStatus('sendJob'); // useEffect to laucnh fetchRunGsea will not work
+        
         let res;
         const myos = OS.scientific_name.replace(' ', '_');
 
@@ -201,7 +246,7 @@ function GSEAomic({ omic }) {
             );
         } else {
             res = await fetch(
-                `${API_URL}/run_mummichog/${jobID}/${omic}/${gseaID}`,
+                `${API_URL}/run_mummichog/${jobID}/${omic}/${gseaID}/${myos}`,
                 {
                     method: 'POST',
                     headers: {
@@ -213,17 +258,51 @@ function GSEAomic({ omic }) {
         }
 
         const resJson = await res.json();
-
         console.log(resJson);
 
-    }, [API_URL, jobID, gseaID, gseaData]);
+        // Get results
+        if (!isM) {
+            fetchResultsRef.current = {};
+            db.filter(e => e.db != 'Custom').map(e => {
+                fetchResultsRef.current[e.db] = setInterval(() => fetchResults(e.db), 5000);
+            });
+        } else {
+            console.log('Get for metabolomics');
+        }
+
+    }, [OS, API_URL, jobID, gseaID, gseaData, fetchResults, fetchResultsRef]);
 
     useEffect(() => {
-        // only fetch when there is one waiting job
-        if (waitingGsea.length != 1) return;
+        // only fetch when there is one waiting job and nothing is sent to back-end
+        console.log('useEffect: ', backendStatus);
+        if (waitingGsea.length != 1 || backendStatus != 'ready') return;
+        console.log('useEffect');
         const myTimeout = setTimeout(fetchRunGsea, 500);
         return () => clearTimeout(myTimeout);
-    }, [waitingGsea]);
+    }, [waitingGsea, fetchRunGsea, backendStatus]);
+
+    // Getting results finished
+    useEffect(() => {
+        if (db.every(e => e.status != 'waiting') && backendStatus == 'sendJob') {
+            console.log('useEffect to handle finish GSEA');
+
+            // If there is another element in the waiting list --> change status to waiting
+            if (waitingGsea.length > 1) {
+                console.log('Change status to waiting');
+                setDb(prev => [
+                    ...prev.filter(e => e.db == 'Custom'),
+                    ...prev.filter(e => e.db != 'Custom').map(e => ({ ...e, status: 'waiting' }))
+                ]);
+            }
+
+            setWaitingGsea(prev => prev.slice(1));
+            setBackendStatus('ready');
+        }
+    }, [waitingGsea, db]);
+
+    console.log(waitingGsea);
+    console.log(backendStatus);
+    console.log(db);
 
     return (
         <Box>
