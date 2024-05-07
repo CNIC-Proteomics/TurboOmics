@@ -142,7 +142,7 @@ function ParamSelector({
                 e => e.includes('int') || e.includes('float')
             )
         }
-    ]), [resStatus]);
+    ]), [resStatus, fx2i, mdataType]);
 
     const [subRankColOpts, setSubRankColOpts] = useState([]); // Number of component or metavariable
     const [showSubSection, setShowSubSection] = useState(false);

@@ -1,7 +1,7 @@
 import { Box, CircularProgress } from '@mui/material';
 import React, { useState } from 'react'
 
-const DbSelector = ({ db, selDb, setDb }) => {
+const DbSelector = ({ db, selDb, setDb, setShowEnrichment }) => {
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -12,22 +12,34 @@ const DbSelector = ({ db, selDb, setDb }) => {
                     setDb={setDb}
                     dbid={e.db}
                     status={e.status}
+                    label={e.label}
+                    setShowEnrichment={setShowEnrichment}
                 />
             ))}
         </Box>
     )
 }
 
-const SetButton = ({ selDb, setDb, dbid, status }) => {
+const SetButton = ({
+    selDb,
+    setDb,
+    dbid,
+    status,
+    label,
+    setShowEnrichment
+}) => {
 
     const selected = selDb == dbid;
     const [isHover, setIsHover] = useState(false);
 
     const handleClick = () => {
         if (status != 'ok') return;
+        setShowEnrichment(false);
+        setTimeout(() => setShowEnrichment(true), 500);
         setDb(prev => prev.map(e =>
             e.db == dbid ? { ...e, show: true } : { ...e, show: false }
         ));
+        
     }
 
     let bgColor = '#00000015';
@@ -36,9 +48,9 @@ const SetButton = ({ selDb, setDb, dbid, status }) => {
     if (selected) {
         bgColor = '#006633ff';
         textColor = '#ffffff';
-    } else if (status!='ok') {
+    } else if (status != 'ok') {
         bgColor = '#00000033';
-        textColor = '#000000aa';        
+        textColor = '#000000aa';
     } else if (isHover) {
         bgColor = '#00000033';
         textColor = '#000000aa';//'#ffffff';
@@ -62,12 +74,12 @@ const SetButton = ({ selDb, setDb, dbid, status }) => {
             onClick={handleClick}
         >
             <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
-                { status == 'waiting' &&
+                {status == 'waiting' &&
                     <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
                         <CircularProgress disableShrink size={15} />
                     </Box>
                 }
-                <Box>{dbid}</Box>
+                <Box>{label}</Box>
             </Box>
         </Box>
     )

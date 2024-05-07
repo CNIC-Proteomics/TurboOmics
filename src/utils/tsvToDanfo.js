@@ -54,8 +54,6 @@ export function tsvToDanfo(tsvString, sep = '\t', traspose = false) {
         }
 
         resolve(data);
-        /*let df = new dfd.DataFrame(data).setIndex({column: headers[0]});
-        df.drop({ columns: [headers[0]], inplace: true });
-        resolve(df);*/
+
     })
 }
