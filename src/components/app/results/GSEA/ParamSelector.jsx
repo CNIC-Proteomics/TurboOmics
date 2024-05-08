@@ -65,48 +65,57 @@ function ParamSelector({
         () => fx2i.columns.map(e => ({ label: e, id: e })),
         [fx2i]);
 
+    // Save previous gProfiler results
+    const [cachedG2i, setCachedG2i] = useState({});
+
     const handleGidColOpts = async (e, newValue) => {
         if (newValue == null) return;
         setG2info(null);
         setGidCol(newValue);
 
-        const g2i = {};
+        let g2i = {};
         const gidColSerie = fx2i.column(newValue.id);
 
         // Fetch from gProfiler only for Proteomics and Transcriptomics
         if (!isM) {
 
-            gidColSerie.values.map((g, i) => {
-                Object.keys(g2i).includes(g) ?
-                    g2i[g].f.push(gidColSerie.index[i]) : g2i[g] = { f: [gidColSerie.index[i]] };
-            });
+            if (Object.keys(cachedG2i).includes(newValue.id)) {
+                g2i = cachedG2i[newValue.id];
+            } else {
 
-            console.log('Fetch ENTREZ identifiers');
-            const res = await fetch(
-                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        "organism": OS.id,
-                        "target": "ENTREZGENE_ACC",
-                        "query": Object.keys(g2i)
-                    })
-                }
-            );
+                gidColSerie.values.map((g, i) => {
+                    Object.keys(g2i).includes(g) ?
+                        g2i[g].f.push(gidColSerie.index[i]) : g2i[g] = { f: [gidColSerie.index[i]] };
+                });
 
-            const resJson = await res.json();
+                console.log('Fetch ENTREZ identifiers');
+                const res = await fetch(
+                    'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "organism": OS.id,
+                            "target": "ENTREZGENE_ACC",
+                            "query": Object.keys(g2i)
+                        })
+                    }
+                );
 
-            const _g = [];
-            resJson.result.map(e => {
-                if (_g.includes(e.incoming) || e.converted == 'None') return;
-                _g.push(e.incoming);
-                g2i[e.incoming].gn = e.name;
-                g2i[e.incoming].egn = e.name.toUpperCase();
-                g2i[e.incoming].eid = e.converted;
-            });
+                const resJson = await res.json();
+
+                const _g = [];
+                resJson.result.map(e => {
+                    if (_g.includes(e.incoming) || e.converted == 'None') return;
+                    _g.push(e.incoming);
+                    g2i[e.incoming].gn = e.name;
+                    g2i[e.incoming].egn = e.name.toUpperCase();
+                    g2i[e.incoming].eid = e.converted;
+                });
+                setCachedG2i(prev => ({ ...prev, [newValue.id]: g2i }));
+            }
 
         } else {
             // Metabolomics
@@ -228,7 +237,7 @@ function ParamSelector({
         setIonValOpts(
             [...new Set(fx2i.column(newValue.id).values)].map(
                 e => ({ label: e, id: e })
-            ).slice(0,10) // Take only first ten elements
+            ).slice(0, 10) // Take only first ten elements
         );
     }
 
@@ -288,7 +297,7 @@ function ParamSelector({
                     </Box>
                 }
                 <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>Select GSEA Ranking Metric</Typography>
+                    <Typography type='body2'>Select {isM ? 'Enrichment' : 'GSEA'} Ranking Metric</Typography>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                         <Autocomplete
                             options={rankColOpts}

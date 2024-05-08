@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useJob } from '../../JobContext'
 import { Box } from '@mui/material'
 import OmicSelector from '../EDA/DataDistribution/OmicSelector';
 import GSEAomic from './GSEAomic';
+import useWindowSize from '@/hooks/useWindowSize';
 
 function GSEA() {
 

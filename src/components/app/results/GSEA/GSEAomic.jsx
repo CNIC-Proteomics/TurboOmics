@@ -21,8 +21,8 @@ const DB = {
     t: [
         { db: 'Custom', label: 'Custom', status: 'ok', show: true },
         { db: 'HALLMARK', label: 'HALLMARK', status: '', show: false, gseaRes: null },
+        { db: 'KEGG', label: 'KEGG', status: '', show: false, gseaRes: null },
         { db: 'REACTOME', label: 'REACTOME', status: '', show: false, gseaRes: null },
-        { db: 'KEGG', label: 'KEGG', status: '', show: false, gseaRes: null }
     ],
     m: [
         { db: 'Custom', label: 'Custom', status: 'ok', show: true },
@@ -177,12 +177,13 @@ function GSEAomic({ omic }) {
 
         // Show results section
         setTitleGsea(
-            `GSEA: ${gidCol.label} | 
+            `${isM ? 'QEA' : 'GSEA'}: ${gidCol.label} | 
             ${rankCol.label} | 
             ${subRankCol.label}
             ${rankCol.label == 't-test' ? ' | ' + groups.g1.label + ' vs ' + groups.g2.label : ''}`
         );
         setShowGsea(false);
+        setDb(prev => prev.map(e => ({ ...e, show: e.db == 'Custom' ? true : false })))
         setTimeout(() => setShowGsea(true), 500);
 
     }, [
@@ -363,6 +364,8 @@ function GSEAomic({ omic }) {
                                     :
                                     <EnrichmentTable
                                         gseaRes={db.filter(e => e.db == selDb)[0].gseaRes}
+                                        omic={omic}
+                                        db={selDb}
                                     />
                                 }
                             </MyMotion>
