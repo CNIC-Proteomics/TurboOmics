@@ -12,6 +12,7 @@ import DbSelector from './utils/DbSelector';
 import { getMedian, getTvalue } from './utils/stats';
 import { tsvToDanfo } from '@/utils/tsvToDanfo';
 import EnrichmentTable from './EnrichmentTable';
+import CustomEnrichment from './CustomEnrichment';
 
 
 /*
@@ -214,8 +215,39 @@ function GSEAomic({ omic }) {
         if (resJson.status != 'waiting') {
 
             let gseaRes = null;
+            let EC2fid = {};
             if (resJson.status == 'ok') {
-                gseaRes = !isM ? resJson.gseaRes : await tsvToDanfo(resJson.gseaRes, '\t', false);
+                if (isM) {
+                    gseaRes = await tsvToDanfo(resJson.gseaRes, '\t', false);
+
+                    /*const usrInput = await tsvToDanfo(resJson.usrInput, '\t', false)
+                    .map(e => { row2fid[e.massfeature_rows] = e.CompoundID_from_user });*/
+
+                    //const EC2fid = [];
+                    const EC2fid = await tsvToDanfo(resJson.usrInput2EC, '\t', false);
+                    //usrInput2EC.map(e => { EC2fid[e.EID] = e.CompoundID_from_user });
+
+                    gseaRes = gseaRes.map(e => {
+                        if (!e['overlap_EmpiricalCompounds (id)']) {
+                            return { ...e, overlap_fid: '' };
+                        } else {
+                            const myEC = e['overlap_EmpiricalCompounds (id)'].split(',');
+                            const fid = [...new Set(EC2fid.filter(e2 => myEC.includes(e2.EID)).map(e2 => e2.CompoundID_from_user))]
+                            return { ...e, overlap_fid: fid.join(',') };
+                        }
+
+                    });
+
+                    /*gseaRes = gseaRes.map(e => ({
+                        ...e,
+                        overlap_fid: !e['overlap_EmpiricalCompounds (id)'] ? '' :
+                            e['overlap_EmpiricalCompounds (id)'].split(',')
+                                .map(EC => EC2fid[EC]).join(',')
+                    }));*/
+
+                } else {
+                    gseaRes = resJson.gseaRes;
+                }
             }
 
             setDb(prev => prev.map(e => {
@@ -317,8 +349,6 @@ function GSEAomic({ omic }) {
         }
     }, [waitingGsea, db, backendStatus]);
 
-    console.log(db);
-
     /*
     DISPLAY DATABASE OPTIONS
     */
@@ -360,7 +390,7 @@ function GSEAomic({ omic }) {
                         {showEnrichment &&
                             <MyMotion>
                                 {selDb == 'Custom' ?
-                                    <Box>Custom Table</Box>
+                                    <CustomEnrichment gseaData={gseaData} omic={omic} />
                                     :
                                     <EnrichmentTable
                                         gseaRes={db.filter(e => e.db == selDb)[0].gseaRes}

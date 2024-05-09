@@ -46,9 +46,6 @@ function EnrichmentTable({ gseaRes, omic, db }) {
         }
     }, [myData]);
 
-    console.log(myData);
-    console.log(columns);
-
     const [rowSelection, setRowSelection] = useState({});
 
 
@@ -116,7 +113,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Box sx={{ width: 1050, border: '0px solid red' }}>
+            <Box sx={{ width: 1150, border: '0px solid red' }}>
                 <MaterialReactTable table={table} />
             </Box>
         </Box>
@@ -130,15 +127,7 @@ const handleExportData = (data, db) => {
         useKeysAsHeaders: true,
         filename: `GSEA_Enrichment_${db}`
     });
-
-    /*const data = myData.map(e => ({
-        'GO': e.native,
-        'Type': e.source,
-        'Name': e.name,
-        'FDR': e.FDR
-    }));*/
-
-    const csv = generateCsv(csvConfig)(data);
+    const csv = generateCsv(csvConfig)(data).replace(/,null/g, ',');
     download(csvConfig)(csv);
 };
 

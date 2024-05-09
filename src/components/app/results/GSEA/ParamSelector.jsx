@@ -473,7 +473,7 @@ function ParamSelector({
                             color='primary'
                             endIcon={<SendIcon />}
                             disabled={!(
-                                changeID && gidCol && rankCol && subRankCol && g2info &&
+                                true && gidCol && rankCol && subRankCol && g2info &&
                                 (rankCol.label != 't-test' || (groups.g1 && groups.g2))
                             )}
                             onClick={handleRunGSEA}

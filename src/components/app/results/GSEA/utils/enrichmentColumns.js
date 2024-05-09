@@ -28,40 +28,40 @@ export const COLUMNS = {
             header: 'padj',
             accessorKey: 'padj',
             filterFn: 'lessThanOrEqualTo',
-            size: 80,
+            size: 100,
             columnFilterModeOptions: [],
             ...common
         },
         {
             header: 'ES',
             accessorKey: 'ES',
-            filterFn: 'greaterThanOrEqualTo',
-            size: 80,
-            columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+            filterFn: 'greaterThan',
+            size: 100,
+            //columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
             ...common
         },
         {
             header: 'NES',
             accessorKey: 'NES',
             size: 100,
-            filterFn: 'greaterThanOrEqualTo',
-            columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+            filterFn: 'greaterThan',
+            //columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
             ...common
         },
         {
             header: 'N. Leading Edge',
             accessorKey: 'nLeadingEdge',
-            filterFn: 'greaterThanOrEqualTo',
-            columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
-            size: 180,
+            filterFn: 'greaterThan',
+            //columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+            size: 200,
             ...common
         },
         {
             header: 'Size',
             accessorKey: 'size',
-            size: 80,
-            filterFn: 'greaterThanOrEqualTo',
-            columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
+            size: 120,
+            filterFn: 'greaterThan',
+            //columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
             ...common
         },
     ],
@@ -99,6 +99,15 @@ export const COLUMNS = {
             ...common,
             columnFilterModeOptions: ['lessThanOrEqualTo', 'greaterThanOrEqualTo'],
 
+        },
+        {
+            header: 'Features',
+            accessorKey: 'overlap_fid',
+            size: 220,
+            ...common,
+            muiTableBodyCellProps: {
+                align: 'left',
+            }
         },
     ]
 }
