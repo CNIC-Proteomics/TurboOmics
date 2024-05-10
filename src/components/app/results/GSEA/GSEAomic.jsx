@@ -62,14 +62,14 @@ function GSEAomic({ omic }) {
     const { mdataType } = useJob();
 
     // Generate column options for feature id (protein or transcript) or mz (untargeted metab.)
-    const [gidCol, setGidCol] = useState(isM ? { id: 'Apex m/z', label: 'Apex m/z' } : null);
+    const [gidCol, setGidCol] = useState(null);//isM ? { id: 'Apex m/z', label: 'Apex m/z' } : null);
 
     // Mummichog Untargeted metabolomic enrichment
-    const [rtCol, setRtCol] = useState(isM ? { id: 'RT [min]', label: 'RT [min]' } : null);
-    const [ionCol, setIonCol] = useState(isM ? { id: 'Mode', label: 'Mode' } : null);
+    const [rtCol, setRtCol] = useState(null);//isM ? { id: 'RT [min]', label: 'RT [min]' } : null);
+    const [ionCol, setIonCol] = useState(null); //isM ? { id: 'Mode', label: 'Mode' } : null);
     const [ionVal, setIonVal] = useState({
-        pos: isM ? { id: 'POS', label: 'POS' } : null,
-        neg: isM ? { id: 'NEG', label: 'NEG' } : null,
+        pos: null, //isM ? { id: 'POS', label: 'POS' } : null,
+        neg: null //isM ? { id: 'NEG', label: 'NEG' } : null,
     }); // HANDLE RUN GSEA FOR METABOLOMICS
 
     // GSEA ranking metric

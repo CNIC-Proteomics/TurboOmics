@@ -16,24 +16,11 @@ function CustomGSEA({ f2MeanL, fSet }) {
     const EMPIRICAL_PVALUE = 100;
 
     const BASE_URL = useVars().BASE_URL;
-    //const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
-    //const mdataColInfo = useJob().mdataType[mdataCol];
-    /*const [groups, setGroups] = useState({
-        g1: mdataColInfo.levels[0],
-        g2: mdataColInfo.levels[1]
-    });*/
-
     const [loading, setLoading] = useState(false);
-
-    /*useEffect(() => {
-        const myTimeout = setTimeout(() => setLoading(true), 100);
-        const myTimeOut2 = setTimeout(() => setLoading(false), 1500);
-        return () => { clearTimeout(myTimeout); clearTimeout(myTimeOut2) };
-    }, [fSet]);*/
 
     const dataZ = useMemo(() => {
         return Object.keys(f2MeanL).map(
-            e => [e, f2MeanL[e]]//[e, f2MeanL[e][groups.g1] - f2MeanL[e][groups.g2]]
+            e => [e, f2MeanL[e]]
         );
     }, [f2MeanL]);
 
@@ -84,34 +71,6 @@ function CustomGSEA({ f2MeanL, fSet }) {
         </Box>
     )
 }
-
-/*const GroupsSelector = ({ groups, setGroups, mdataColInfo }) => {
-    return (
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ width: '20%' }}>
-                <MySelect
-                    options={mdataColInfo.levels.map(e => ({ label: e, value: e }))}
-                    onChange={
-                        e => setGroups(prev => ({ ...prev, g1: e.value }))
-                    }
-                    value={{ label: `${groups.g1}`, value: groups.g1 }}
-                    label=''
-                />
-            </Box>
-            <Box sx={{ mx: 2, pt: 3.5 }}><Typography variant='h6'>vs</Typography></Box>
-            <Box sx={{ width: '20%' }}>
-                <MySelect
-                    options={mdataColInfo.levels.map(e => ({ label: e, value: e }))}
-                    onChange={
-                        e => setGroups(prev => ({ ...prev, g2: e.value }))
-                    }
-                    value={{ label: `${groups.g2}`, value: groups.g2 }}
-                    label=''
-                />
-            </Box>
-        </Box>
-    )
-}*/
 
 const GSEAplot = ({ ES, setBool, deltaZ, score, pvalue }) => {
 
