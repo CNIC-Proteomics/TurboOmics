@@ -15,7 +15,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
 
     const isM = omic == 'm';
 
-    const columns = useMemo(() => COLUMNS[isM ? 'm' : 't']);
+    const columns = useMemo(() => COLUMNS[isM ? 'm' : 't'], [isM]);
     const myData = useMemo(() => {
         if (!isM) {
             return gseaRes.map(e => ({
@@ -27,7 +27,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
         } else {
             return gseaRes.filter(e => !(e.overlap_size==0 || e.pathway_size==0));
         }
-    }, [gseaRes]);
+    }, [gseaRes, isM]);
 
     const myDataStyle = useMemo(() => {
         if (!isM) {
@@ -44,7 +44,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
                 'p-value': Number.parseFloat(e['p-value']).toExponential(2)
             }));
         }
-    }, [myData]);
+    }, [myData, isM]);
 
     const [rowSelection, setRowSelection] = useState({});
 

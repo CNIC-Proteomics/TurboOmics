@@ -321,7 +321,9 @@ function GSEAomic({ omic }) {
         }
 
     }, [OS, API_URL, jobID, gseaID, gseaData, fetchResults,
-        fetchResultsRef, db, isM, omic, fx2i]);
+        fetchResultsRef, db, isM, omic, fx2i,
+        ionCol, ionVal, rtCol
+    ]);
 
     useEffect(() => {
         // only fetch when there is one waiting job and nothing is sent to back-end
