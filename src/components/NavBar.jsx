@@ -30,10 +30,10 @@ export default function MyNavBar() {
                     <Nav className="me-auto">
                         <Nav.Link href="home" className='mx-2'>Home</Nav.Link>
                         <Nav.Link href="TurboOmicsApp.html" active className='mx-2'>TurboOmics</Nav.Link>
-                        <Nav.Link href="webserver" className='mx-2'>Web Server</Nav.Link>
+                        <Nav.Link href="webserver" className='mx-2'>TurboPutative</Nav.Link>
                         <Nav.Link href="webservices" className='mx-2'>Web Services</Nav.Link>
                         <NavDropdown title="Help" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="webserverhelp">Web Server</NavDropdown.Item>
+                            <NavDropdown.Item href="webserverhelp">TurboPutative</NavDropdown.Item>
                             <NavDropdown.Item href="webserviceshelp">Web Services</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="moduleshelp">Modules</NavDropdown.Item>
@@ -43,7 +43,7 @@ export default function MyNavBar() {
                 </Navbar.Collapse>
             </Container>
             <Navbar.Collapse className="justify-content-end" >
-                <Navbar.Brand href="home" style={{fontSize:"1.2em"}}>TurboPutative</Navbar.Brand>
+                <Navbar.Brand href="home" style={{fontSize:"1.2em"}}>TurboOmics</Navbar.Brand>
             </Navbar.Collapse>
         </Navbar>
     );
