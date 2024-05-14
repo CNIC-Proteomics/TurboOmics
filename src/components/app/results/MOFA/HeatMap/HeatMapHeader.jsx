@@ -37,7 +37,7 @@ function HeatMapHeader({ nFeatRef }) {
                     }
                 </Box>
             ))}
-
+            <Box sx={{ width: '5%' }}></Box>
         </Box>
     )
 }

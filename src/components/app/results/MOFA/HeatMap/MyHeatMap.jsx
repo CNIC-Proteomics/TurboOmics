@@ -54,7 +54,7 @@ export function MyHeatMap({
     )
 }
 
-export const HeatMapIndex = ({ myIndex, mdataCol }) => {
+export const HeatMapIndex = ({ myIndex, mdataCol, showBorder }) => {
 
     const mdataColInfo = useJob().mdataType[mdataCol];
 
@@ -82,8 +82,8 @@ export const HeatMapIndex = ({ myIndex, mdataCol }) => {
                         key={index}
                         style={{
                             height: frequencyCount[value] * 500 / arrayA.length,
-                            borderTop: '2px solid #444444',
-                            borderBottom: '2px solid #444444',
+                            borderTop: showBorder && '2px solid #444444',
+                            borderBottom: showBorder && '2px solid #444444',
                         }}
                     >
                         <td style={{ paddingRight: 5 }}><Typography variant='h7'>{value}</Typography></td>

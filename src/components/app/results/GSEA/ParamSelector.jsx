@@ -40,7 +40,7 @@ function ParamSelector({
     subRankCol, setSubRankCol,
     groups, setGroups,
     handleRunGSEA,
-    changeID
+    changeID, ready
 }) {
 
     // check if this is a metabolomics section
@@ -473,12 +473,12 @@ function ParamSelector({
                             color='primary'
                             endIcon={<SendIcon />}
                             disabled={!(
-                                true && gidCol && rankCol && subRankCol && g2info &&
+                                ready && true && gidCol && rankCol && subRankCol && g2info &&
                                 (rankCol.label != 't-test' || (groups.g1 && groups.g2))
                             )}
                             onClick={handleRunGSEA}
                         >
-                            Run GSEA
+                            Run QEA
                         </Button>
                     </Box>
                 </MyMotion>

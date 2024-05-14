@@ -11,6 +11,10 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
 
     const { omics } = useJob();
 
+    // Show observation id in heatmap
+    const showIndex = useJob().user.mdata.shape[0] <= 24;
+    const mdataIdCol = useJob().user.mdata.columns[0];
+
     const savedZLegend = useResults().MOFA.displayOpts.zLegend;
     const [zLegend, updateZLegend] = useImmer(
         omics.reduce((o, e) => ({
@@ -51,7 +55,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
             <HeatMapHeader nFeatRef={nFeatRef} />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
-                    <HeatMapIndex myIndex={myIndex} mdataCol={mdataCol} />
+                    <HeatMapIndex myIndex={myIndex} mdataCol={mdataCol}  showBorder={true}/>
                 </Box>
                 {omics.map(omic => (
                     <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>
@@ -75,6 +79,9 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
                         }
                     </Box>
                 ))}
+                <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-start' }}>
+                    {showIndex && <HeatMapIndex myIndex={myIndex} mdataCol={mdataIdCol} showBorder={false} />}
+                </Box>
             </Box>
             <HeatMapLegend
                 nFeatRef={nFeatRef}

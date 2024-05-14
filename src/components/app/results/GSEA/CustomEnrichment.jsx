@@ -121,6 +121,7 @@ function CustomEnrichment({ gseaData, omic }) {
         enableFullScreenToggle: true,
         enableGlobalFilter: false,
         enableFilterMatchHighlighting: false,
+        muiTableContainerProps: { sx: { maxHeight: '500px' } },
         initialState: {
             density: 'compact',
             showColumnFilters: true,
@@ -149,7 +150,7 @@ function CustomEnrichment({ gseaData, omic }) {
     const filteredSet = table.getFilteredRowModel().rows.map((row) => row.original[fx2i.columns[0]]);
 
     return (
-        <Box sx={{ px: 5, pb: 3 }}>
+        <Box sx={{ px: 5, pb: 3, mt:2 }}>
             <MaterialReactTable table={table} />
             <Dialog
                 onClose={() => setPlotGsea(false)}

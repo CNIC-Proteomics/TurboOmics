@@ -72,7 +72,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
         enableFullScreenToggle: false,
         enableHiding: false,
         enableColumnActions: false,
-        muiTableContainerProps: { sx: { maxHeight: '400px' } },
+        muiTableContainerProps: { sx: { maxHeight: '500px' } },
         //onSortingChange: setSorting,
         enableFacetedValues: true,
         initialState: {

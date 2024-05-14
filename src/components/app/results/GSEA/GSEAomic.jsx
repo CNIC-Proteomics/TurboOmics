@@ -22,6 +22,9 @@ const DB = {
     t: [
         { db: 'Custom', label: 'Custom', status: 'ok', show: true },
         { db: 'HALLMARK', label: 'HALLMARK', status: '', show: false, gseaRes: null },
+        { db: 'GO_MF', label: 'GO:MF', status: '', show: false, gseaRes: null },
+        { db: 'GO_CC', label: 'GO:CC', status: '', show: false, gseaRes: null },
+        { db: 'GO_BP', label: 'GO:BP', status: '', show: false, gseaRes: null },
         { db: 'KEGG', label: 'KEGG', status: '', show: false, gseaRes: null },
         { db: 'REACTOME', label: 'REACTOME', status: '', show: false, gseaRes: null },
     ],
@@ -215,17 +218,10 @@ function GSEAomic({ omic }) {
         if (resJson.status != 'waiting') {
 
             let gseaRes = null;
-            let EC2fid = {};
             if (resJson.status == 'ok') {
                 if (isM) {
                     gseaRes = await tsvToDanfo(resJson.gseaRes, '\t', false);
-
-                    /*const usrInput = await tsvToDanfo(resJson.usrInput, '\t', false)
-                    .map(e => { row2fid[e.massfeature_rows] = e.CompoundID_from_user });*/
-
-                    //const EC2fid = [];
                     const EC2fid = await tsvToDanfo(resJson.usrInput2EC, '\t', false);
-                    //usrInput2EC.map(e => { EC2fid[e.EID] = e.CompoundID_from_user });
 
                     gseaRes = gseaRes.map(e => {
                         if (!e['overlap_EmpiricalCompounds (id)']) {
@@ -237,13 +233,6 @@ function GSEAomic({ omic }) {
                         }
 
                     });
-
-                    /*gseaRes = gseaRes.map(e => ({
-                        ...e,
-                        overlap_fid: !e['overlap_EmpiricalCompounds (id)'] ? '' :
-                            e['overlap_EmpiricalCompounds (id)'].split(',')
-                                .map(EC => EC2fid[EC]).join(',')
-                    }));*/
 
                 } else {
                     gseaRes = resJson.gseaRes;
@@ -337,14 +326,16 @@ function GSEAomic({ omic }) {
     // Getting results finished
     useEffect(() => {
         console.log('Ending useEffect - did finished?', backendStatus, db);
+
+        
         if (db.every(e => e.status != 'waiting') && backendStatus == 'sendJob') {
             console.log('useEffect will handle GSEA finish');
-
+            
             // If there is another element in the waiting list --> change status to waiting
-            if (waitingGsea.length > 1) {
+            /*if (waitingGsea.length > 1) {
                 console.log('Change status to waiting');
-                setDb(prev => prev.map(e.db == 'Custom' ? e : { ...e, status: 'waiting' }));
-            }
+                setDb(prev => prev.map(e => e.db == 'Custom' ? e : { ...e, status: 'waiting' }));
+            }*/
 
             setWaitingGsea(prev => prev.slice(1));
             setBackendStatus('ready');
@@ -356,8 +347,6 @@ function GSEAomic({ omic }) {
     */
     const [showEnrichment, setShowEnrichment] = useState(true);
     const selDb = db.filter(e => e.show)[0].db;
-    const selGseaRes = selDb == 'Custom' ? null :
-        db.filter(e => e.db == selDb)[0].gseaRes;
 
 
     return (
@@ -374,6 +363,7 @@ function GSEAomic({ omic }) {
                 groups={groups} setGroups={setGroups}
                 handleRunGSEA={handleRunGSEA}
                 changeID={gseaID != getGseaId()}
+                ready={waitingGsea.length == 0}
             />
             {showGsea &&
                 <MyMotion>
@@ -389,19 +379,21 @@ function GSEAomic({ omic }) {
                                 setShowEnrichment={setShowEnrichment}
                             />
                         </Box>
-                        {showEnrichment &&
-                            <MyMotion>
-                                {selDb == 'Custom' ?
-                                    <CustomEnrichment gseaData={gseaData} omic={omic} />
-                                    :
-                                    <EnrichmentTable
-                                        gseaRes={db.filter(e => e.db == selDb)[0].gseaRes}
-                                        omic={omic}
-                                        db={selDb}
-                                    />
-                                }
-                            </MyMotion>
-                        }
+                        <Box sx={{height:620}}>
+                            {showEnrichment &&
+                                <MyMotion>
+                                    {selDb == 'Custom' ?
+                                        <CustomEnrichment gseaData={gseaData} omic={omic} />
+                                        :
+                                        <EnrichmentTable
+                                            gseaRes={db.filter(e => e.db == selDb)[0].gseaRes}
+                                            omic={omic}
+                                            db={selDb}
+                                        />
+                                    }
+                                </MyMotion>
+                            }
+                        </Box>
                     </Box>
                 </MyMotion>
             }

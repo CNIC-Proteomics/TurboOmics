@@ -43,7 +43,7 @@ export default function MyNavBar() {
                 </Navbar.Collapse>
             </Container>
             <Navbar.Collapse className="justify-content-end" >
-                <Navbar.Brand href="home" style={{fontSize:"1.2em"}}>TurboOmics</Navbar.Brand>
+                <Navbar.Brand href="" style={{fontSize:"1.2em", userSelect:'none'}}>TurboOmics</Navbar.Brand>
             </Navbar.Collapse>
         </Navbar>
     );

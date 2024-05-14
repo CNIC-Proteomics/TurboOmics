@@ -35,6 +35,7 @@ const HeatMapLegend = ({ nFeatRef, zLegend, updateZLegend, plotHeatMap }) => {
                     </Box>
                 ))
             }
+            <Box sx={{ width: '5%' }}></Box>
         </Box>
     )
 }
@@ -81,7 +82,7 @@ const Legend = ({ a, b, updateZLegend, omic, plotHeatMap }) => {
             updateZLegend(draft => {
                 draft[omic][minmax] = numValue
             });
-            dispatchResults({type:'update-zlegend', omic, minmax, numValue});
+            dispatchResults({ type: 'update-zlegend', omic, minmax, numValue });
             plotHeatMap();
         }
     }
