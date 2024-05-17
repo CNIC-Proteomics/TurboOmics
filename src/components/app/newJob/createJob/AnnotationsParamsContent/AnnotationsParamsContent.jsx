@@ -20,11 +20,11 @@ function AnnotationsParamsContent({ setPage, setCreatingJob, setAnnotating }) {
     const dispatchJob = useDispatchJob();
 
     const [annParams, setAnnParams] = useState({
-        mzCol: { label: 'Apex m/z', id: 'Apex m/z' },
-        rtCol: { label: 'RT [min]', id: 'RT [min]' },
-        ionCol: { label: 'Mode', id: 'Mode' },
-        ionValPos: { label: 'POS', id: 'POS' },
-        ionValNeg: { label: 'NEG', id: 'NEG' },
+        mzCol: null,//{ label: 'Apex m/z', id: 'Apex m/z' },
+        rtCol: null,//{ label: 'RT [min]', id: 'RT [min]' },
+        ionCol: null,//{ label: 'Mode', id: 'Mode' },
+        ionValPos: null,//{ label: 'POS', id: 'POS' },
+        ionValNeg: null,//{ label: 'NEG', id: 'NEG' },
         mzError: 5,
         posAdd: ["M+H", "M+2H", "M+Na", "M+K", "M+H-H2O", "M+H+HCOONa", "M+NH4"],
         negAdd: ["M-H", "M-2H", "M-H+HCOONa", "M+Na-2H", "M+Cl", "M-H-H2O"],

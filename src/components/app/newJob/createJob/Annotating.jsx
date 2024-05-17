@@ -196,7 +196,7 @@ function Annotating() {
 
         // Run interval to ask if positive and negative finished
         setLoadText('Running TurboPutative');
-        getTPRef.current = setInterval(getTurboPutative, 5_000);
+        getTPRef.current = setInterval(getTurboPutative, 20_000);
 
     }, [annParams, mzBatches, getTPRef, getTurboPutative, API_URL, fetchCMM, jobID]);
 
