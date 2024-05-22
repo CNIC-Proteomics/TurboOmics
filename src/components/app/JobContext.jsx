@@ -33,10 +33,6 @@ function jobReducer(draft, action) {
     console.log(action);
 
     switch (action.type) {
-        case 'find-job': {
-            console.log('findJob');
-            return action.results;
-        }
         case 'set-os': {
             draft.OS = action.OS;
             break;

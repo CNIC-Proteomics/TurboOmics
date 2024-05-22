@@ -19,10 +19,10 @@ export default function Menu({ page, setPage, setCreatingJob, setAnnotating }) {
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
             {
                 page == 'new-job' &&
-                <LoadSampleBtn page={page} />
+                <LoadSampleBtn />
             }
             <MenuOption text='New Job' id='new-job' setPage={setPage} page={page}><CreateIcon /></MenuOption>
-            { false && 
+            { true && 
                 <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
             }
             <MenuOption text='Results' id='results' setPage={setPage} page={page}><ScienceIcon /></MenuOption>
