@@ -114,7 +114,7 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='QUANTITATIVE ENRICHMENT ANALYSIS' status='' />}
+                            label={<TabComponent text='ENRICHMENT ANALYSIS' status='' />}
                             value={2.1}
                             sx={{ fontSize: 12, m: 0, p: 0 }}
                             disabled={false}
