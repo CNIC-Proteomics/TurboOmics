@@ -22,7 +22,7 @@ export default function Menu({ page, setPage, setCreatingJob, setAnnotating }) {
                 <LoadSampleBtn />
             }
             <MenuOption text='New Job' id='new-job' setPage={setPage} page={page}><CreateIcon /></MenuOption>
-            { true && 
+            { false && 
                 <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
             }
             <MenuOption text='Results' id='results' setPage={setPage} page={page}><ScienceIcon /></MenuOption>

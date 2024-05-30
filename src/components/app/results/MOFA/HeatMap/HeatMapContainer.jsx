@@ -32,7 +32,6 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
     }, [omics, xi]);
 
     const myFeat = useMemo(() => {
-        console.log(plotHM);
         const myFeat = {};
         console.log(fLVec)
         omics.map(omic => {
@@ -55,7 +54,12 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
             <HeatMapHeader nFeatRef={nFeatRef} />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
-                    <HeatMapIndex myIndex={myIndex} mdataCol={mdataCol}  showBorder={true}/>
+                    <HeatMapIndex 
+                    myIndex={myIndex} 
+                    mdataCol={mdataCol}  
+                    showBorder={true}
+                    showLevel={true}
+                    />
                 </Box>
                 {omics.map(omic => (
                     <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>
@@ -80,7 +84,13 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
                     </Box>
                 ))}
                 <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-start' }}>
-                    {showIndex && <HeatMapIndex myIndex={myIndex} mdataCol={mdataIdCol} showBorder={false} />}
+                    {showIndex && 
+                    <HeatMapIndex 
+                    myIndex={myIndex} 
+                    mdataCol={mdataCol} 
+                    showBorder={false} 
+                    showLevel={false}
+                    />}
                 </Box>
             </Box>
             <HeatMapLegend

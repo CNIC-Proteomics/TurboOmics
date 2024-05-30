@@ -54,7 +54,7 @@ export function MyHeatMap({
     )
 }
 
-export const HeatMapIndex = ({ myIndex, mdataCol, showBorder }) => {
+export const HeatMapIndex = ({ myIndex, mdataCol, showBorder, showLevel }) => {
 
     const mdataColInfo = useJob().mdataType[mdataCol];
 
@@ -63,7 +63,12 @@ export const HeatMapIndex = ({ myIndex, mdataCol, showBorder }) => {
         [myIndex, mdataColInfo]
     )
 
-    const arrayA = hmData.map(e => e.id.split('##')).map(e => e[e.length - 1]);
+    let arrayA = [];
+    if (showLevel) {
+        arrayA = hmData.map(e => e.id.split('##')).map(e => e[e.length - 1]);
+    } else {
+        arrayA = hmData.map(e => e.id.split('##')).map(e => e.slice(0, -1).join("##"));
+    }
 
     // Crear un objeto para realizar el conteo de frecuencias
     const frequencyCount = {};
