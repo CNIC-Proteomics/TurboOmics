@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchJob, useJob } from '../../JobContext'
 import { useVars } from '@/components/VarsContext';
 
-const BATCH_SIZE = 5;
-const TIME_SLEEP = 1000; //in milliseconds
+const BATCH_SIZE = 2;
+const TIME_SLEEP = 1500; //in milliseconds
 const PROXY = "https://corsproxy.io";
 const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
 //const CMM_URI = "mediator/api/v3/batch";

@@ -32,6 +32,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
     }, [omics, xi]);
 
     const myFeat = useMemo(() => {
+        console.log(plotHM);
         const myFeat = {};
         console.log(fLVec)
         omics.map(omic => {
