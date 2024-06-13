@@ -1,8 +1,8 @@
 //import './globals.css'
 
 export const metadata = {
-  title: 'TurboOmics Integrator',
-  description: 'TurboPutative modules for the integration of Proteomics and Metabolomics data',
+  title: 'TurboOmics',
+  description: 'A web-based platform for the analysis of untargeted metabolomics with multi-omics integrative approach',
 }
 
 import { Roboto } from 'next/font/google'
@@ -23,6 +23,7 @@ export default function RootLayout({ children }) {
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
           crossOrigin="anonymous"
         />
+        
       </head>
       <body className={roboto.className}>
         {children}

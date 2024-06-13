@@ -3,11 +3,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchJob, useJob } from '../../JobContext'
 import { useVars } from '@/components/VarsContext';
 
-const BATCH_SIZE = 1;
-const TIME_SLEEP = 2000; //in milliseconds
+const BATCH_SIZE = 2;
+const TIME_SLEEP = 5000; //in milliseconds
 const PROXY = "https://corsproxy.io";
 const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
-//const CMM_URI = "mediator/api/v3/batch";
+const MY_FECTH = "https://truboomics.alwaysdata.net/get_cmm"
 
 function Annotating() {
 
@@ -114,18 +114,19 @@ function Annotating() {
 
             try {
                 const res = await fetch(
-                    `${PROXY}/?${CMM_URI}`,
+                    MY_FECTH,
+                    //`${PROXY}/?${encodeURIComponent(CMM_URI)}`,
                     {
                         method: 'POST',
                         headers: {
-                            "Content-Type": "application/json",
+                            "Content-Type": "application/json"
                         },
                         body: JSON.stringify(body)
                     });
-
+                
                 if (res.ok) {
                     console.log('Successful POST request');
-                    const resJson = await res.json()
+                    const resJson = await res.json();
                     resolve(resJson.results);
                 } else {
                     console.error('Error on POST request:', res.statusText);

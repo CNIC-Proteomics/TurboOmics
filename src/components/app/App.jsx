@@ -14,12 +14,12 @@ import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsContent
 import Annotating from './newJob/createJob/Annotating';
 
 
-
 export default function App() {
 
     const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
     const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", "annotations-params"
     const [annotating, setAnnotating] = useState(false);
+    
     return (
         <div>
             <JobProvider>
