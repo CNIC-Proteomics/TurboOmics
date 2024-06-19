@@ -22,9 +22,7 @@ export default function Menu({ page, setPage, setCreatingJob, setAnnotating }) {
                 <LoadSampleBtn />
             }
             <MenuOption text='New Job' id='new-job' setPage={setPage} page={page}><CreateIcon /></MenuOption>
-            { false && 
-                <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
-            }
+            <MenuOption text='Find Job' id='find-job' setPage={setPage} page={page}><SearchIcon /></MenuOption>
             <MenuOption text='Results' id='results' setPage={setPage} page={page}><ScienceIcon /></MenuOption>
             {
                 page == 'new-job' && user.mdata && omics.length > 0 && OS != null && // ((user.xm && user.m2i) && (user.xq && user.q2i)) && 

@@ -23,14 +23,11 @@ export function tsvToDanfo(tsvString, sep = '\t', traspose = false) {
                 })
             });
 
-            lines = trasposed.map(e => e.join('\t'));
+            lines = trasposed.map(e => e.join(sep));
             
         } else {    
             lines = tsvString.split(/[\r\n]+/);
         }
-
-
-        //const lines = tsvString.split(/[\r\n]+/);
 
         if (lines.length < 2) {
             throw new Error('String text does not have expected DataFrame format');

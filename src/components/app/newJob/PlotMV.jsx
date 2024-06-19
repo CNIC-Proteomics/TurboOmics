@@ -56,8 +56,6 @@ export default function PlotMV({ fileType, omic }) {
         MVType: MVType
     })
 
-    //if (MVdata == null) return (<></>)
-
     const error = console.error;
     console.error = (...args) => {
         if (/defaultProps/.test(args[0])) return;

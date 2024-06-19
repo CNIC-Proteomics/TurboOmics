@@ -4,7 +4,7 @@ import { JobProvider } from './JobContext';
 import MyMotion from '../MyMotion'
 import Menu from './menu/Menu';
 
-import NewJob from './newJob/NewJob'
+import NewJob from './newJob/NewJob';
 import FindJob from './findJob/FindJob';
 import Results from './results/Results'
 import { ResultsProvider } from './ResultsContext';
@@ -19,7 +19,7 @@ export default function App() {
     const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
     const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", "annotations-params"
     const [annotating, setAnnotating] = useState(false);
-    
+
     return (
         <div>
             <JobProvider>

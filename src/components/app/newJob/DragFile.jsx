@@ -9,7 +9,7 @@ import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
 const fileFormat = ["TSV"];
 
 
-export default function DragFile({ title, fileType, traspose=false }) {
+export default function DragFile({ title, fileType, traspose = false }) {
 
     const fileName = useJob().userFileNames[fileType];
     const dispatchJob = useDispatchJob();
@@ -27,8 +27,11 @@ export default function DragFile({ title, fileType, traspose=false }) {
     };
 
     return (
-        <div style={{ width: '30%', textAlign:'center' }}>
-            <Card sx={{ transition: "all 1s ease", backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)' }} >
+        <div style={{ width: '30%', textAlign: 'center' }}>
+            <Card sx={{
+                transition: "all 1s ease",
+                backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)'
+            }}>
                 <Typography variant="h6" className="pt-2">{title}</Typography>
                 <DialogHelp title={title} />
                 <Box sx={{ width: 400, margin: 'auto' }}>
