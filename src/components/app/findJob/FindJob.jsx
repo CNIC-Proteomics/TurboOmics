@@ -6,29 +6,41 @@ import SearchIcon from '@mui/icons-material/Search';
 
 import { useVars } from '../../VarsContext';
 import { useDispatchJob } from '../JobContext';
+import { json2Danfo } from '@/utils/jobDanfoJsonConverter';
+import { useDispatchResults } from '../ResultsContext';
 
-export default function FindJob({ setPage }) {
+export default function FindJob({ setPage, setAnnotating }) {
 
     const [searchedJobID, setSearchedJobID] = useState('');
     const [exist, setExist] = useState(true);
     
     const dispatchJob = useDispatchJob();
+    const dispatchResults = useDispatchResults();
     const API_URL = useVars().API_URL;
 
     async function handleSearch(searchedJobID) {
-        console.log(`Search Job ID: ${searchedJobID}`);
-        const response = await fetch(`${API_URL}/search/${searchedJobID}`);
-        const results = await response.json();
-        console.log('Server response received:');
-        //console.log(results);
+        if (searchedJobID == '') return; 
 
-        if (results.exist) {
-            //updateJob(results.results);
+        console.log(`Search Job ID: ${searchedJobID}`);
+        const res = await fetch(`${API_URL}/search/${searchedJobID}`);
+        const resJson = await res.json();
+
+        if (resJson.exist) {
+            console.log(resJson)
+            setAnnotating(false);
+            
             dispatchJob({
-                type: 'find-job',
-                results: results.results
-            })
+                type: 'set-job-context',
+                jobContext: json2Danfo(resJson.jobContext)
+            });
+            
+            dispatchResults({type:'reset-results'});
+            
+            if (resJson.jobContext.annParams != null) {
+                setAnnotating(true);
+            }
             setPage('results');
+
         } else {
             setExist(false)
         }

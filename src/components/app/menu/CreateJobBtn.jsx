@@ -8,12 +8,6 @@ import { useDispatchJob, useJob } from '../JobContext';
 import { useVars } from '@/components/VarsContext';
 import { useDispatchResults } from '../ResultsContext';
 
-const StyledCard = styled(Card)(({ theme }) => ({
-    transition: "transform 0.15s ease-in-out, background 0.15s",
-    "&:hover": { transform: "scale3d(1.05, 1.05, 1)", backgroundColor: 'rgba(255, 0, 0, 0.3)' },
-}));
-
-
 export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating }) {
 
     const dispatchJob = useDispatchJob();
@@ -21,7 +15,10 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
     const job = useJob();
     const { DEV_MODE, API_URL } = useVars();
 
+    const allowCreateJob = job.user.mdata!=null && job.omics.length>0 && job.OS != null;
+    
     const handleCreateJob = async () => {
+        if (!allowCreateJob) return;
 
         // Reset (if necessary) annotations of CMM
         setAnnotating(false);
@@ -31,12 +28,13 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
 
         // Get and set jobID
         const jobID = DEV_MODE ? '123456' : generateIdentifier(10);
+        //const jobID = generateIdentifier(10);
 
         console.log(`Creating job: ${jobID}`);
-        dispatchJob({
+        /*dispatchJob({
             type: 'set-job-id',
             jobID: jobID
-        });
+        });*/
 
         // Generate boolean array with size of f2i indicating 
         // features that will be contained in xi_norm
@@ -52,10 +50,10 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
             });
         });
 
-        dispatchJob({
+        /*dispatchJob({
             type: 'set-f2x',
             f2x
-        });
+        });*/
 
         // Create job in back-end
         const res = await fetch(`${API_URL}/create_job`, {
@@ -87,8 +85,23 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
     }
 
     return (
-        <StyledCard
-            sx={{ ...getStyle('rgba(255, 0, 0, 0.2)'), position: 'absolute', right: '12%' }}
+        <Card
+            sx={{
+                width: 110,
+                height: 70,
+                textAlign: 'center',
+                cursor: !allowCreateJob ? 'not-allowed' : 'pointer',
+                userSelect: 'none',
+                margin: "0px 15px",
+                position: 'absolute', 
+                right: '12%',
+                backgroundColor: allowCreateJob ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0,0,0,0.10)',
+                transition: "transform 0.15s ease-in-out, background 0.15s",
+                "&:hover": allowCreateJob && { 
+                    transform: "scale3d(1.05, 1.05, 1)", 
+                    backgroundColor: 'rgba(255, 0, 0, 0.3)' 
+                },
+            }}
             onClick={handleCreateJob}
         >
             <Box sx={{ py: 1 }}>
@@ -97,6 +110,6 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
             <Box>
                 <Typography gutterBottom variant="h7" component="div">Create Job</Typography>
             </Box>
-        </StyledCard>
+        </Card>
     )
 }

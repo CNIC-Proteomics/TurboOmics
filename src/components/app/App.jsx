@@ -63,7 +63,7 @@ export default function App() {
                     {
                         page == 'find-job' &&
                         <MyMotion>
-                            <FindJob setPage={setPage} />
+                            <FindJob setPage={setPage} setAnnotating={setAnnotating} />
                         </MyMotion>
                     }
 

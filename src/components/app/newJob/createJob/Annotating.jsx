@@ -5,13 +5,13 @@ import { useVars } from '@/components/VarsContext';
 
 const BATCH_SIZE = 2;
 const TIME_SLEEP = 5000; //in milliseconds
-const PROXY = "https://corsproxy.io";
-const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
-const MY_FECTH = "https://truboomics.alwaysdata.net/get_cmm"
+//const PROXY = "https://corsproxy.io";
+//const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
+//const MY_FECTH = "https://truboomics.alwaysdata.net/get_cmm"
 
 function Annotating() {
 
-    const { SERVER_URL, API_URL } = useVars();
+    const { SERVER_URL, API_URL, FETCH_CMM_URL } = useVars();
 
     const getTPRef = useRef();
 
@@ -27,8 +27,8 @@ function Annotating() {
 
     // Component state
     const [progress, setProgress] = useState(0);
-    const [loadText, setLoadText] = useState('');
-    const [status, setStatus] = useState('waiting'); // waiting, error, ok
+    const [status, setStatus] = useState(annParams.status); // waiting, error, ok
+    const [loadText, setLoadText] = useState(annParams.status == 'ok' ? 'CMM & TP Finished:' : '');
 
     // Batches of mz to be sent to CMM
     const mzBatches = useMemo(() => {
@@ -114,7 +114,7 @@ function Annotating() {
 
             try {
                 const res = await fetch(
-                    MY_FECTH,
+                    FETCH_CMM_URL,
                     //`${PROXY}/?${encodeURIComponent(CMM_URI)}`,
                     {
                         method: 'POST',
@@ -123,14 +123,14 @@ function Annotating() {
                         },
                         body: JSON.stringify(body)
                     });
-                
+
                 if (res.ok) {
                     console.log('Successful POST request');
                     const resJson = await res.json();
                     resolve(resJson.results);
                 } else {
                     console.error('Error on POST request:', res.statusText);
-                    reject([]);
+                    resolve([]);
                 }
             } catch (error) {
                 console.error('Error al realizar la solicitud POST:', error);
@@ -151,7 +151,7 @@ function Annotating() {
             setLoadText('Running CMM Positive Mode');
 
             for (let i = 0; i < mzBatches.pos.length; i++) {
-            //for (let i = 0; i < 1; i++) {
+                //for (let i = 0; i < 1; i++) {
                 setProgress(100 * (i + 1) / mzBatches.pos.length);
                 const resCMM = await fetchCMM('positive', annParams.posAdd, mzBatches.pos[i]);
                 fullResCMM.pos = [...fullResCMM.pos, ...resCMM];
@@ -176,7 +176,7 @@ function Annotating() {
             setLoadText('Running CMM Negative Mode');
 
             for (let i = 0; i < mzBatches.neg.length; i++) {
-            //for (let i = 0; i < 1; i++) {
+                //for (let i = 0; i < 1; i++) {
                 setProgress(100 * (i + 1) / mzBatches.neg.length);
                 const resCMM = await fetchCMM('negative', annParams.negAdd, mzBatches.neg[i]);
                 fullResCMM.neg = [...fullResCMM.neg, ...resCMM];
@@ -202,7 +202,8 @@ function Annotating() {
     }, [annParams, mzBatches, getTPRef, getTurboPutative, API_URL, fetchCMM, jobID]);
 
     useEffect(() => {
-        console.log('useEffect: Run CMM & TP')
+        if (status != 'waiting') return;
+        console.log('useEffect: Run CMM & TP');
         const cmmTimeOut = setTimeout(requestCMM, 1000);
         return () => clearTimeout(cmmTimeOut);
     }, [requestCMM]);

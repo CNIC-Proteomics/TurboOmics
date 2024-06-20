@@ -33,7 +33,8 @@ function AnnotationsParamsContent({ setPage, setCreatingJob, setAnnotating }) {
         mRtWNeg: 0.1,
         lRtWNeg: 2,
         lipidAddPos: DEFAULT_POSITIVE_DATA_NH4,
-        lipidAddNeg: DEFAULT_NEGATIVE_DATA
+        lipidAddNeg: DEFAULT_NEGATIVE_DATA,
+        status: 'waiting'
     });
 
     const onAnnotate = () => {
@@ -66,7 +67,7 @@ function AnnotationsParamsContent({ setPage, setCreatingJob, setAnnotating }) {
             <AnnotateButton
                 showButton={
                     annParams.mzCol &&
-                    //annParams.rtCol &&
+                    annParams.rtCol &&
                     annParams.ionCol &&
                     (
                         (annParams.ionValPos && annParams.posAdd.length > 0) ||

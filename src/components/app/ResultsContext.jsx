@@ -177,10 +177,6 @@ const resultsTemplate = {
     'status': {
         EDA_PCA: { status: 'waiting' }, // waiting, ok, error
         MOFA: { status: 'waiting' },
-        //LEIDEN: 'waiting',
-        //rCCA: 'waiting',
-        //DCA: 'waiting',
-        //ENET: 'waiting'
     },
     'EDA': {
         'DD': { // Data distribution section

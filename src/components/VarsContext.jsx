@@ -9,6 +9,8 @@ const VarsContext = createContext({
         'https://proteomics.cnic.es/TurboPutative',
     API_URL: DEV_MODE ? 'http://localhost:8080/TurboPutative/api/tbomics' :
         'https://proteomics.cnic.es/TurboPutative/api/tbomics',
+    FETCH_CMM_URL: DEV_MODE ? 'http://localhost:8000/get_cmm' :
+        'https://truboomics.alwaysdata.net/get_cmm',
     OMIC2NAME: {
         'q': 'Proteomics',
         'm': 'Metabolomics',

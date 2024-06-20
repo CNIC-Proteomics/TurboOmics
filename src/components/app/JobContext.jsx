@@ -38,14 +38,14 @@ function jobReducer(draft, action) {
             break;
         }
         case 'user-upload': {
-            
+
             let df = new dfd.DataFrame(action.dfJson);
-            
+
             df.setIndex({ column: df.columns[0], inplace: true });
-            
+
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 const omic = action.fileType.slice(-1)
-                
+
                 df.drop({ columns: [df.columns[0]], inplace: true });
 
                 // Missing values calculations
@@ -153,10 +153,10 @@ function jobReducer(draft, action) {
             break;
         }
 
-        case 'set-job-id': {
+        /*case 'set-job-id': {
             draft.f2x = action.f2x;
             break;
-        }
+        }*/
 
         case 'set-ann-params': {
             draft.annParams = action.annParams;
@@ -234,8 +234,8 @@ const jobTemplate = {
                 'xt': 'KNN'
             }
         },
-        annParams: null // Annotations params for putative annotations
-    }
+    },
+    annParams: null // Annotations params for putative annotations
 }
 
 const sortOmics = (sOmics) => {

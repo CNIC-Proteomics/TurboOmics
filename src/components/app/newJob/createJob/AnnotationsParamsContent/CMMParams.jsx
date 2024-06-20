@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 function CMMParams({ annParams, setAnnParams }) {
     return (
         <Box>
-
             <Box sx={{ display: 'block', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <Box>
                     <Typography variant='h6'>Tolerance (ppm)</Typography>
