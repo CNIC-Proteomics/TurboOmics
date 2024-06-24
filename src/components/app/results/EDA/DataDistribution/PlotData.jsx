@@ -147,11 +147,16 @@ export default function PlotData({
         dataHist = dataHist.flat();
         dataHist.sort((a, b) => a.binCenter - b.binCenter);
 
-        const yMaxHist = Math.max(...dataHist.map(e => e.d))
+        let yMaxHist = 0;
+        const allDensities = dataHist.map(e => e.d);
+        for (let i=0; i<allDensities.length; i++) {
+            yMaxHist = allDensities[i] > yMaxHist ? allDensities[i] : yMaxHist;
+        }
+
         const yrange = [0, Number.parseFloat((1.05 * yMaxHist).toPrecision(2))]
 
         return { dataHist, yrange };
-    }, [myData, minimum, maximum])
+    }, [myData, minimum, maximum]);
 
     // Generate data used for BoxPlot
     const dataBox = useMemo(() => {

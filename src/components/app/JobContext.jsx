@@ -153,11 +153,6 @@ function jobReducer(draft, action) {
             break;
         }
 
-        /*case 'set-job-id': {
-            draft.f2x = action.f2x;
-            break;
-        }*/
-
         case 'set-ann-params': {
             draft.annParams = action.annParams;
             break;

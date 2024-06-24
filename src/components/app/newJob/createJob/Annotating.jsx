@@ -137,7 +137,7 @@ function Annotating() {
                 reject([]);
             }
         })
-    }, [annParams])
+    }, [annParams, FETCH_CMM_URL])
 
     // Loop all mz batches
     const requestCMM = useCallback(async () => {
@@ -206,7 +206,7 @@ function Annotating() {
         console.log('useEffect: Run CMM & TP');
         const cmmTimeOut = setTimeout(requestCMM, 1000);
         return () => clearTimeout(cmmTimeOut);
-    }, [requestCMM]);
+    }, [requestCMM, status]);
 
     return (
         <Box
