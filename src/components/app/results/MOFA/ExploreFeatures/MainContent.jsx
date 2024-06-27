@@ -85,7 +85,13 @@ function MainContent({ omic, thrLRef }) {
 
 
     // Selection of column containing protein/transcript ID
-    const [colFid, setColFid] = useState({ label: f2i.columns[0], id: f2i.columns[0] });
+    const [colFid, setColFid] = useState(
+        omic == 'm' ? {
+            kegg: null,
+            chebi: null
+        } : 
+        { label: f2i.columns[0], id: f2i.columns[0] }
+    );
 
     // Array containing enriched categories filtered by user
     // They will be downloadable from main table
@@ -132,6 +138,8 @@ function MainContent({ omic, thrLRef }) {
                                             <EnrichmentM
                                                 fRef={fFact[sign]}
                                                 f2MeanL={f2MeanL}
+                                                colFid={colFid}
+                                                setColFid={setColFid}
                                             />
                                         }
                                     </Box>
