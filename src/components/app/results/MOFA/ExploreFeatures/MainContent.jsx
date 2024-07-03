@@ -86,10 +86,7 @@ function MainContent({ omic, thrLRef }) {
 
     // Selection of column containing protein/transcript ID
     const [colFid, setColFid] = useState(
-        omic == 'm' ? {
-            kegg: null,
-            chebi: null
-        } : 
+        omic == 'm' ? null : 
         { label: f2i.columns[0], id: f2i.columns[0] }
     );
 
@@ -140,6 +137,7 @@ function MainContent({ omic, thrLRef }) {
                                                 f2MeanL={f2MeanL}
                                                 colFid={colFid}
                                                 setColFid={setColFid}
+                                                setM2cat={setQ2cat_sign[sign]}
                                             />
                                         }
                                     </Box>

@@ -120,23 +120,16 @@ function EnrichmentQ({
                         mdataColInfo.type == 'categorical' &&
                         mdataColInfo.levels.length > 1 &&
                         qCat &&
-                        <>
-                            {false && <GSEA
-                                f2MeanL={f2MeanL}
-                                fSet={qCat.map(e => e.converted)}
-                                omic='q'
-                            />}
-                            <Box sx={{ pl: 2, mt: 13 }}>
-                                <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.2s' }}>
-                                    <ProteinCategoryTable
-                                        qCat={qCat}
-                                        fRef={fRef}
-                                        omic={omic}
-                                        colFid={colFid}
-                                    />
-                                </Box>
+                        <Box sx={{ pl: 2, mt: 13 }}>
+                            <Box sx={{ opacity: loadingPCTable ? 0 : 1, transition: 'all ease 0.2s' }}>
+                                <ProteinCategoryTable
+                                    qCat={qCat}
+                                    fRef={fRef}
+                                    omic={omic}
+                                    colFid={colFid}
+                                />
                             </Box>
-                        </>
+                        </Box>
                     }
                 </Box>
             </Box>

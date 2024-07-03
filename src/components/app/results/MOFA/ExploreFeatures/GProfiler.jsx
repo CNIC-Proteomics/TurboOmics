@@ -81,8 +81,6 @@ function GProfiler({
 
         setGoRes(resJson);
 
-        // Create 
-
     }, [OS, fSet, myBackg]);
 
     useEffect(() => {

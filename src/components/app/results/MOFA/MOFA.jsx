@@ -59,7 +59,7 @@ function MOFA() {
     Get arrays for pvalue table
     */
     const [colNames, factorNames] = useMemo(
-        () => getFactorNames(dataMOFA, setSelectedPlot), [dataMOFA],
+        () => getFactorNames(dataMOFA), [dataMOFA],
     );
     const rowNames = useMemo(
         () => getRowNames(dataMOFA, factorNames), [dataMOFA, factorNames]
