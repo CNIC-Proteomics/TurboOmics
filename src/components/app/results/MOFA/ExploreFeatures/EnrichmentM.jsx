@@ -1,13 +1,16 @@
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import MetabolomicSetSelector from './MetabolomicSetSelector'
 import GSEA from './GSEA'
 import { useResults } from '@/components/app/ResultsContext'
 import { useJob } from '@/components/app/JobContext'
 import FieldSelector from './FieldSelector'
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 import { MetaboID } from '@/utils/MetaboID'
 import { useVars } from '@/components/VarsContext'
+import { download, generateCsv, mkConfig } from 'export-to-csv'
+import { MaterialReactTable, useMaterialReactTable } from 'material-react-table'
 
 // constants
 const idTypeOpts = [
@@ -21,11 +24,16 @@ const idTypeOpts = [
 
 function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
 
-    const {API_URL} = useVars();
+    const { jobID } = useJob();
+    const { API_URL } = useVars();
     const { m2i } = useJob().user;
     const m2x = useJob().f2x.m;
-    const {OS} = useJob();
-   
+    const { OS } = useJob();
+
+    /*
+    Parameters to select column and ID type
+    */
+
     // Select columns from m2i to get ID
     const f2iColumns = useMemo(
         () => m2i.columns.map(e => ({ label: e, id: e })),
@@ -34,8 +42,13 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
     // Metabolomics ID type selected
     const [idType, setIdType] = useState(idTypeOpts[0]);
 
-    //const mdataCol = useResults().MOFA.displayOpts.selectedPlot.mdataCol;
-    //const mdataColInfo = useJob().mdataType[mdataCol];
+    /**/
+
+    /*
+    Get enrichment from myORA.py
+    */
+
+    const [resORA, setResORA] = useState([]);
 
     // Handle change on column containing ID or ID_type
     useEffect(() => {
@@ -48,12 +61,13 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
         let midTargetArr = fRef.map(e => e[colFid.id]).filter(e => e);
 
         let midArr = m2i.column(colFid.id).values.filter((e, i) => e && m2x[i]);
-        
+
+        // Convert id to integer string
         if (['ChEBI', 'PubChem'].includes(idType.id)) {
             midTargetArr = midTargetArr.map(e => Number(e).toString());
             midArr = midArr.map(e => Number(e).toString());
         }
-               
+
         midArr = midArr.map(e => ({ id: e, target: midTargetArr.includes(e) }))
 
         // Obtain map index of user metabolites
@@ -62,29 +76,55 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
         // if no map was obtained go out
         if (midIndex.every(e => e == -1)) {
             console.log('No index found');
+            setResORA([]);
             return
         }
         // Build object to be sent to back-end
         ['KEGG', 'ChEBI'].map(db => {
             ORAinput[db] = midIndex
-            .map((e, i) => ({ id: MetaboID[db][e], target: midArr[i].target }))
-            .filter( e => e.id)
+                .map((e, i) => ({ id: MetaboID[db][e], target: midArr[i].target }))
+                .filter(e => e.id)
         });
 
         fetch(
-            `${API_URL}/run_ora/${OS['scientific_name']}`,
+            `${API_URL}/run_ora/${jobID}/${OS['scientific_name']}`,
             {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ORAinput)
             }
         )
-        .then(res => res.json())
-        .then(resJson => console.log(resJson));
+            .then(res => res.json())
+            .then(resJson => {
+                resJson.KEGG = resJson.KEGG.map(e => ({
+                    ...e, name: e.name.split(' - ').slice(0, -1).join(' - ')
+                }));
+                let myResORA = [];
+                Object.keys(resJson).map(db => {
+                    resJson[db].map(e => myResORA.push({
+                        ...e, pvalue: Math.round(e.pvalue * 1000) / 1000, db: db
+                    }))
+                })
+                setResORA(myResORA.filter(e => e.N_pathway_sig > 0));
+            });
 
     }, [colFid, idType]);
 
+    /**/
+
+    /*
+    Store categories selected by user
+    */
+
+    const [category, setCategory] = useState(null);
+    const [myUsrFilt, setMyUsrFilt] = useState([]);
+
+    useEffect(() => {
+        console.log('setM2Cat');
+    }, [myUsrFilt])
+
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
+        <Box sx={{}}>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <FieldSelector
                     options={f2iColumns}
@@ -102,8 +142,357 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
                     Select ID Type
                 </FieldSelector>
             </Box>
+            {colFid &&
+                <Box sx={{ display: 'flex', justifyContent: 'space-around', mt: 4 }}>
+                    <Box sx={{ border: '1px solid red', width: '65%' }}>
+                        <CategoryTable
+                            myData={resORA}
+                            setCategory={setCategory}
+                            myUsrFilt={myUsrFilt}
+                            setMyUsrFilt={setMyUsrFilt}
+                        />
+                    </Box>
+                    <Box sx={{ border: '1px solid red', width: '30%' }}>
+                        {category &&
+                            <MetaboliteCategoryTable
+                                mCat={category}
+                                colFid={colFid}
+                            />
+                        }
+                    </Box>
+                </Box>
+            }
         </Box>
     )
 }
+
+const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
+    const handleExportData = () => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename: `Metabolite_Enrichment`
+        });
+
+        const data = myData.map(e => ({
+            'ID': e.id,
+            'Type': e.db,
+            'Name': e.name,
+            'pvalue': e.pvalue,
+            'FDR': e.FDR,
+            'N. mapped': e.N_pathway_mapped,
+            'N. target': e.N_pathway_sig
+        }));
+
+        const csv = generateCsv(csvConfig)(data);
+        download(csvConfig)(csv);
+    };
+    const columns = useMemo(() => ([
+        {
+            header: 'ID',
+            accessorKey: 'id',
+            size: 100,
+        },
+        {
+            header: 'Type',
+            accessorKey: 'db',
+            size: 120,
+            filterVariant: 'multi-select'
+        },
+        {
+            header: 'Name',
+            accessorKey: 'name',
+            size: 250,
+        },
+        {
+            header: 'pvalue',
+            accessorKey: 'pvalue',
+            size: 80,
+            filterFn: 'lessThan',
+        },
+        {
+            header: 'FDR',
+            accessorKey: 'FDR',
+            size: 80,
+            filterFn: 'lessThan'
+        },
+        {
+            header: 'N. mapped',
+            accessorKey: 'N_pathway_mapped',
+            size: 80,
+            //filterFn: 'lessThan'
+        },
+        {
+            header: 'N. mapped',
+            accessorKey: 'N_pathway_sig',
+            size: 80,
+            //filterFn: 'lessThan'
+        },
+    ]), []);
+
+    // Row selection for GSEA
+    const initialSelectedRow = useMemo(() => {
+        return myData.length > 0 ? { [myData[0].id]: true } : {}
+    }, [myData]);
+    const [rowSelection, setRowSelection] = useState(initialSelectedRow);
+
+    useEffect(() => {
+        if (Object.keys(rowSelection).length == 0) {
+            setCategory(null);
+        } else {
+            setCategory(
+                myData.filter(e => e.id == Object.keys(rowSelection)[0])[0]
+            );
+        };
+    }, [rowSelection, myData, setCategory]);
+
+    const table = useMaterialReactTable({
+        columns,
+        data: myData, //10,000 rows
+        //defaultDisplayColumn: { enableResizing: true },
+        layoutMode: 'grid',
+        enableBottomToolbar: false,
+        enableColumnResizing: true,
+        //enableColumnVirtualization: true,
+        //enableGlobalFilterModes: true,
+        enablePagination: false,
+        enableColumnPinning: false,
+        enableRowNumbers: false,
+        //enableRowVirtualization: true,
+        enableRowActions: false,
+        enableRowSelection: true,
+        enableMultiRowSelection: false,
+        enableDensityToggle: false,
+        enableColumnFilters: true,
+        enableFullScreenToggle: false,
+        enableHiding: false,
+        enableColumnActions: false,
+        muiTableContainerProps: { sx: { maxHeight: '250px' } },
+        //onSortingChange: setSorting,
+        enableFacetedValues: true,
+        initialState: {
+            density: 'compact',
+            showGlobalFilter: true,
+            showColumnFilters: true,
+            columnFilters: [{ id: 'pvalue', value: 0.05 }],
+            rowSelection: { initialSelectedRow },
+            sorting: [{ id: 'pvalue', desc: false }]
+        },
+        positionToolbarAlertBanner: 'bottom', //move the alert banner to the bottom
+        getRowId: (row) => row.id, //give each row a more useful id
+        muiTableBodyRowProps: ({ row }) => ({
+            //add onClick to row to select upon clicking anywhere in the row
+            onClick: row.getToggleSelectedHandler(),
+            sx: { cursor: 'pointer' },
+        }),
+        onRowSelectionChange: setRowSelection, //connect internal row selection state to your own
+        state: { rowSelection },
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box
+                sx={{
+                    display: 'flex',
+                    gap: '16px',
+                    padding: '8px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={handleExportData}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export All Data
+                </Button>
+            </Box>
+        )
+    });
+
+    // Capture user filter
+    const [usrFilt, setUsrFilt] = useState(myData.map(e => e.native));
+    const newUsrFilt = table.getFilteredRowModel().rows.map(e => e.id);
+
+    if (
+        !usrFilt.every(e => newUsrFilt.includes(e)) ||
+        !newUsrFilt.every(e => usrFilt.includes(e))
+    ) {
+        setUsrFilt(newUsrFilt);
+    }
+
+    useEffect(() => {
+        console.log('Setting ID')
+        if (
+            !myUsrFilt.every(e => usrFilt.includes(e)) ||
+            !usrFilt.every(e => myUsrFilt.includes(e))
+        ) {
+            setMyUsrFilt(usrFilt)
+        }
+    }, [usrFilt, setMyUsrFilt, myUsrFilt]);
+
+    return (
+        <>
+            <MaterialReactTable table={table} />
+        </>
+    )
+};
+
+const MetaboliteCategoryTable = ({ mCat, colFid }) => {
+
+    const idCol = colFid.id; // useJob().user.q2i.columns[0];
+
+    const { myData, mySet } = useMemo(() => {
+        let myData = [];
+        /*mCat.pathway_sig.map(e => {
+            const eidx = MetaboID[mCat.db].indexOf(e);
+            myData.push({
+                'ID': MetaboID[idCol][eidx],
+                'Name': MetaboID['Name'][eidx],
+                'Target': true
+            });
+        });*/
+        mCat.pathway_mapped.map(e => {
+            const eidx = MetaboID[mCat.db].indexOf(e);
+            myData.push({
+                'ID': MetaboID[idCol][eidx],
+                'Name': MetaboID['Name'][eidx],
+                'Target': mCat.pathway_sig.includes(e)
+            });
+        });
+        myData.sort((a, b) => (b.Target - a.Target));
+
+        let mySet = {};
+        myData.map(e => { if (e.Target) mySet[e.ID] = true });
+        return { myData, mySet }
+    }, [mCat, idCol]);
+
+    console.log(mySet)
+
+    /*const mySet = useMemo(() => {
+        const mySet = {};
+        fRef.map(e => { mySet[e[idCol]] = true });
+        return mySet
+    }, [fRef, idCol]);
+
+    const myData = useMemo(() => {
+        const mySetArr = Object.keys(mySet);
+        let data = [];
+        data = qCat.map(
+            e => ({
+                ...e,
+                desc: e.description.replace(/\[[^\]]*\]/g, ''),
+                filtered: mySetArr.includes(e.converted) ? 1 : 0
+            })
+        );
+
+        data.sort((a, b) => (b.filtered - a.filtered));
+        return data
+    }, [qCat, mySet]);*/
+
+    const columns = useMemo(() => ([
+        {
+            header: 'ID',
+            accessorKey: 'ID',
+            size: 60
+        },
+        {
+            header: 'Name',
+            accessorKey: 'Name',
+            size: 60
+        },
+    ]), []);
+
+    const handleExportData = () => {
+        const csvConfig = mkConfig({
+            fieldSeparator: ',',
+            decimalSeparator: '.',
+            useKeysAsHeaders: true,
+            filename: `CategoryProteins`
+        });
+
+        const data = myData.map(e => ({
+            'ID': e.ID,
+            'Name': e.Name,
+            'Filtered': e.Target
+        }));
+
+        const csv = generateCsv(csvConfig)(data);
+        download(csvConfig)(csv);
+    };
+
+    const rowVirtualizerInstanceRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [sorting, setSorting] = useState([]);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsLoading(false);
+        }
+    }, []);
+    useEffect(() => {
+        //scroll to the top of the table when the sorting changes
+        try {
+            rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+        } catch (error) {
+            console.error(error);
+        }
+    }, [sorting]);
+
+    const table = useMaterialReactTable({
+        columns,
+        data: myData,
+        layoutMode: 'grid',
+        enableBottomToolbar: true,
+        positionToolbarAlertBanner: 'bottom',
+        enableSelectAll: false,
+        enablePagination: false,
+        enableRowPinning: false,
+        enableRowSelection: false,
+        enableStickyHeader: true,
+        enableColumnPinning: false,
+        enableDensityToggle: false,
+        enableColumnFilters: false,
+        enableFullScreenToggle: false,
+        enableHiding: false,
+        enableColumnActions: false,
+        rowPinningDisplayMode: 'select-sticky',
+        muiTableContainerProps: { sx: { maxHeight: '300px' } },
+        enableRowVirtualization: true,
+        enableColumnVirtualization: true,
+        getRowId: (row) => row.ID,
+        state: {
+            rowSelection: mySet,
+            isLoading, sorting
+        },
+        rowVirtualizerInstanceRef, //optional
+        rowVirtualizerOptions: { overscan: 5 },
+        columnVirtualizerOptions: { overscan: 2 },
+        initialState: {
+            rowSelection: mySet,
+            density: 'compact',
+            showGlobalFilter: true,
+        },
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box
+                sx={{
+                    display: 'flex',
+                    gap: '16px',
+                    padding: '8px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={handleExportData}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export All Data
+                </Button>
+            </Box>
+        )
+    });
+
+    return (
+        <MaterialReactTable table={table} />
+    )
+};
 
 export default EnrichmentM

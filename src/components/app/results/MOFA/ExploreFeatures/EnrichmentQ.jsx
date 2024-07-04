@@ -137,8 +137,6 @@ function EnrichmentQ({
     )
 }
 
-
-
 const ProteinCategoryTable = ({ qCat, fRef, omic, colFid }) => {
 
     const idCol = colFid.id; // useJob().user.q2i.columns[0];

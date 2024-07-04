@@ -109,7 +109,7 @@ function MainContent({ omic, thrLRef }) {
                         <Typography variant='h5'>
                             {sign == 'up' ? 'Positively' : 'Negatively'} Associated {OMIC2NAME[omic]}
                         </Typography>
-                        <MySectionContainer height='80vh'>
+                        <MySectionContainer height='75vh'>
                             <MySection>
                                 <MyMRTable
                                     omic={omic}
