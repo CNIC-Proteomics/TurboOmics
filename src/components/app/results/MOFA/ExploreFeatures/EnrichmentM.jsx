@@ -22,7 +22,7 @@ const idTypeOpts = [
 
 // Main component
 
-function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
+function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
 
     const { jobID } = useJob();
     const { API_URL } = useVars();
@@ -48,7 +48,40 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
     Get enrichment from myORA.py
     */
 
+    const isIntegerID = useMemo(() => ['ChEBI', 'PubChem'].includes(idType.id), [idType])
     const [resORA, setResORA] = useState([]);
+
+    const { midTargetArr, midArr, midIndex, db2usr } = useMemo(() => {
+        let midTargetArr, midArr, midIndex;
+        let db2usr = {};
+
+        if (colFid) {  
+            // Get ORA input for selected ID type
+            midTargetArr = fRef.map(e => e[colFid.id]).filter(e => e);
+            
+            midArr = m2i.column(colFid.id).values.filter((e, i) => e && m2x[i]);
+            
+            // Convert id to integer string
+            if (isIntegerID) {
+                midTargetArr = midTargetArr.map(e => Number(e).toString());
+                midArr = midArr.map(e => {
+                    let i = Number(e).toString();
+                    db2usr[i] = e;
+                    return i
+            });
+            } else {
+                midArr.map(e => db2usr[e] = e);
+            }
+            
+            midArr = midArr.map(e => ({ id: e, target: midTargetArr.includes(e) }))
+            
+            // Obtain map index of user metabolites
+            midIndex = midArr.map(e => MetaboID[idType.id].indexOf(e.id));
+        }
+
+        return {midTargetArr, midArr, midIndex, db2usr}
+
+    }, [colFid, idType, isIntegerID]);
 
     // Handle change on column containing ID or ID_type
     useEffect(() => {
@@ -56,22 +89,6 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
         if (colFid === null) return
 
         const ORAinput = {};
-
-        // Get ORA input for selected ID type
-        let midTargetArr = fRef.map(e => e[colFid.id]).filter(e => e);
-
-        let midArr = m2i.column(colFid.id).values.filter((e, i) => e && m2x[i]);
-
-        // Convert id to integer string
-        if (['ChEBI', 'PubChem'].includes(idType.id)) {
-            midTargetArr = midTargetArr.map(e => Number(e).toString());
-            midArr = midArr.map(e => Number(e).toString());
-        }
-
-        midArr = midArr.map(e => ({ id: e, target: midTargetArr.includes(e) }))
-
-        // Obtain map index of user metabolites
-        const midIndex = midArr.map(e => MetaboID[idType.id].indexOf(e.id));
 
         // if no map was obtained go out
         if (midIndex.every(e => e == -1)) {
@@ -108,7 +125,7 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
                 setResORA(myResORA.filter(e => e.N_pathway_sig > 0));
             });
 
-    }, [colFid, idType]);
+    }, [midIndex, midArr, colFid]);
 
     /**/
 
@@ -121,11 +138,33 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
 
     useEffect(() => {
         console.log('setM2Cat');
-    }, [myUsrFilt])
+
+        if (!colFid) return;
+
+        const myM2Cat = {};
+        midTargetArr.map(e => myM2Cat[db2usr[e]] = []);
+
+        let resORAfilt = resORA.filter(e => myUsrFilt.includes(e.id));
+        console.log(resORAfilt)
+        console.log(myM2Cat)
+        resORAfilt.map(cat => {
+            cat.pathway_sig.map(tid => {
+                const i = MetaboID[idType.id][MetaboID[cat.db].indexOf(tid)]
+                if (i && midTargetArr.includes(i)) {
+                    myM2Cat[db2usr[i]].push({
+                        native: cat.id, name: cat.name
+                    })
+                }
+            })
+        });
+
+        setM2cat(myM2Cat)
+        console.log(myM2Cat);
+    }, [myUsrFilt, midTargetArr, resORA, idType])
 
     return (
         <Box sx={{}}>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', pb: 4 }}>
                 <FieldSelector
                     options={f2iColumns}
                     selectedField={colFid}
@@ -143,8 +182,8 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
                 </FieldSelector>
             </Box>
             {colFid &&
-                <Box sx={{ display: 'flex', justifyContent: 'space-around', mt: 4 }}>
-                    <Box sx={{ border: '1px solid red', width: '65%' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                    <Box sx={{ width: '65%' }}>
                         <CategoryTable
                             myData={resORA}
                             setCategory={setCategory}
@@ -152,11 +191,11 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2Cat }) {
                             setMyUsrFilt={setMyUsrFilt}
                         />
                     </Box>
-                    <Box sx={{ border: '1px solid red', width: '30%' }}>
+                    <Box sx={{ width: '30%' }}>
                         {category &&
                             <MetaboliteCategoryTable
                                 mCat={category}
-                                colFid={colFid}
+                                idType={idType}
                             />
                         }
                     </Box>
@@ -203,12 +242,12 @@ const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
         {
             header: 'Name',
             accessorKey: 'name',
-            size: 250,
+            size: 220,
         },
         {
             header: 'pvalue',
             accessorKey: 'pvalue',
-            size: 80,
+            size: 100,
             filterFn: 'lessThan',
         },
         {
@@ -218,15 +257,15 @@ const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
             filterFn: 'lessThan'
         },
         {
-            header: 'N. mapped',
+            header: 'N. Backg.',
             accessorKey: 'N_pathway_mapped',
-            size: 80,
+            size: 100,
             //filterFn: 'lessThan'
         },
         {
-            header: 'N. mapped',
+            header: 'N. Target',
             accessorKey: 'N_pathway_sig',
-            size: 80,
+            size: 100,
             //filterFn: 'lessThan'
         },
     ]), []);
@@ -268,7 +307,7 @@ const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
         enableFullScreenToggle: false,
         enableHiding: false,
         enableColumnActions: false,
-        muiTableContainerProps: { sx: { maxHeight: '250px' } },
+        muiTableContainerProps: { sx: { maxHeight: '330px', minHeight: '330px' } },
         //onSortingChange: setSorting,
         enableFacetedValues: true,
         initialState: {
@@ -330,26 +369,17 @@ const CategoryTable = ({ myData, setCategory, myUsrFilt, setMyUsrFilt }) => {
     }, [usrFilt, setMyUsrFilt, myUsrFilt]);
 
     return (
-        <>
-            <MaterialReactTable table={table} />
-        </>
+        <MaterialReactTable table={table} />
     )
 };
 
-const MetaboliteCategoryTable = ({ mCat, colFid }) => {
+const MetaboliteCategoryTable = ({ mCat, idType }) => {
 
-    const idCol = colFid.id; // useJob().user.q2i.columns[0];
+    const idCol = idType.id; // useJob().user.q2i.columns[0];
 
     const { myData, mySet } = useMemo(() => {
         let myData = [];
-        /*mCat.pathway_sig.map(e => {
-            const eidx = MetaboID[mCat.db].indexOf(e);
-            myData.push({
-                'ID': MetaboID[idCol][eidx],
-                'Name': MetaboID['Name'][eidx],
-                'Target': true
-            });
-        });*/
+
         mCat.pathway_mapped.map(e => {
             const eidx = MetaboID[mCat.db].indexOf(e);
             myData.push({
@@ -364,29 +394,6 @@ const MetaboliteCategoryTable = ({ mCat, colFid }) => {
         myData.map(e => { if (e.Target) mySet[e.ID] = true });
         return { myData, mySet }
     }, [mCat, idCol]);
-
-    console.log(mySet)
-
-    /*const mySet = useMemo(() => {
-        const mySet = {};
-        fRef.map(e => { mySet[e[idCol]] = true });
-        return mySet
-    }, [fRef, idCol]);
-
-    const myData = useMemo(() => {
-        const mySetArr = Object.keys(mySet);
-        let data = [];
-        data = qCat.map(
-            e => ({
-                ...e,
-                desc: e.description.replace(/\[[^\]]*\]/g, ''),
-                filtered: mySetArr.includes(e.converted) ? 1 : 0
-            })
-        );
-
-        data.sort((a, b) => (b.filtered - a.filtered));
-        return data
-    }, [qCat, mySet]);*/
 
     const columns = useMemo(() => ([
         {
@@ -406,7 +413,7 @@ const MetaboliteCategoryTable = ({ mCat, colFid }) => {
             fieldSeparator: ',',
             decimalSeparator: '.',
             useKeysAsHeaders: true,
-            filename: `CategoryProteins`
+            filename: `CategoryMetabolites`
         });
 
         const data = myData.map(e => ({
@@ -454,7 +461,7 @@ const MetaboliteCategoryTable = ({ mCat, colFid }) => {
         enableHiding: false,
         enableColumnActions: false,
         rowPinningDisplayMode: 'select-sticky',
-        muiTableContainerProps: { sx: { maxHeight: '300px' } },
+        muiTableContainerProps: { sx: { maxHeight: '250px', minHeight: '250px' } },
         enableRowVirtualization: true,
         enableColumnVirtualization: true,
         getRowId: (row) => row.ID,
