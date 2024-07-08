@@ -145,8 +145,6 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
         midTargetArr.map(e => myM2Cat[db2usr[e]] = []);
 
         let resORAfilt = resORA.filter(e => myUsrFilt.includes(e.id));
-        console.log(resORAfilt)
-        console.log(myM2Cat)
         resORAfilt.map(cat => {
             cat.pathway_sig.map(tid => {
                 const i = MetaboID[idType.id][MetaboID[cat.db].indexOf(tid)]
@@ -159,7 +157,6 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
         });
 
         setM2cat(myM2Cat)
-        console.log(myM2Cat);
     }, [myUsrFilt, midTargetArr, resORA, idType])
 
     return (

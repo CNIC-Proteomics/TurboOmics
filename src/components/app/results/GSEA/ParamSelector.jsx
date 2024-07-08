@@ -11,6 +11,10 @@ import MyMotion from '@/components/MyMotion';
 Constants
 */
 const TEXT = {
+    'Mean difference': {
+        text1: 'Select metadata variable',
+        text2: 'Metadata Variable'
+    },
     't-test': {
         text1: 'Select metadata variable',
         text2: 'Metadata Variable'
@@ -80,7 +84,7 @@ function ParamSelector({
         if (!isM) {
 
             if (Object.keys(cachedG2i).includes(newValue.id)) {
-                g2i = cachedG2i[newValue.id];
+                g2i = 0[newValue.id];
             } else {
 
                 gidColSerie.values.map((g, i) => {
@@ -131,6 +135,12 @@ function ParamSelector({
     const resStatus = useResults().status;
 
     const rankColOpts = useMemo(() => ([
+        {
+            label: 'Mean difference',
+            disabled: !Object.keys(mdataType).some(e =>
+                mdataType[e].type == 'categorical'
+            )
+        },
         {
             label: 't-test',
             disabled: !Object.keys(mdataType).some(e =>
@@ -195,7 +205,7 @@ function ParamSelector({
             );
         }
 
-        if (newValue.label == 't-test') {
+        if (['Mean difference', 't-test'].includes(newValue.label)) {
             setSubRankColOpts(
                 Object.keys(mdataType).filter(
                     e => mdataType[e].type == 'categorical'
@@ -218,7 +228,7 @@ function ParamSelector({
         if (newValue == null) return;
         setSubRankCol(newValue);
 
-        if (rankCol.label == 't-test') {
+        if (['Mean difference', 't-test'].includes(rankCol.label)) {
             setGroups({ g1: null, g2: null });
             setGroupColOpts(
                 mdataType[newValue.id].levels.map(e => ({ label: e, id: e }))
@@ -296,27 +306,6 @@ function ParamSelector({
                         </Box>
                     </Box>
                 }
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>Select {isM ? 'Enrichment' : 'GSEA'} Ranking Metric</Typography>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Autocomplete
-                            options={rankColOpts}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => <TextField {...params} label='GSEA Ranking Metric' />}
-                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                            getOptionDisabled={(option) => option.disabled}
-                            value={rankCol}
-                            onChange={handleRankColOpts}
-                            renderOption={(props, option) => {
-                                return (
-                                    <li {...props} key={option.label}>
-                                        {option.label}
-                                    </li>
-                                );
-                            }}
-                        />
-                    </Box>
-                </Box>
             </Box>
             {isM &&
                 <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mt: 2 }}>
@@ -385,23 +374,40 @@ function ParamSelector({
                     </Box>
                 </Box>
             }
-            {showSubSection &&
-                <MyMotion>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'space-evenly',
-                        textAlign: 'center',
-                        mt: 5,
-                    }}>
-                        <Box>
-                            <Typography type='body2'>{TEXT[rankCol.label].text1}</Typography>
+            <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', mt: 3 }}>
+                    <Box sx={{ width: '50%' }}>
+                        <Typography type='body2'>Select {isM ? 'Enrichment' : 'GSEA'} Ranking Metric</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={rankColOpts}
+                                sx={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} label='GSEA Ranking Metric' />}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                getOptionDisabled={(option) => option.disabled}
+                                value={rankCol}
+                                onChange={handleRankColOpts}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                    {true &&
+                        <Box sx={{ width: '50%' }}>
+                            <Typography type='body2'>{showSubSection && TEXT[rankCol.label].text1}</Typography>
                             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                 <Autocomplete
                                     options={subRankColOpts}
                                     sx={{ width: 300 }}
                                     renderInput={
-                                        (params) => <TextField {...params} label={TEXT[rankCol.label].text2} />
+                                        (params) => <TextField {...params} label={showSubSection && TEXT[rankCol.label].text2} />
                                     }
+                                    disabled={!showSubSection}
                                     isOptionEqualToValue={(option, value) => option.label === value.label}
                                     value={subRankCol}
                                     onChange={handleSubRankColOpts}
@@ -415,74 +421,86 @@ function ParamSelector({
                                 />
                             </Box>
                         </Box>
-                        {rankCol.label == 't-test' &&
-                            <Box sx={{ display: 'flex' }}>
-                                <Box>
-                                    <Typography type='body2'>Select 1st group</Typography>
-                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                        <Autocomplete
-                                            options={groupColOpts}
-                                            sx={{ width: 200 }}
-                                            renderInput={
-                                                (params) => <TextField {...params} label='1st Group' />
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                                            value={groups.g1}
-                                            onChange={(e, newValue) => setGroups(prev => ({ ...prev, g1: newValue }))}
-                                            renderOption={(props, option) => {
-                                                return (
-                                                    <li {...props} key={option.label}>
-                                                        {option.label}
-                                                    </li>
-                                                );
-                                            }}
-                                        />
+                    }
+                </Box>
+                {showSubSection &&
+                    <MyMotion>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-evenly',
+                            textAlign: 'center',
+                            mt: 5,
+                        }}>
+
+                            {['Mean difference', 't-test'].includes(rankCol.label) &&
+                                <Box sx={{ display: 'flex' }}>
+                                    <Box>
+                                        <Typography type='body2'>Select 1st group</Typography>
+                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                            <Autocomplete
+                                                options={groupColOpts}
+                                                sx={{ width: 200 }}
+                                                renderInput={
+                                                    (params) => <TextField {...params} label='1st Group' />
+                                                }
+                                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                                value={groups.g1}
+                                                onChange={(e, newValue) => setGroups(prev => ({ ...prev, g1: newValue }))}
+                                                renderOption={(props, option) => {
+                                                    return (
+                                                        <li {...props} key={option.label}>
+                                                            {option.label}
+                                                        </li>
+                                                    );
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ width: '20%', mx: 2, display: 'flex', alignItems: 'flex-end' }}>
+                                        <Typography type='body1' sx={{ py: 2 }}>vs</Typography>
+                                    </Box>
+                                    <Box sx={{}}>
+                                        <Typography type='body2'>Select 2nd group</Typography>
+                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                            <Autocomplete
+                                                options={groupColOpts}
+                                                sx={{ width: 200 }}
+                                                renderInput={
+                                                    (params) => <TextField {...params} label='2nd Group' />
+                                                }
+                                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                                value={groups.g2}
+                                                onChange={(e, newValue) => setGroups(prev => ({ ...prev, g2: newValue }))}
+                                                renderOption={(props, option) => {
+                                                    return (
+                                                        <li {...props} key={option.label}>
+                                                            {option.label}
+                                                        </li>
+                                                    );
+                                                }}
+                                            />
+                                        </Box>
                                     </Box>
                                 </Box>
-                                <Box sx={{ width: '20%', mx: 2, display: 'flex', alignItems: 'flex-end' }}>
-                                    <Typography type='body1' sx={{ py: 2 }}>vs</Typography>
-                                </Box>
-                                <Box sx={{}}>
-                                    <Typography type='body2'>Select 2nd group</Typography>
-                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                        <Autocomplete
-                                            options={groupColOpts}
-                                            sx={{ width: 200 }}
-                                            renderInput={
-                                                (params) => <TextField {...params} label='2nd Group' />
-                                            }
-                                            isOptionEqualToValue={(option, value) => option.label === value.label}
-                                            value={groups.g2}
-                                            onChange={(e, newValue) => setGroups(prev => ({ ...prev, g2: newValue }))}
-                                            renderOption={(props, option) => {
-                                                return (
-                                                    <li {...props} key={option.label}>
-                                                        {option.label}
-                                                    </li>
-                                                );
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-                            </Box>
-                        }
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-                        <Button
-                            variant='outlined'
-                            color='primary'
-                            endIcon={<SendIcon />}
-                            disabled={!(
-                                ready && true && gidCol && rankCol && subRankCol && g2info &&
-                                (rankCol.label != 't-test' || (groups.g1 && groups.g2))
-                            )}
-                            onClick={handleRunGSEA}
-                        >
-                            Run QEA
-                        </Button>
-                    </Box>
-                </MyMotion>
-            }
+                            }
+                        </Box>
+                    </MyMotion>
+                }
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+                    <Button
+                        variant='outlined'
+                        color='primary'
+                        endIcon={<SendIcon />}
+                        disabled={!(
+                            ready && gidCol && rankCol && subRankCol && g2info &&
+                            (!['Mean difference', 't-test'].includes(rankCol.label) || (groups.g1 && groups.g2))
+                        )}
+                        onClick={handleRunGSEA}
+                    >
+                        Run QEA
+                    </Button>
+                </Box>
+            </Box>
         </Box>
     )
 }

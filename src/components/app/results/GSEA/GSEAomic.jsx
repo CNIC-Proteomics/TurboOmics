@@ -9,7 +9,7 @@ import MyMotion from '@/components/MyMotion';
 import ParamSelector from './ParamSelector';
 import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
 import DbSelector from './utils/DbSelector';
-import { getMedian, getTvalue } from './utils/stats';
+import { getMeanDiff, getMedian, getTvalue } from './utils/stats';
 import { tsvToDanfo } from '@/utils/tsvToDanfo';
 import EnrichmentTable from './EnrichmentTable';
 import CustomEnrichment from './CustomEnrichment';
@@ -87,11 +87,11 @@ function GSEAomic({ omic }) {
     const getGseaId = useCallback(() => {
         if (
             !(gidCol && rankCol && subRankCol &&
-                (rankCol.label != 't-test' || (groups.g1 && groups.g2)))
+                (!['Mean difference', 't-test'].includes(rankCol.label) || (groups.g1 && groups.g2)))
         ) return '';
 
         let myGseaID = `${OS.id}-${gidCol.id}-${rankCol.label}-${subRankCol.id}`;
-        myGseaID += rankCol.label == 't-test' ?
+        myGseaID += ['Mean difference', 't-test'].includes(rankCol.label) ?
             `${groups.g1.id}vs${groups.g2.id}` : '';
 
         if (isM) {
@@ -131,7 +131,7 @@ function GSEAomic({ omic }) {
             });
         }
 
-        if (rankCol.label == 't-test') {
+        if (['Mean difference', 't-test'].includes(rankCol.label)) {
             const xiJson = danfo2RowColJson(xi);
             const g1Id = mdataType[subRankCol.id].level2id[groups.g1.id]
                 .filter(e => xi.index.includes(e));
@@ -142,7 +142,8 @@ function GSEAomic({ omic }) {
                 preData[e].fRank = preData[e].f.map(f => {
                     const g1v = g1Id.map(myid => xiJson[myid][f]);
                     const g2v = g2Id.map(myid => xiJson[myid][f]);
-                    return getTvalue(g1v, g2v);
+                    if (rankCol.label == 'Mean difference') return getMeanDiff(g1v, g2v);
+                    if (rankCol.label == 't-test') return getTvalue(g1v, g2v);
                 });
             });
         }
@@ -327,10 +328,10 @@ function GSEAomic({ omic }) {
     useEffect(() => {
         console.log('Ending useEffect - did finished?', backendStatus, db);
 
-        
+
         if (db.every(e => e.status != 'waiting') && backendStatus == 'sendJob') {
             console.log('useEffect will handle GSEA finish');
-            
+
             // If there is another element in the waiting list --> change status to waiting
             /*if (waitingGsea.length > 1) {
                 console.log('Change status to waiting');
@@ -379,7 +380,7 @@ function GSEAomic({ omic }) {
                                 setShowEnrichment={setShowEnrichment}
                             />
                         </Box>
-                        <Box sx={{height:620}}>
+                        <Box sx={{ height: 620 }}>
                             {showEnrichment &&
                                 <MyMotion>
                                     {selDb == 'Custom' ?

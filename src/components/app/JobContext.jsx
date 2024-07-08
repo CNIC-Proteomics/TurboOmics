@@ -72,6 +72,7 @@ function jobReducer(draft, action) {
             }
 
             if (action.fileType == 'mdata') {
+                draft.mdataType = {};
                 const df_ctypes = df.ctypes;
                 df_ctypes.values.map((ctype, i) => {
                     let columnName = df_ctypes.index[i];

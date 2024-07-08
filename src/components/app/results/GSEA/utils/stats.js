@@ -32,3 +32,9 @@ export const getMedian = (values) => {
         : (values[half - 1] + values[half]) / 2
     );
 }
+
+export const getMeanDiff = (x, y) => {
+    const meanX = x.reduce((prev, curr) => prev + curr) / x.length;
+    const meanY = y.reduce((prev, curr) => prev + curr) / y.length;
+    return meanX - meanY;
+}
