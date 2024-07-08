@@ -131,6 +131,10 @@ function ParamSelector({
         setG2info(g2i);
     }
 
+    // Create g2info for metabolomics using apex m/z and metabolite ID & Type
+    // The same function executing different blocks depending on the field completed
+    // create states to save selections
+
     // GSEA ranking metric
     const resStatus = useResults().status;
 
@@ -252,49 +256,23 @@ function ParamSelector({
     }
 
     return (
-        <Box sx={{ mt: 5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography type='body2'>
-                        {!isM ?
-                            `Select column containing ${OMIC2NAME[omic]} ID` :
-                            'Select column containing Apex m/z'
-                        }
-                    </Typography>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Autocomplete
-                            options={gidColOpts}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => (
-                                <TextField {...params} label={!isM ?
-                                    `${OMIC2NAME[omic]} ID column` : 'Apex m/z Column'}
-                                />
-                            )}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            value={gidCol}
-                            onChange={handleGidColOpts}
-                            renderOption={(props, option) => {
-                                return (
-                                    <li {...props} key={option.label}>
-                                        {option.label}
-                                    </li>
-                                );
-                            }}
-                        />
-                    </Box>
-                </Box>
-                {isM &&
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography type='body2'>Select Retention Time Column (min)</Typography>
+        <Box sx={{ mt: 2 }}>
+            <Box >
+                {!isM &&
+                    <Box sx={{ textAlign: 'center', p: 2 }}>
+                        <Typography type='body2'>
+                            {`Select column containing ${OMIC2NAME[omic]} ID`}
+                        </Typography>
                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                             <Autocomplete
                                 options={gidColOpts}
                                 sx={{ width: 300 }}
-                                renderInput={(params) => <TextField {...params} label='RT column (min)' />}
-                                isOptionEqualToValue={(option, value) => option.label === value.label}
-                                getOptionDisabled={(option) => option.disabled}
-                                value={rtCol}
-                                onChange={(e, newValue) => setRtCol(newValue)}
+                                renderInput={(params) => (
+                                    <TextField {...params} label={`${OMIC2NAME[omic]} ID column`}/>
+                                )}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                value={gidCol}
+                                onChange={handleGidColOpts}
                                 renderOption={(props, option) => {
                                     return (
                                         <li {...props} key={option.label}>
@@ -306,77 +284,184 @@ function ParamSelector({
                         </Box>
                     </Box>
                 }
+
+                {isM &&
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center' }}>
+                        <Box sx={{ width: '49%', p: 2 }}>
+                            <Typography type='body2' variant='h6'>MSEA</Typography>
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-evenly',
+                                flexDirection: 'column',
+                                mt: 2
+                            }}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography type='body2'>Select Metabolite ID</Typography>
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Autocomplete
+                                            options={gidColOpts}
+                                            sx={{ width: 250 }}
+                                            renderInput={(params) => <TextField {...params} label='Metabolite ID' />}
+                                            isOptionEqualToValue={(option, value) => option.label === value.label}
+                                            getOptionDisabled={(option) => option.disabled}
+                                            value={null}
+                                            onChange={(e, newValue) => console.log(newValue)}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box sx={{ textAlign: 'center', mt: 4 }}>
+                                    <Typography type='body2'>Select ID Type</Typography>
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Autocomplete
+                                            options={gidColOpts}
+                                            sx={{ width: 250 }}
+                                            renderInput={(params) => <TextField {...params} label='ID Type' />}
+                                            isOptionEqualToValue={(option, value) => option.label === value.label}
+                                            getOptionDisabled={(option) => option.disabled}
+                                            value={null}
+                                            onChange={(e, newValue) => console.log(newValue)}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                        <Box sx={{ width: 0, borderWidth: '1px', borderStyle: 'dashed', borderColor: 'rgba(0,0,0,0.2)' }}></Box>
+                        <Box sx={{ width: '49%', p: 2 }}>
+                            <Typography type='body2' variant='h6'>Mummichog</Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mt: 2 }}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography type='body2'>Select Apex m/z Column</Typography>
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Autocomplete
+                                            options={gidColOpts}
+                                            sx={{ width: 250 }}
+                                            renderInput={(params) => <TextField {...params} label='Apex m/z' />}
+                                            isOptionEqualToValue={(option, value) => option.label === value.label}
+                                            getOptionDisabled={(option) => option.disabled}
+                                            value={null}
+                                            onChange={(e, newValue) => console.log(newValue)}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography type='body2'>Select Retention Time Column (min)</Typography>
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Autocomplete
+                                            options={gidColOpts}
+                                            sx={{ width: 250 }}
+                                            renderInput={(params) => <TextField {...params} label='RT column (min)' />}
+                                            isOptionEqualToValue={(option, value) => option.label === value.label}
+                                            getOptionDisabled={(option) => option.disabled}
+                                            value={rtCol}
+                                            onChange={(e, newValue) => setRtCol(newValue)}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                            </Box>
+                            <Box>
+                                <Box sx={{ textAlign: 'center', mt: 4 }}>
+                                    <Typography type='body2'>Select Ion Mode Column</Typography>
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                        <Autocomplete
+                                            options={gidColOpts}
+                                            sx={{ width: 250 }}
+                                            renderInput={(params) => <TextField {...params} label='Ion Mode Column' />}
+                                            isOptionEqualToValue={(option, value) => option.label === value.label}
+                                            getOptionDisabled={(option) => option.disabled}
+                                            value={ionCol}
+                                            onChange={handleIonCol}
+                                            renderOption={(props, option) => {
+                                                return (
+                                                    <li {...props} key={option.label}>
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                    <Box sx={{ textAlign: 'center' }}>
+                                        <Typography type='body2'>Positive Ion Value</Typography>
+                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                            <Autocomplete
+                                                options={ionValOpts}
+                                                sx={{ width: 150 }}
+                                                renderInput={(params) => <TextField {...params} label='Positive Ion' />}
+                                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                                getOptionDisabled={(option) => option.disabled}
+                                                value={ionVal.pos}
+                                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, pos: newValue }))}
+                                                renderOption={(props, option) => {
+                                                    return (
+                                                        <li {...props} key={option.label}>
+                                                            {option.label}
+                                                        </li>
+                                                    );
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ width: '5%' }}></Box>
+                                    <Box sx={{ textAlign: 'center' }}>
+                                        <Typography type='body2'>Negative Ion Value</Typography>
+                                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                            <Autocomplete
+                                                options={ionValOpts}
+                                                sx={{ width: 150 }}
+                                                renderInput={(params) => <TextField {...params} label='Negative Ion' />}
+                                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                                getOptionDisabled={(option) => option.disabled}
+                                                value={ionVal.neg}
+                                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, neg: newValue }))}
+                                                renderOption={(props, option) => {
+                                                    return (
+                                                        <li {...props} key={option.label}>
+                                                            {option.label}
+                                                        </li>
+                                                    );
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+                }
             </Box>
-            {isM &&
-                <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mt: 2 }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography type='body2'>Select Ion Mode Column</Typography>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                            <Autocomplete
-                                options={gidColOpts}
-                                sx={{ width: 300 }}
-                                renderInput={(params) => <TextField {...params} label='Ion Mode Column' />}
-                                isOptionEqualToValue={(option, value) => option.label === value.label}
-                                getOptionDisabled={(option) => option.disabled}
-                                value={ionCol}
-                                onChange={handleIonCol}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.label}>
-                                            {option.label}
-                                        </li>
-                                    );
-                                }}
-                            />
-                        </Box>
-                    </Box>
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography type='body2'>Positive Ion Value</Typography>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                            <Autocomplete
-                                options={ionValOpts}
-                                sx={{ width: 300 }}
-                                renderInput={(params) => <TextField {...params} label='Positive Ion' />}
-                                isOptionEqualToValue={(option, value) => option.label === value.label}
-                                getOptionDisabled={(option) => option.disabled}
-                                value={ionVal.pos}
-                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, pos: newValue }))}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.label}>
-                                            {option.label}
-                                        </li>
-                                    );
-                                }}
-                            />
-                        </Box>
-                    </Box>
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography type='body2'>Negative Ion Value</Typography>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                            <Autocomplete
-                                options={ionValOpts}
-                                sx={{ width: 300 }}
-                                renderInput={(params) => <TextField {...params} label='Negative Ion' />}
-                                isOptionEqualToValue={(option, value) => option.label === value.label}
-                                getOptionDisabled={(option) => option.disabled}
-                                value={ionVal.neg}
-                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, neg: newValue }))}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.label}>
-                                            {option.label}
-                                        </li>
-                                    );
-                                }}
-                            />
-                        </Box>
-                    </Box>
-                </Box>
-            }
+            <Box sx={{ height: 0, borderWidth: '1px', borderStyle: 'dashed', borderColor: 'rgba(0,0,0,0.2)' }}></Box>
             <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', mt: 3 }}>
-                    <Box sx={{ width: '50%' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', textAlign: 'center', mt: 3 }}>
+                    <Box sx={{ width: '30%' }}>
                         <Typography type='body2'>Select {isM ? 'Enrichment' : 'GSEA'} Ranking Metric</Typography>
                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                             <Autocomplete
@@ -397,33 +482,32 @@ function ParamSelector({
                             />
                         </Box>
                     </Box>
-                    {true &&
-                        <Box sx={{ width: '50%' }}>
-                            <Typography type='body2'>{showSubSection && TEXT[rankCol.label].text1}</Typography>
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                <Autocomplete
-                                    options={subRankColOpts}
-                                    sx={{ width: 300 }}
-                                    renderInput={
-                                        (params) => <TextField {...params} label={showSubSection && TEXT[rankCol.label].text2} />
-                                    }
-                                    disabled={!showSubSection}
-                                    isOptionEqualToValue={(option, value) => option.label === value.label}
-                                    value={subRankCol}
-                                    onChange={handleSubRankColOpts}
-                                    renderOption={(props, option) => {
-                                        return (
-                                            <li {...props} key={option.label}>
-                                                {option.label}
-                                            </li>
-                                        );
-                                    }}
-                                />
-                            </Box>
+
+                    <Box sx={{ width: '30%' }}>
+                        <Typography type='body2'>{showSubSection ? TEXT[rankCol.label].text1 : '-'}</Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Autocomplete
+                                options={subRankColOpts}
+                                sx={{ width: 300 }}
+                                renderInput={
+                                    (params) => <TextField {...params} label={showSubSection ? TEXT[rankCol.label].text2 : ''} />
+                                }
+                                disabled={!showSubSection}
+                                isOptionEqualToValue={(option, value) => option.label === value.label}
+                                value={subRankCol}
+                                onChange={handleSubRankColOpts}
+                                renderOption={(props, option) => {
+                                    return (
+                                        <li {...props} key={option.label}>
+                                            {option.label}
+                                        </li>
+                                    );
+                                }}
+                            />
                         </Box>
-                    }
+                    </Box>
                 </Box>
-                {showSubSection &&
+                {showSubSection && ['Mean difference', 't-test'].includes(rankCol.label) &&
                     <MyMotion>
                         <Box sx={{
                             display: 'flex',
