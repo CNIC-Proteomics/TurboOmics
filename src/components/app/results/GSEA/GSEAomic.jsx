@@ -13,6 +13,7 @@ import { getMeanDiff, getMedian, getTvalue } from './utils/stats';
 import { tsvToDanfo } from '@/utils/tsvToDanfo';
 import EnrichmentTable from './EnrichmentTable';
 import CustomEnrichment from './CustomEnrichment';
+import { MetaboID } from '../../../../utils/MetaboID';
 
 
 /*
@@ -21,17 +22,19 @@ Constants
 const DB = {
     t: [
         { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'HALLMARK', label: 'HALLMARK', status: '', show: false, gseaRes: null },
-        { db: 'GO_MF', label: 'GO:MF', status: '', show: false, gseaRes: null },
-        { db: 'GO_CC', label: 'GO:CC', status: '', show: false, gseaRes: null },
-        { db: 'GO_BP', label: 'GO:BP', status: '', show: false, gseaRes: null },
-        { db: 'KEGG', label: 'KEGG', status: '', show: false, gseaRes: null },
-        { db: 'REACTOME', label: 'REACTOME', status: '', show: false, gseaRes: null },
+        { db: 'HALLMARK', label: 'HALLMARK', status: '', gseaRes: null, show: false },
+        { db: 'GO_MF', label: 'GO:MF', status: '', gseaRes: null, show: false },
+        { db: 'GO_CC', label: 'GO:CC', status: '', gseaRes: null, show: false },
+        { db: 'GO_BP', label: 'GO:BP', status: '', gseaRes: null, show: false },
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'REACTOME', label: 'REACTOME', status: '', gseaRes: null, show: false },
     ],
     m: [
         { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'pos', label: 'Mummichog (+)', status: '', show: false, gseaRes: null },
-        { db: 'neg', label: 'Mummichog (-)', status: '', show: false, gseaRes: null }
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'ChEBI', label: 'REACTOME', status: '', gseaRes: null, show: false },
+        { db: 'pos', label: 'Mummichog (+)', status: '', gseaRes: null, show: false },
+        { db: 'neg', label: 'Mummichog (-)', status: '', gseaRes: null, show: false }
     ]
 };
 
@@ -51,12 +54,13 @@ function GSEAomic({ omic }) {
     // Get results
     const results = useResults();
     const dispatchResults = useDispatchResults();
-
-    // Data used for GSEA
-    const [g2info, setG2info] = useState(null);
+    const gseaObj = results.GSEA[omic];
 
     // Get fx2i 
     const [fx2i] = useFx2i(omic);
+
+    // Data used for GSEA
+    const [g2info, setG2info] = useState(gseaObj.g2i);
 
     // Get quantifications
     const xi = useJob().norm[`x${omic}`];
@@ -67,13 +71,15 @@ function GSEAomic({ omic }) {
     // Generate column options for feature id (protein or transcript) or mz (untargeted metab.)
     const [gidCol, setGidCol] = useState(null);//isM ? { id: 'Apex m/z', label: 'Apex m/z' } : null);
 
-    // Mummichog Untargeted metabolomic enrichment
-    const [rtCol, setRtCol] = useState(null);//isM ? { id: 'RT [min]', label: 'RT [min]' } : null);
-    const [ionCol, setIonCol] = useState(null); //isM ? { id: 'Mode', label: 'Mode' } : null);
-    const [ionVal, setIonVal] = useState({
-        pos: null, //isM ? { id: 'POS', label: 'POS' } : null,
-        neg: null //isM ? { id: 'NEG', label: 'NEG' } : null,
-    }); // HANDLE RUN GSEA FOR METABOLOMICS
+    // Untargeted metabolomic enrichment
+    const [mParams, setMParams] = useState({
+        mid: null, midType: null, mz: null, rt: null, ionCol: null, ionVal: { pos: null, neg: null }
+    });
+
+    const mMethod = useMemo(() => ({
+        msea: isM && !!mParams.mid && !!mParams.midType,
+        mummichog: isM && !!mParams.mz && !!mParams.rt && !!mParams.ionCol && (!!mParams.ionVal.pos || !!mParams.ionVal.neg)
+    }), [isM, mParams]);
 
     // GSEA ranking metric
     const [rankCol, setRankCol] = useState(null);
@@ -81,28 +87,33 @@ function GSEAomic({ omic }) {
     const [groups, setGroups] = useState({ 'g1': null, 'g2': null }); // only for t-test
 
     // DataBases
-    const [db, setDb] = useState(isM ? DB.m : DB.t);
+    const [db, setDb] = useState(gseaObj.db);
 
     // Run GSEA
     const getGseaId = useCallback(() => {
-        if (
-            !(gidCol && rankCol && subRankCol &&
-                (!['Mean difference', 't-test'].includes(rankCol.label) || (groups.g1 && groups.g2)))
-        ) return '';
 
-        let myGseaID = `${OS.id}-${gidCol.id}-${rankCol.label}-${subRankCol.id}`;
+        let myGseaID = `${OS.scientific_name.replace(' ', '_')}-${rankCol.label}-${subRankCol.id}`;
         myGseaID += ['Mean difference', 't-test'].includes(rankCol.label) ?
             `${groups.g1.id}vs${groups.g2.id}` : '';
 
-        if (isM) {
-            myGseaID += rtCol ? '_' + rtCol.id : '';
-            myGseaID += ionVal.pos ? '_' + ionVal.pos.id : '';
-            myGseaID += ionVal.neg ? '_' + ionVal.neg.id : '';
+        if (!isM) {
+            myGseaID += `-${gidCol.id}`;
+        }
+
+        if (mMethod.msea) {
+            myGseaID += `-${mParams.mid.id}-${mParams.midType.id}`;
+        }
+
+        if (mMethod.mummichog) {
+            myGseaID += `-${mParams.mz.id}-${mParams.rt.id}`;
+            myGseaID += mParams.ionVal.pos.id ? '_' + mParams.ionVal.pos.id : '';
+            myGseaID += mParams.ionVal.neg.id ? '_' + mParams.ionVal.neg.id : '';
         }
 
         myGseaID = myGseaID.replace(/[^a-zA-Z0-9]/g, '_');
         return myGseaID
-    }, [gidCol, rankCol, subRankCol, groups, OS, rtCol, ionVal, isM]);
+
+    }, [gidCol, rankCol, subRankCol, groups, OS, isM, mParams, mMethod]);
 
     const [gseaID, setGseaID] = useState('');
     const [waitingGsea, setWaitingGsea] = useState([]);
@@ -114,7 +125,30 @@ function GSEAomic({ omic }) {
         console.log('Run GSEA');
 
         // get rank
-        const preData = g2info;
+        let preData = {};
+
+        if (!isM) {
+            preData = g2info;
+        } else {
+            fx2i.index.map(e => preData[e] = { f: [e] });
+
+            if (mMethod.msea) {
+                const midSerie = fx2i.column(mParams.mid.id);
+                midSerie.index.map((e, i) => {
+                    const mid = midSerie.values[i]
+                    const midIndex = MetaboID[mParams.midType.id].indexOf(mid);
+                    preData[e].mid = mid;
+                    preData[e].KEGG = MetaboID.KEGG[midIndex];
+                    preData[e].ChEBI = MetaboID.ChEBI[midIndex];
+                });
+            }
+
+            if (mMethod.mummichog) {
+                const mzSerie = fx2i.column(mParams.mz.id);
+                mzSerie.index.map((e, i) => preData[e].mz = mzSerie.values[i]);
+            }
+
+        }
 
         if (rankCol.label == 'PCA') {
             const ranks = results.EDA.PCA[omic].data.loadings;
@@ -168,35 +202,48 @@ function GSEAomic({ omic }) {
         setGseaID(myGseaID);
 
         // Add GSEA job to waiting list
-        if (!isM || (isM && rtCol && (ionVal.pos || ionVal.neg))) {
-            if (waitingGsea.length == 0) {
-                // If nothing is in waitingGsea --> change status to waiting
-                // If there is something in waitingGsea --> useEffect will change it after finished
-                setDb(prev => prev.map(e => e.db == 'Custom' ? e : { ...e, status: 'waiting' }));
-            }
-            setWaitingGsea(
-                prev => prev.length < 2 ?
-                    [...prev, { id: myGseaID }] : [...prev.slice(0, 1), { id: myGseaID }]
-            );
-        }
+        setWaitingGsea([{ id: myGseaID }]);
 
         // Show results section
         setTitleGsea(
-            `${isM ? 'QEA' : 'GSEA'}: ${gidCol.label} | 
-            ${rankCol.label} | 
-            ${subRankCol.label}
-            ${rankCol.label == 't-test' ? ' | ' + groups.g1.label + ' vs ' + groups.g2.label : ''}`
+            `Enrichment Analysis: ${rankCol.label} | ${subRankCol.label}
+            ${['Mean difference', 't-test'].includes(rankCol.label) ? ' | ' +
+                groups.g1.label + ' vs ' + groups.g2.label : ''}`
         );
         setShowGsea(false);
-        setDb(prev => prev.map(e => ({ ...e, show: e.db == 'Custom' ? true : false })))
+
+        if (!isM) {
+            setDb(prev => prev.map(e => e.db == 'Custom' ? e : { ...e, status: 'waiting' }))
+        } else {
+            setDb(prev => prev.map(e => {
+                if (e.db == 'Custom') return e
+                if (['KEGG', 'ChEBI'].includes(e.db)) {
+                    if (mMethod.msea) {
+                        return { ...e, status: 'waiting' }
+                    } else {
+                        return { ...e, status: '' }
+                    }
+                }
+                if (['pos', 'neg'].includes(e.db)) {
+                    if (mMethod.mummichog) {
+                        return { ...e, status: 'waiting' }
+                    } else {
+                        return { ...e, status: '' }
+                    }
+                }
+            }))
+        }
+
+        //setDb(prev => prev.map(e => e.db == 'Custom' ? e : {...e,  status:'waiting'}))
+        //setDb(prev => prev.map(e => ({ ...e, show: e.db == 'Custom' ? true : false })))
         setTimeout(() => setShowGsea(true), 500);
+        console.log('Executed')
 
     }, [
-        g2info, gidCol, rankCol, subRankCol, groups,
-        rtCol, ionVal, fx2i, getGseaId, isM, mdataType,
-        omic, results, waitingGsea, xi
+        g2info, rankCol, subRankCol, groups,
+        fx2i, getGseaId, isM, mdataType, mMethod,
+        omic, results, xi, mParams
     ]);
-
 
     /*
     BACK-END INTERACTION
@@ -220,7 +267,7 @@ function GSEAomic({ omic }) {
 
             let gseaRes = null;
             if (resJson.status == 'ok') {
-                if (isM) {
+                if (isM && ['pos', 'neg'].includes(mydb)) {
                     gseaRes = await tsvToDanfo(resJson.gseaRes, '\t', false);
                     const EC2fid = await tsvToDanfo(resJson.usrInput2EC, '\t', false);
 
@@ -229,7 +276,10 @@ function GSEAomic({ omic }) {
                             return { ...e, overlap_fid: '' };
                         } else {
                             const myEC = e['overlap_EmpiricalCompounds (id)'].split(',');
-                            const fid = [...new Set(EC2fid.filter(e2 => myEC.includes(e2.EID)).map(e2 => e2.CompoundID_from_user))]
+                            const fid = [...new Set(
+                                EC2fid.filter(e2 => myEC.includes(e2.EID))
+                                    .map(e2 => e2.CompoundID_from_user)
+                            )];
                             return { ...e, overlap_fid: fid.join(',') };
                         }
 
@@ -272,29 +322,50 @@ function GSEAomic({ omic }) {
                     body: JSON.stringify(gseaScriptData)
                 }
             );
+            const resJson = await res.json();
+            console.log('GSEA data was sent: ', resJson);
+
         } else {
 
-            const gseaScriptData = getDataM(
-                gseaData, danfo2RowColJson(fx2i), rtCol, ionCol, ionVal
-            );
+            if (mMethod.msea) {
+                const gseaScriptData = getDataMSEA(gseaData);
+                res = await fetch(
+                    `${API_URL}/run_msea/${jobID}/${omic}/${gseaID}/${myos}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(gseaScriptData)
+                    }
+                );
 
-            res = await fetch(
-                `${API_URL}/run_mummichog/${jobID}/${omic}/${gseaID}/${myos}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(gseaScriptData)
-                }
-            );
+                const resJson = await res.json();
+                console.log('GSEA data (msea) was sent: ', resJson);
+            }
+
+            if (mMethod.mummichog) {
+                const gseaScriptData = getDataMummichog(
+                    gseaData, danfo2RowColJson(fx2i),
+                    mParams.rt, mParams.ionCol, mParams.ionVal
+                );
+
+                res = await fetch(
+                    `${API_URL}/run_mummichog/${jobID}/${omic}/${gseaID}/${myos}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(gseaScriptData)
+                    }
+                );
+                const resJson = await res.json();
+                console.log('GSEA data (mummichog) was sent: ', resJson);
+            }
         }
-
-        const resJson = await res.json();
-        console.log('GSEA data was sent: ', resJson);
 
         // Get results
         console.log('fetchRunGsea will set a fetchResults interval to get GSEA results');
+
         fetchResultsRef.current = {};
 
         if (!isM) {
@@ -302,17 +373,24 @@ function GSEAomic({ omic }) {
                 fetchResultsRef.current[e.db] = setInterval(() => fetchResults(e.db), 5000);
             });
         } else {
-            Object.keys(ionVal).map(e => { // pos or neg
-                if (!ionVal[e]) return;
-                fetchResultsRef.current[e] = setInterval(() => fetchResults(e), 5000);
 
-            })
+            if (mMethod.msea) {
+                fetchResultsRef.current['KEGG'] = setInterval(() => fetchResults('KEGG'), 5000);
+                fetchResultsRef.current['ChEBI'] = setInterval(() => fetchResults('ChEBI'), 5000);
+            }
+
+            if (mMethod.mummichog) {
+                Object.keys(mParams.ionVal).map(e => { // pos or neg
+                    if (!mParams.ionVal[e]) return;
+                    fetchResultsRef.current[e] = setInterval(() => fetchResults(e), 5000);
+                })
+            }
+
             console.log('Get for metabolomics');
         }
 
     }, [OS, API_URL, jobID, gseaID, gseaData, fetchResults,
-        fetchResultsRef, db, isM, omic, fx2i,
-        ionCol, ionVal, rtCol
+        fetchResultsRef, db, isM, omic, fx2i, mParams, mMethod
     ]);
 
     useEffect(() => {
@@ -356,14 +434,11 @@ function GSEAomic({ omic }) {
                 omic={omic}
                 g2info={g2info} setG2info={setG2info}
                 gidCol={gidCol} setGidCol={setGidCol}
-                rtCol={rtCol} setRtCol={setRtCol}
-                ionCol={ionCol} setIonCol={setIonCol}
-                ionVal={ionVal} setIonVal={setIonVal}
+                mParams={mParams} setMParams={setMParams} mMethod={mMethod}
                 rankCol={rankCol} setRankCol={setRankCol}
                 subRankCol={subRankCol} setSubRankCol={setSubRankCol}
                 groups={groups} setGroups={setGroups}
                 handleRunGSEA={handleRunGSEA}
-                changeID={gseaID != getGseaId()}
                 ready={waitingGsea.length == 0}
             />
             {showGsea &&
@@ -423,7 +498,7 @@ const getDataQT = (gseaData) => {
     return gseaScriptData;
 }
 
-const getDataM = (gseaData, fx2iJson, rtCol, ionCol, ionVal) => {
+const getDataMummichog = (gseaData, fx2iJson, rtCol, ionCol, ionVal) => {
 
     let preData = { ...gseaData };
 
@@ -463,6 +538,35 @@ const getDataM = (gseaData, fx2iJson, rtCol, ionCol, ionVal) => {
         });
     });
 
+    return gseaScriptData;
+}
+
+const getDataMSEA = (gseaData) => {
+    const _idadded = { KEGG: [], ChEBI: [] }
+    const gseaScriptData = {
+        KEGG: Object.keys(gseaData).map(e => ({
+            ID: gseaData[e].KEGG,
+            RankStat: gseaData[e].rank
+        })).filter(e => {
+            let filter = false;
+            if (!!e.ID && !_idadded.KEGG.includes(e.ID)) {
+                filter = true;
+                _idadded.KEGG.push(e.ID);
+            }
+            return filter;
+        }),
+        ChEBI: Object.keys(gseaData).map(e => ({
+            ID: gseaData[e].ChEBI,
+            RankStat: gseaData[e].rank
+        })).filter(e => {
+            let filter = false;
+            if (!!e.ID && !_idadded.ChEBI.includes(e.ID)) {
+                filter = true;
+                _idadded.ChEBI.push(e.ID);
+            }
+            return filter;
+        }),
+    };
     return gseaScriptData;
 }
 

@@ -15,9 +15,16 @@ function EnrichmentTable({ gseaRes, omic, db }) {
 
     const isM = omic == 'm';
 
-    const columns = useMemo(() => COLUMNS[isM ? 'm' : 't'], [isM]);
+    const mMethod = useMemo(() => {
+        let mMethod = null;
+        if (isM && ['pos', 'neg'].includes(db)) mMethod = 'mummichog';
+        if (isM && ['KEGG', 'ChEBI'].includes(db)) mMethod = 'msea';
+        return mMethod;
+    }, [db, isM])
+
+    const columns = useMemo(() => COLUMNS[(isM && mMethod=='mummichog') ? 'm' : 't'], [isM, mMethod]);
     const myData = useMemo(() => {
-        if (!isM) {
+        if (!(isM && mMethod == 'mummichog')) {
             return gseaRes.map(e => ({
                 ...e,
                 pval: e.pval == 0 ? 1 / 10000 : e.pval,
@@ -25,12 +32,12 @@ function EnrichmentTable({ gseaRes, omic, db }) {
                 leadingEdge: e.leadingEdge.reduce((prev, curr) => `${prev} // ${curr}`,)
             }))
         } else {
-            return gseaRes.filter(e => !(e.overlap_size==0 || e.pathway_size==0));
+            return gseaRes.filter(e => !(e.overlap_size == 0 || e.pathway_size == 0));
         }
-    }, [gseaRes, isM]);
+    }, [gseaRes, isM, mMethod]);
 
     const myDataStyle = useMemo(() => {
-        if (!isM) {
+        if (!(isM && mMethod == 'mummichog')) {
             return myData.map(e => ({
                 ...e,
                 pval: e.pval == 0 ? 0 : Number.parseFloat(e.pval).toExponential(2),
@@ -44,7 +51,7 @@ function EnrichmentTable({ gseaRes, omic, db }) {
                 'p-value': Number.parseFloat(e['p-value']).toExponential(2)
             }));
         }
-    }, [myData, isM]);
+    }, [myData, isM, mMethod]);
 
     const [rowSelection, setRowSelection] = useState({});
 

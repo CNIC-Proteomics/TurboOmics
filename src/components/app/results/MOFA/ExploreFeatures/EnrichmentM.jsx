@@ -81,7 +81,7 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
 
         return {midTargetArr, midArr, midIndex, db2usr}
 
-    }, [colFid, idType, isIntegerID]);
+    }, [colFid, idType, isIntegerID, fRef, m2i, m2x]);
 
     // Handle change on column containing ID or ID_type
     useEffect(() => {
@@ -125,7 +125,7 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
                 setResORA(myResORA.filter(e => e.N_pathway_sig > 0));
             });
 
-    }, [midIndex, midArr, colFid]);
+    }, [midIndex, midArr, colFid, API_URL, OS, jobID]);
 
     /**/
 
@@ -157,7 +157,7 @@ function EnrichmentM({ fRef, f2MeanL, colFid, setColFid, setM2cat }) {
         });
 
         setM2cat(myM2Cat)
-    }, [myUsrFilt, midTargetArr, resORA, idType])
+    }, [myUsrFilt, midTargetArr, resORA, idType, colFid, db2usr, setM2cat])
 
     return (
         <Box sx={{}}>

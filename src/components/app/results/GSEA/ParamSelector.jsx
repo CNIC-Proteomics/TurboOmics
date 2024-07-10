@@ -10,6 +10,9 @@ import MyMotion from '@/components/MyMotion';
 /*
 Constants
 */
+
+const MIDTYPE = ['ChEBI', 'KEGG', 'HMDB', 'PubChem'];
+
 const TEXT = {
     'Mean difference': {
         text1: 'Select metadata variable',
@@ -37,14 +40,12 @@ function ParamSelector({
     omic,
     g2info, setG2info,
     gidCol, setGidCol,
-    rtCol, setRtCol,
-    ionCol, setIonCol,
-    ionVal, setIonVal,
+    mParams, setMParams,
     rankCol, setRankCol,
     subRankCol, setSubRankCol,
     groups, setGroups,
     handleRunGSEA,
-    changeID, ready
+    ready, mMethod
 }) {
 
     // check if this is a metabolomics section
@@ -84,7 +85,7 @@ function ParamSelector({
         if (!isM) {
 
             if (Object.keys(cachedG2i).includes(newValue.id)) {
-                g2i = 0[newValue.id];
+                g2i = cachedG2i[newValue.id];
             } else {
 
                 gidColSerie.values.map((g, i) => {
@@ -121,13 +122,7 @@ function ParamSelector({
                 setCachedG2i(prev => ({ ...prev, [newValue.id]: g2i }));
             }
 
-        } else {
-            // Metabolomics
-            gidColSerie.index.map((e, i) => {
-                g2i[e] = { f: [e], mz: gidColSerie.values[i] }
-            });
         }
-
         setG2info(g2i);
     }
 
@@ -243,8 +238,8 @@ function ParamSelector({
     // Set ion values
     const [ionValOpts, setIonValOpts] = useState([]);
     const handleIonCol = (e, newValue) => {
-        setIonCol(newValue);
-        setIonVal({ pos: null, neg: null });
+        setMParams(prev => ({ ...prev, ionCol: newValue }));
+        setMParams(prev => ({ ...prev, ionVal: { pos: null, neg: null } }));
 
         if (!newValue) return;
 
@@ -268,7 +263,7 @@ function ParamSelector({
                                 options={gidColOpts}
                                 sx={{ width: 300 }}
                                 renderInput={(params) => (
-                                    <TextField {...params} label={`${OMIC2NAME[omic]} ID column`}/>
+                                    <TextField {...params} label={`${OMIC2NAME[omic]} ID column`} />
                                 )}
                                 isOptionEqualToValue={(option, value) => option.id === value.id}
                                 value={gidCol}
@@ -304,8 +299,10 @@ function ParamSelector({
                                             renderInput={(params) => <TextField {...params} label='Metabolite ID' />}
                                             isOptionEqualToValue={(option, value) => option.label === value.label}
                                             getOptionDisabled={(option) => option.disabled}
-                                            value={null}
-                                            onChange={(e, newValue) => console.log(newValue)}
+                                            value={mParams.mid}
+                                            onChange={(e, newValue) => {
+                                                setMParams(prev => ({ ...prev, mid: newValue }));
+                                            }}
                                             renderOption={(props, option) => {
                                                 return (
                                                     <li {...props} key={option.label}>
@@ -320,13 +317,15 @@ function ParamSelector({
                                     <Typography type='body2'>Select ID Type</Typography>
                                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                         <Autocomplete
-                                            options={gidColOpts}
+                                            options={MIDTYPE.map(e => ({ id: e, label: e }))}
                                             sx={{ width: 250 }}
                                             renderInput={(params) => <TextField {...params} label='ID Type' />}
                                             isOptionEqualToValue={(option, value) => option.label === value.label}
                                             getOptionDisabled={(option) => option.disabled}
-                                            value={null}
-                                            onChange={(e, newValue) => console.log(newValue)}
+                                            value={mParams.midType}
+                                            onChange={(e, newValue) => {
+                                                setMParams(prev => ({ ...prev, midType: newValue }));
+                                            }}
                                             renderOption={(props, option) => {
                                                 return (
                                                     <li {...props} key={option.label}>
@@ -352,8 +351,10 @@ function ParamSelector({
                                             renderInput={(params) => <TextField {...params} label='Apex m/z' />}
                                             isOptionEqualToValue={(option, value) => option.label === value.label}
                                             getOptionDisabled={(option) => option.disabled}
-                                            value={null}
-                                            onChange={(e, newValue) => console.log(newValue)}
+                                            value={mParams.mz}
+                                            onChange={(e, newValue) => {
+                                                setMParams(prev => ({ ...prev, mz: newValue }))
+                                            }}
                                             renderOption={(props, option) => {
                                                 return (
                                                     <li {...props} key={option.label}>
@@ -373,8 +374,10 @@ function ParamSelector({
                                             renderInput={(params) => <TextField {...params} label='RT column (min)' />}
                                             isOptionEqualToValue={(option, value) => option.label === value.label}
                                             getOptionDisabled={(option) => option.disabled}
-                                            value={rtCol}
-                                            onChange={(e, newValue) => setRtCol(newValue)}
+                                            value={mParams.rt}
+                                            onChange={(e, newValue) => {
+                                                setMParams(prev => ({ ...prev, rt: newValue }));
+                                            }}
                                             renderOption={(props, option) => {
                                                 return (
                                                     <li {...props} key={option.label}>
@@ -396,7 +399,7 @@ function ParamSelector({
                                             renderInput={(params) => <TextField {...params} label='Ion Mode Column' />}
                                             isOptionEqualToValue={(option, value) => option.label === value.label}
                                             getOptionDisabled={(option) => option.disabled}
-                                            value={ionCol}
+                                            value={mParams.ionCol}
                                             onChange={handleIonCol}
                                             renderOption={(props, option) => {
                                                 return (
@@ -418,8 +421,12 @@ function ParamSelector({
                                                 renderInput={(params) => <TextField {...params} label='Positive Ion' />}
                                                 isOptionEqualToValue={(option, value) => option.label === value.label}
                                                 getOptionDisabled={(option) => option.disabled}
-                                                value={ionVal.pos}
-                                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, pos: newValue }))}
+                                                value={mParams.ionVal.pos}
+                                                onChange={
+                                                    (e, newValue) => setMParams(
+                                                        prev => ({ ...prev, ionVal: { ...prev.ionVal, pos: newValue } })
+                                                    )
+                                                }
                                                 renderOption={(props, option) => {
                                                     return (
                                                         <li {...props} key={option.label}>
@@ -440,8 +447,12 @@ function ParamSelector({
                                                 renderInput={(params) => <TextField {...params} label='Negative Ion' />}
                                                 isOptionEqualToValue={(option, value) => option.label === value.label}
                                                 getOptionDisabled={(option) => option.disabled}
-                                                value={ionVal.neg}
-                                                onChange={(e, newValue) => setIonVal(prev => ({ ...prev, neg: newValue }))}
+                                                value={mParams.ionVal.neg}
+                                                onChange={
+                                                    (e, newValue) => setMParams(
+                                                        prev => ({ ...prev, ionVal: { ...prev.ionVal, neg: newValue } })
+                                                    )
+                                                }
                                                 renderOption={(props, option) => {
                                                     return (
                                                         <li {...props} key={option.label}>
@@ -576,8 +587,10 @@ function ParamSelector({
                         color='primary'
                         endIcon={<SendIcon />}
                         disabled={!(
-                            ready && gidCol && rankCol && subRankCol && g2info &&
-                            (!['Mean difference', 't-test'].includes(rankCol.label) || (groups.g1 && groups.g2))
+                            ready && rankCol && subRankCol &&
+                            (!['Mean difference', 't-test'].includes(rankCol.label) || (groups.g1 && groups.g2)) &&
+                            (!isM || (mMethod.msea || mMethod.mummichog)) && // if metabolomic, required method
+                            (isM || (gidCol && g2info)) // If not metabolomics, required id and g2info
                         )}
                         onClick={handleRunGSEA}
                     >

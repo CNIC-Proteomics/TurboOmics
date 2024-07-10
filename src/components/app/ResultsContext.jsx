@@ -1,5 +1,35 @@
+/*
+Libraries
+*/
+
 import { createContext, useContext, useState } from 'react';
 import { useImmerReducer } from 'use-immer';
+
+/*
+Constants
+*/
+const GSEA_DB = {
+    t: [
+        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
+        { db: 'HALLMARK', label: 'HALLMARK', status: '', gseaRes: null, show: false },
+        { db: 'GO_MF', label: 'GO:MF', status: '', gseaRes: null, show: false },
+        { db: 'GO_CC', label: 'GO:CC', status: '', gseaRes: null, show: false },
+        { db: 'GO_BP', label: 'GO:BP', status: '', gseaRes: null, show: false },
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'REACTOME', label: 'REACTOME', status: '', gseaRes: null, show: false },
+    ],
+    m: [
+        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'ChEBI', label: 'REACTOME', status: '', gseaRes: null, show: false },
+        { db: 'pos', label: 'Mummichog (+)', status: '', gseaRes: null, show: false },
+        { db: 'neg', label: 'Mummichog (-)', status: '', gseaRes: null, show: false }
+    ]
+};
+
+/*
+Context Component
+*/
 
 const ResultsContext = createContext();
 const DispatchResultsContext = createContext();
@@ -152,6 +182,12 @@ function resultsReducer(draft, action) {
             break;
         }
 
+        /*
+        GSEA
+        */
+
+
+
     }
 }
 
@@ -211,5 +247,11 @@ const resultsTemplate = {
                 (o, e) => ({ ...o, [e]: { min: -2, max: 2 } }), {}
             )
         }
+    },
+    'GSEA': {
+        'm': {db: GSEA_DB.m, colParams: {msea: null, mummichog: null}, rankParams: null, guiParams: null},
+        'q': {db: GSEA_DB.t, colParams: null, rankParams: null, guiParams: null, g2i: null},
+        't': {db: GSEA_DB.t, colParams: null, rankParams: null, guiParams: null, g2i: null}
     }
 }
+
