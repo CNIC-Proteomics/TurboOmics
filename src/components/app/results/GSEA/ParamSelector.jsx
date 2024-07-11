@@ -58,6 +58,7 @@ function ParamSelector({
     // Get results
     const results = useResults();
     const dispatchResults = useDispatchResults();
+    const gseaObj = results.GSEA[omic];
 
     // Get mdata
     const { mdataType } = useJob();
@@ -85,7 +86,9 @@ function ParamSelector({
         if (!isM) {
 
             if (Object.keys(cachedG2i).includes(newValue.id)) {
+
                 g2i = cachedG2i[newValue.id];
+
             } else {
 
                 gidColSerie.values.map((g, i) => {
@@ -124,6 +127,7 @@ function ParamSelector({
 
         }
         setG2info(g2i);
+        dispatchResults({ type: 'set-g2info', omic: omic, g2info: g2i, gidCol: newValue });
     }
 
     // Create g2info for metabolomics using apex m/z and metabolite ID & Type
@@ -162,9 +166,9 @@ function ParamSelector({
         }
     ]), [resStatus, fx2i, mdataType]);
 
-    const [subRankColOpts, setSubRankColOpts] = useState([]); // Number of component or metavariable
-    const [showSubSection, setShowSubSection] = useState(false);
-    const [groupColOpts, setGroupColOpts] = useState([]); // Only when selecting t-test
+    const [subRankColOpts, setSubRankColOpts] = useState(gseaObj.rankParams.subRankColOpts); // Number of component or metavariable
+    const [showSubSection, setShowSubSection] = useState(gseaObj.rankParams.showSubSection);
+    const [groupColOpts, setGroupColOpts] = useState(gseaObj.rankParams.groupColOpts); // Only when selecting t-test
 
     const handleRankColOpts = async (e, newValue) => {
         if (!newValue) return;
@@ -172,9 +176,10 @@ function ParamSelector({
         setSubRankCol(null);
         setGroupColOpts([]);
         setGroups({ g1: null, g2: null });
-        setShowSubSection(false)
-        setTimeout(e => setShowSubSection(true), 100)
+        setShowSubSection(false);
+        setTimeout(e => setShowSubSection(true), 100);
 
+        let _subRankColOpts = [];
         if (newValue.label == 'PCA') {
             let expVar = results.EDA.PCA[omic].data.explained_variance
             if (expVar == null) {
@@ -184,9 +189,7 @@ function ParamSelector({
                 dispatchResults({ type: 'set-eda-pca-status', status: resStatus, omic: omic });
                 expVar = dataPCA.explained_variance;
             }
-            setSubRankColOpts(
-                Object.keys(expVar).map(e => ({ label: `PCA${e}`, id: `PCA${e}` }))
-            );
+            _subRankColOpts = Object.keys(expVar).map(e => ({ label: `PCA${e}`, id: `PCA${e}` }))
         }
 
         if (newValue.label == 'MOFA') {
@@ -199,55 +202,70 @@ function ParamSelector({
             } else {
                 expVar = results.MOFA.data.explained_variance[omic];
             }
-            setSubRankColOpts(
-                Object.keys(expVar).map(e => ({ label: e, id: e }))
-            );
+            _subRankColOpts = Object.keys(expVar).map(e => ({ label: e, id: e }))
         }
 
         if (['Mean difference', 't-test'].includes(newValue.label)) {
-            setSubRankColOpts(
-                Object.keys(mdataType).filter(
-                    e => mdataType[e].type == 'categorical'
-                ).map(e => ({ label: e, id: e }))
-            );
+            _subRankColOpts = Object.keys(mdataType).filter(
+                e => mdataType[e].type == 'categorical'
+            ).map(e => ({ label: e, id: e }));
         }
 
         if (newValue.label == 'Custom') {
             const dtypeSerie = fx2i.ctypes;
-            setSubRankColOpts(
-                dtypeSerie.index.filter(
-                    (e, i) => dtypeSerie.values[i].includes('int') ||
-                        dtypeSerie.values[i].includes('float')
-                ).map(e => ({ label: e, id: e }))
-            );
+            _subRankColOpts = dtypeSerie.index.filter(
+                (e, i) => dtypeSerie.values[i].includes('int') ||
+                    dtypeSerie.values[i].includes('float')
+            ).map(e => ({ label: e, id: e }))
         }
+
+        setSubRankColOpts(_subRankColOpts);
+
+        dispatchResults({
+            type: 'handle-rank-col-opts',
+            omic: omic,
+            rankParams: {
+                rankCol: newValue,
+                subRankCol: null,
+                groups: { g1: null, g2: null },
+                subRankColOpts: _subRankColOpts,
+                groupColOpts: [],
+                showSubSection: true
+            }
+        })
     }
 
     const handleSubRankColOpts = (e, newValue) => {
         if (newValue == null) return;
         setSubRankCol(newValue);
+        dispatchResults({ type: 'set-sub-rank-col', subRankCol: newValue, omic })
 
         if (['Mean difference', 't-test'].includes(rankCol.label)) {
             setGroups({ g1: null, g2: null });
-            setGroupColOpts(
-                mdataType[newValue.id].levels.map(e => ({ label: e, id: e }))
-            );
+            let _groupColOpts = mdataType[newValue.id].levels.map(e => ({ label: e, id: e }))
+            setGroupColOpts(_groupColOpts);
+            dispatchResults({ type: 'set-group-col-opts', groupColOpts: _groupColOpts, omic })
         }
     }
 
     // Set ion values
-    const [ionValOpts, setIonValOpts] = useState([]);
+    const [ionValOpts, setIonValOpts] = useState(isM ? gseaObj.ionValOpts : []);
     const handleIonCol = (e, newValue) => {
+
         setMParams(prev => ({ ...prev, ionCol: newValue }));
+        dispatchResults({ type: 'set-m-params', attr: 'ionCol', value: newValue });
+
         setMParams(prev => ({ ...prev, ionVal: { pos: null, neg: null } }));
+        dispatchResults({ type: 'set-m-params', attr: 'ionVal', value: { pos: null, neg: null } });
 
         if (!newValue) return;
 
-        setIonValOpts(
-            [...new Set(fx2i.column(newValue.id).values)].map(
-                e => ({ label: e, id: e })
-            ).slice(0, 10) // Take only first ten elements
-        );
+        let _ionValOpts = [...new Set(fx2i.column(newValue.id).values)].map(
+            e => ({ label: e, id: e })
+        ).slice(0, 10); // Take only first ten elements
+
+        setIonValOpts(_ionValOpts);
+        dispatchResults({ type: 'set-ion-val-opts', ionValOpts: _ionValOpts });
     }
 
     return (
@@ -302,6 +320,7 @@ function ParamSelector({
                                             value={mParams.mid}
                                             onChange={(e, newValue) => {
                                                 setMParams(prev => ({ ...prev, mid: newValue }));
+                                                dispatchResults({ type: 'set-m-params', attr: 'mid', value: newValue });
                                             }}
                                             renderOption={(props, option) => {
                                                 return (
@@ -325,6 +344,7 @@ function ParamSelector({
                                             value={mParams.midType}
                                             onChange={(e, newValue) => {
                                                 setMParams(prev => ({ ...prev, midType: newValue }));
+                                                dispatchResults({ type: 'set-m-params', attr: 'midType', value: newValue });
                                             }}
                                             renderOption={(props, option) => {
                                                 return (
@@ -354,6 +374,7 @@ function ParamSelector({
                                             value={mParams.mz}
                                             onChange={(e, newValue) => {
                                                 setMParams(prev => ({ ...prev, mz: newValue }))
+                                                dispatchResults({ type: 'set-m-params', attr: 'mz', value: newValue });
                                             }}
                                             renderOption={(props, option) => {
                                                 return (
@@ -377,6 +398,7 @@ function ParamSelector({
                                             value={mParams.rt}
                                             onChange={(e, newValue) => {
                                                 setMParams(prev => ({ ...prev, rt: newValue }));
+                                                dispatchResults({ type: 'set-m-params', attr: 'rt', value: newValue });
                                             }}
                                             renderOption={(props, option) => {
                                                 return (
@@ -423,9 +445,12 @@ function ParamSelector({
                                                 getOptionDisabled={(option) => option.disabled}
                                                 value={mParams.ionVal.pos}
                                                 onChange={
-                                                    (e, newValue) => setMParams(
-                                                        prev => ({ ...prev, ionVal: { ...prev.ionVal, pos: newValue } })
-                                                    )
+                                                    (e, newValue) => {
+                                                        setMParams(
+                                                            prev => ({ ...prev, ionVal: { ...prev.ionVal, pos: newValue } })
+                                                        );
+                                                        dispatchResults({ type: 'set-ion-val', mode: 'pos', value: newValue })
+                                                    }
                                                 }
                                                 renderOption={(props, option) => {
                                                     return (
@@ -449,9 +474,12 @@ function ParamSelector({
                                                 getOptionDisabled={(option) => option.disabled}
                                                 value={mParams.ionVal.neg}
                                                 onChange={
-                                                    (e, newValue) => setMParams(
-                                                        prev => ({ ...prev, ionVal: { ...prev.ionVal, neg: newValue } })
-                                                    )
+                                                    (e, newValue) => {
+                                                        setMParams(
+                                                            prev => ({ ...prev, ionVal: { ...prev.ionVal, neg: newValue } })
+                                                        );
+                                                        dispatchResults({type:'set-ion-val', mode: 'neg', value: newValue});
+                                                    }
                                                 }
                                                 renderOption={(props, option) => {
                                                     return (
@@ -540,7 +568,10 @@ function ParamSelector({
                                                 }
                                                 isOptionEqualToValue={(option, value) => option.label === value.label}
                                                 value={groups.g1}
-                                                onChange={(e, newValue) => setGroups(prev => ({ ...prev, g1: newValue }))}
+                                                onChange={(e, newValue) => {
+                                                    setGroups(prev => ({ ...prev, g1: newValue }));
+                                                    dispatchResults({ type: 'set-group', g: 'g1', value: newValue, omic });
+                                                }}
                                                 renderOption={(props, option) => {
                                                     return (
                                                         <li {...props} key={option.label}>
@@ -565,7 +596,10 @@ function ParamSelector({
                                                 }
                                                 isOptionEqualToValue={(option, value) => option.label === value.label}
                                                 value={groups.g2}
-                                                onChange={(e, newValue) => setGroups(prev => ({ ...prev, g2: newValue }))}
+                                                onChange={(e, newValue) => {
+                                                    setGroups(prev => ({ ...prev, g2: newValue }));
+                                                    dispatchResults({ type: 'set-group', g: 'g2', value: newValue, omic });
+                                                }}
                                                 renderOption={(props, option) => {
                                                     return (
                                                         <li {...props} key={option.label}>

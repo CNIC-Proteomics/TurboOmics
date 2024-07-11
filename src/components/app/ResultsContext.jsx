@@ -5,27 +5,7 @@ Libraries
 import { createContext, useContext, useState } from 'react';
 import { useImmerReducer } from 'use-immer';
 
-/*
-Constants
-*/
-const GSEA_DB = {
-    t: [
-        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'HALLMARK', label: 'HALLMARK', status: '', gseaRes: null, show: false },
-        { db: 'GO_MF', label: 'GO:MF', status: '', gseaRes: null, show: false },
-        { db: 'GO_CC', label: 'GO:CC', status: '', gseaRes: null, show: false },
-        { db: 'GO_BP', label: 'GO:BP', status: '', gseaRes: null, show: false },
-        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
-        { db: 'REACTOME', label: 'REACTOME', status: '', gseaRes: null, show: false },
-    ],
-    m: [
-        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
-        { db: 'ChEBI', label: 'REACTOME', status: '', gseaRes: null, show: false },
-        { db: 'pos', label: 'Mummichog (+)', status: '', gseaRes: null, show: false },
-        { db: 'neg', label: 'Mummichog (-)', status: '', gseaRes: null, show: false }
-    ]
-};
+
 
 /*
 Context Component
@@ -186,7 +166,69 @@ function resultsReducer(draft, action) {
         GSEA
         */
 
+        case 'set-g2info': {
+            draft.GSEA[action.omic].gidCol = action.gidCol;
+            draft.GSEA[action.omic].g2info = action.g2info;
+            break;
+        }
 
+        case 'handle-rank-col-opts': {
+            draft.GSEA[action.omic].rankParams = action.rankParams;
+            break;
+        }
+
+        case 'set-sub-rank-col': {
+            draft.GSEA[action.omic].rankParams.subRankCol = action.subRankCol;
+            break;
+        }
+
+        case 'set-group-col-opts': {
+            draft.GSEA[action.omic].rankParams.groupColOpts = action.groupColOpts;
+            break;
+        }
+
+        case 'set-group': {
+            draft.GSEA[action.omic].rankParams.groups[action.g] = action.value;
+            break;
+        }
+
+        case 'set-m-params': {
+            draft.GSEA.m.mParams[action.attr] = action.value;
+            break;
+        }
+
+        case 'set-ion-val-opts': {
+            draft.GSEA.m.ionValOpts = action.ionValOpts;
+            break;
+        }
+
+        case 'set-ion-val': {
+            draft.GSEA.m.mParams.ionVal[action.mode] = action.value;
+            break;
+        }
+
+        case 'set-run-gsea': {
+            draft.GSEA[action.omic].guiParams = action.guiParams;
+            draft.GSEA[action.omic].db = action.omic == 'm' ? GSEA_DB.m : GSEA_DB.t
+            break;
+        }
+
+        case 'set-gsea-data': {
+            draft.GSEA[action.omic].gseaData = action.gseaData
+        }
+
+        case 'set-db': {
+            draft.GSEA[action.omic].db = draft.GSEA[action.omic].db.map(e => {
+                return e.db == action.db ?
+                    {
+                        ...e,
+                        status: action.status,
+                        gseaID: action.gseaID,
+                        gseaRes: action.gseaRes
+                    } : e
+            })
+            break;
+        }
 
     }
 }
@@ -206,6 +248,41 @@ const PCA_omicTemplate = {
         selectedPlot2D: { x: 1, y: 2, g: 'No color' },
         filterCol: 'All features',
     }
+}
+
+const GSEA_DB = {
+    t: [
+        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
+        { db: 'HALLMARK', label: 'HALLMARK', status: '', gseaRes: null, show: false },
+        { db: 'GO_MF', label: 'GO:MF', status: '', gseaRes: null, show: false },
+        { db: 'GO_CC', label: 'GO:CC', status: '', gseaRes: null, show: false },
+        { db: 'GO_BP', label: 'GO:BP', status: '', gseaRes: null, show: false },
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'REACTOME', label: 'REACTOME', status: '', gseaRes: null, show: false },
+    ],
+    m: [
+        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
+        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
+        { db: 'ChEBI', label: 'REACTOME', status: '', gseaRes: null, show: false },
+        { db: 'pos', label: 'Mummichog (+)', status: '', gseaRes: null, show: false },
+        { db: 'neg', label: 'Mummichog (-)', status: '', gseaRes: null, show: false }
+    ]
+};
+
+const GSEA_PARAMS = {
+    //db: GSEA_DB.m,
+    gseaData: null,
+    //mParams: { mid: null, midType: null, mz: null, rt: null, ionCol: null, ionVal: { pos: null, neg: null } },
+    //ionValOpts: [],
+    rankParams: {
+        rankCol: null,
+        subRankCol: null,
+        groups: { 'g1': null, 'g2': null },
+        subRankColOpts: [],
+        groupColOpts: [],
+        showSubSection: false
+    },
+    guiParams: { gseaID: '', showGsea: false, titleGsea: '' }
 }
 
 const resultsTemplate = {
@@ -249,9 +326,24 @@ const resultsTemplate = {
         }
     },
     'GSEA': {
-        'm': {db: GSEA_DB.m, colParams: {msea: null, mummichog: null}, rankParams: null, guiParams: null},
-        'q': {db: GSEA_DB.t, colParams: null, rankParams: null, guiParams: null, g2i: null},
-        't': {db: GSEA_DB.t, colParams: null, rankParams: null, guiParams: null, g2i: null}
+        'm': {
+            ...GSEA_PARAMS,
+            db: GSEA_DB.m,
+            mParams: { mid: null, midType: null, mz: null, rt: null, ionCol: null, ionVal: { pos: null, neg: null } },
+            ionValOpts: [],
+        },
+        'q': {
+            ...GSEA_PARAMS,
+            db: GSEA_DB.t,
+            gidCol: null,
+            g2info: null,
+        },
+        't': {
+            ...GSEA_PARAMS,
+            db: GSEA_DB.t,
+            gidCol: null,
+            g2info: null,
+        }
     }
 }
 
