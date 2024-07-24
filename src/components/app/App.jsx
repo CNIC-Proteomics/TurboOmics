@@ -6,19 +6,27 @@ import Menu from './menu/Menu';
 
 import NewJob from './newJob/NewJob';
 import FindJob from './findJob/FindJob';
-import Results from './results/Results'
 import { ResultsProvider } from './ResultsContext';
 import AskAnnotationsDialog from './newJob/createJob/AskAnnotationsDialog';
 import CreateJobWaiting from './newJob/createJob/CreateJobWaiting';
 import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog';
 import Annotating from './newJob/createJob/Annotating';
 
+import dynamic from 'next/dynamic'
+const Results = dynamic(
+    () => import('./results/Results')
+)
+//import Results from './results/Results'
 
 export default function App() {
 
     const [page, setPage] = useState('new-job'); // "new-job", "find-job", "results"
     const [creatingJob, setCreatingJob] = useState(''); // "", "waiting", "ask-annotations", "annotations-params"
     const [annotating, setAnnotating] = useState(false);
+
+    useEffect(() => {
+        console.log('TurboOmics loaded!');
+    }, []);
 
     return (
         <div>
@@ -70,7 +78,7 @@ export default function App() {
                     {
                         page == 'results' &&
                         <MyMotion>
-                            <Results />
+                            <Results/>
                         </MyMotion>
                     }
                 </ResultsProvider>

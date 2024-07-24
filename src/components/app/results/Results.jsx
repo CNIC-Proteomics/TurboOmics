@@ -5,13 +5,25 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useJob } from '../JobContext';
 import DataDistribution from './EDA/DataDistribution/DataDistribution';
-import PCA from './EDA/PCA/PCA';
 import { useDispatchResults, useResults } from '../ResultsContext';
 import { CircularProgress, Grid } from '@mui/material';
 import { useVars } from '@/components/VarsContext';
-import MOFA from './MOFA/MOFA';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
-import GSEA from './GSEA/GSEA';
+
+import dynamic from 'next/dynamic'
+
+const PCA = dynamic(
+    () => import('./EDA/PCA/PCA')
+);
+const MOFA = dynamic(
+    () => import('./MOFA/MOFA')
+);
+const GSEA = dynamic(
+    () => import('./GSEA/GSEA')
+);
+// import PCA from './EDA/PCA/PCA';
+// import MOFA from './MOFA/MOFA';
+// import GSEA from './GSEA/GSEA';
 
 export default function Results() {
 

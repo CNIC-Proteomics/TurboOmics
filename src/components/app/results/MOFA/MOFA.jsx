@@ -9,7 +9,12 @@ import ScatterPlotContainer from './ScatterPlot/ScatterPlotContainer';
 import { MySection, MySectionContainer } from '@/components/MySection';
 import LoadingPlotContainer from './LoadingPlot/LoadingPlotContainer';
 import HeatMapContainer from './HeatMap/HeatMapContainer';
-import ExploreFeaturesContainer from './ExploreFeatures/ExploreFeaturesContainer';
+
+import dynamic from 'next/dynamic';
+const ExploreFeaturesContainer = dynamic(
+    () => import('./ExploreFeatures/ExploreFeaturesContainer')
+)
+//import ExploreFeaturesContainer from './ExploreFeatures/ExploreFeaturesContainer';
 
 
 function MOFA() {
@@ -210,10 +215,11 @@ function MOFA() {
                                     endIcon={<ArrowOutwardIcon />}
                                     onClick={() => {
                                         setEFLoading(true);
-                                        setTimeout(() => {
+                                        setExploreF(true)
+                                        /*setTimeout(() => {
                                             setEFLoading(false);
                                             setExploreF(true)
-                                        }, 500);
+                                        }, 3000);*/
                                     }}
                                 >
                                     Explore Features
@@ -234,6 +240,7 @@ function MOFA() {
                                 Factor={selectedPlot.Factor}
                                 mdataCol={selectedPlot.mdataCol}
                                 thrLRef={thrLRef.current}
+                                setEFLoading={setEFLoading}
                             />}
                         </MySection>
                     </>}
