@@ -16,13 +16,14 @@ export default function DragFile({ title, fileType, traspose = false }) {
 
     async function handleChange(file) {
         const fileText = await file.text();
-        let dfJson = await tsvToDanfo(fileText, '\t', traspose);
+        let [dfJson, idCol] = await tsvToDanfo(fileText, '\t', traspose);
 
         dispatchJob({
             type: 'user-upload',
             fileType: fileType,
             userFileName: file.name,
-            dfJson: dfJson
+            dfJson: dfJson,
+            idCol: idCol
         });
     };
 

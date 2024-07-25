@@ -1,8 +1,7 @@
-import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import GProfiler from './GProfiler'
-import GSEA from './GSEA'
 import { useResults } from '@/components/app/ResultsContext';
 import { useJob } from '@/components/app/JobContext';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/dist';

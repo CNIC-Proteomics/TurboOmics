@@ -11,32 +11,22 @@ import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
 import DbSelector from './utils/DbSelector';
 import { getMeanDiff, getMedian, getTvalue } from './utils/stats';
 import { tsvToDanfo } from '@/utils/tsvToDanfo';
-import EnrichmentTable from './EnrichmentTable';
-import CustomEnrichment from './CustomEnrichment';
-import { MetaboID } from '../../../../utils/MetaboID';
+//import { MetaboID } from '../../../../utils/MetaboID';
 
+import dynamic from 'next/dynamic';
+const EnrichmentTable = dynamic(
+    () => import('./EnrichmentTable')
+);
+const CustomEnrichment = dynamic(
+    () => import('./CustomEnrichment')
+);
+//import EnrichmentTable from './EnrichmentTable';
+//import CustomEnrichment from './CustomEnrichment';
 
 /*
 Constants
 */
-const DB = {
-    t: [
-        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'HALLMARK', label: 'HALLMARK', status: '', gseaRes: null, show: false },
-        { db: 'GO_MF', label: 'GO:MF', status: '', gseaRes: null, show: false },
-        { db: 'GO_CC', label: 'GO:CC', status: '', gseaRes: null, show: false },
-        { db: 'GO_BP', label: 'GO:BP', status: '', gseaRes: null, show: false },
-        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
-        { db: 'REACTOME', label: 'REACTOME', status: '', gseaRes: null, show: false },
-    ],
-    m: [
-        { db: 'Custom', label: 'Custom', status: 'ok', show: true },
-        { db: 'KEGG', label: 'KEGG', status: '', gseaRes: null, show: false },
-        { db: 'ChEBI', label: 'REACTOME', status: '', gseaRes: null, show: false },
-        { db: 'pos', label: 'Mummichog (+)', status: '', gseaRes: null, show: false },
-        { db: 'neg', label: 'Mummichog (-)', status: '', gseaRes: null, show: false }
-    ]
-};
+
 
 
 /*
@@ -132,6 +122,7 @@ function GSEAomic({ omic }) {
             fx2i.index.map(e => preData[e] = { f: [e] });
 
             if (mMethod.msea) {
+                const MetaboID = require('@/utils/MetaboID.json');
                 const midSerie = fx2i.column(mParams.mid.id);
                 midSerie.index.map((e, i) => {
                     const mid = midSerie.values[i]

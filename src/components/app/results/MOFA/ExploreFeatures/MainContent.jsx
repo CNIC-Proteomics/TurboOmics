@@ -13,10 +13,19 @@ import { useJob } from '@/components/app/JobContext';
 import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter';
 import { useResults } from '@/components/app/ResultsContext';
 import { MySection, MySectionContainer } from '@/components/MySection';
-import EnrichmentQ from './EnrichmentQ';
-import EnrichmentM from './EnrichmentM';
 import MyMRTable from './MyMRTable';
 import { useVars } from '@/components/VarsContext';
+
+import dynamic from 'next/dynamic';
+const EnrichmentQ = dynamic(
+    () => import('./EnrichmentQ')
+);
+const EnrichmentM = dynamic(
+    () => import('./EnrichmentM')
+);
+
+// import EnrichmentQ from './EnrichmentQ';
+//import EnrichmentM from './EnrichmentM';
 
 function MainContent({ omic, thrLRef }) {
 
@@ -86,8 +95,8 @@ function MainContent({ omic, thrLRef }) {
 
     // Selection of column containing protein/transcript ID
     const [colFid, setColFid] = useState(
-        omic == 'm' ? null : 
-        { label: f2i.columns[0], id: f2i.columns[0] }
+        omic == 'm' ? null :
+            { label: f2i.columns[0], id: f2i.columns[0] }
     );
 
     // Array containing enriched categories filtered by user
@@ -101,15 +110,31 @@ function MainContent({ omic, thrLRef }) {
         return setQ2cat_sign;
     }, [setQ2cat]);
 
+    /*
+    Import MetaboID for metabolomics
+    */
+
+    const [MetaboID, setMetaboID] = useState(null);
+    useEffect(() => {
+        if (omic != 'm') return;
+        const loadMetaboID = async () => {
+            //const _MetaboID = await import('@/utils/MetaboID.json');
+            var _MetaboID = require('@/utils/MetaboID.json');
+            setMetaboID(_MetaboID);
+            console.log('MetaboID was imported')
+        }
+        loadMetaboID();
+    }, [omic]);
+
     return (
-        <Splide aria-label="My Favorite Images">
+        <Splide aria-label="Omic Positive/Negative Change">
             {['up', 'down'].map(sign => (
                 <SplideSlide key={sign}>
                     <Box sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant='h5'>
                             {sign == 'up' ? 'Positively' : 'Negatively'} Associated {OMIC2NAME[omic]}
                         </Typography>
-                        <MySectionContainer height='75vh'>
+                        <MySectionContainer height='85vh'>
                             <MySection>
                                 <MyMRTable
                                     omic={omic}
@@ -132,13 +157,16 @@ function MainContent({ omic, thrLRef }) {
                                                 setQ2cat={setQ2cat_sign[sign]}
                                             />
                                             :
-                                            <EnrichmentM
-                                                fRef={fFact[sign]}
-                                                f2MeanL={f2MeanL}
-                                                colFid={colFid}
-                                                setColFid={setColFid}
-                                                setM2cat={setQ2cat_sign[sign]}
-                                            />
+                                            <>
+                                                {MetaboID && <EnrichmentM
+                                                    fRef={fFact[sign]}
+                                                    f2MeanL={f2MeanL}
+                                                    colFid={colFid}
+                                                    setColFid={setColFid}
+                                                    setM2cat={setQ2cat_sign[sign]}
+                                                    MetaboID={MetaboID}
+                                                />}
+                                            </>
                                         }
                                     </Box>
                                 }

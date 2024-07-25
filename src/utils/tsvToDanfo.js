@@ -49,8 +49,8 @@ export function tsvToDanfo(tsvString, sep = '\t', traspose = false) {
                 console.log(`Row number ${i} could not be read`)
             }
         }
-
-        resolve(data);
+        
+        resolve([data, headers[0]]);
 
     })
 }

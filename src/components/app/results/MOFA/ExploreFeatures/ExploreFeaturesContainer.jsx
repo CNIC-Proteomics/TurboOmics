@@ -70,7 +70,9 @@ function ExploreFeaturesContainer({
                                     transition: 'all ease 0.5s'
                                 }}
                             >
-                                <MainContent omic={omic} thrLRef={thrLRef[omic]} />
+                                {selectedOmic == omic &&
+                                    <MainContent omic={omic} thrLRef={thrLRef[omic]} />
+                                }
                             </Box>
                         ))
                     }

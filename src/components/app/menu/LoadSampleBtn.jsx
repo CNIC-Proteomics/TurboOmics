@@ -23,7 +23,8 @@ export default function LoadSampleBtn() {
                 type: 'user-upload',
                 fileType: key,
                 userFileName: `${key}.tsv`,
-                dfJson: resJson[key]
+                dfJson: resJson[key],
+                idCol: Object.keys(resJson[key][0])[0]
             });
         })
     }

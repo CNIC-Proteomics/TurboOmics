@@ -9,13 +9,17 @@ import FindJob from './findJob/FindJob';
 import { ResultsProvider } from './ResultsContext';
 import AskAnnotationsDialog from './newJob/createJob/AskAnnotationsDialog';
 import CreateJobWaiting from './newJob/createJob/CreateJobWaiting';
-import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog';
 import Annotating from './newJob/createJob/Annotating';
 
 import dynamic from 'next/dynamic'
 const Results = dynamic(
     () => import('./results/Results')
 )
+const AnnotationsParamsDialog = dynamic(
+    () => import('./newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog')
+);
+
+//import AnnotationsParamsDialog from './newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog';
 //import Results from './results/Results'
 
 export default function App() {

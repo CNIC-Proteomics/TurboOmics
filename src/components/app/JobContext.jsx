@@ -41,12 +41,12 @@ function jobReducer(draft, action) {
 
             let df = new dfd.DataFrame(action.dfJson);
 
-            df.setIndex({ column: df.columns[0], inplace: true });
+            df.setIndex({ column: action.idCol, inplace: true });
 
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 const omic = action.fileType.slice(-1)
 
-                df.drop({ columns: [df.columns[0]], inplace: true });
+                df.drop({ columns: [action.idCol], inplace: true });
 
                 // Missing values calculations
                 let dfMV = df.isNa().sum({ axis: 0 }).div(df.shape[0]);
