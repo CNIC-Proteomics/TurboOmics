@@ -14,7 +14,7 @@ import Annotating from './newJob/createJob/Annotating';
 import dynamic from 'next/dynamic'
 const Results = dynamic(
     () => import('./results/Results')
-)
+);
 const AnnotationsParamsDialog = dynamic(
     () => import('./newJob/createJob/AnnotationsParamsContent/AnnotationsParamsDialog')
 );

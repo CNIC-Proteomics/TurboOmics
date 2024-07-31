@@ -34,7 +34,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
     const myFeat = useMemo(() => {
         console.log(plotHM);
         const myFeat = {};
-        console.log(fLVec)
+        //console.log(fLVec)
         omics.map(omic => {
             myFeat[omic] = {
                 down: fLVec[omic].filter(

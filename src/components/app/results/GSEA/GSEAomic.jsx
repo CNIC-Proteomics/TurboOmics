@@ -17,11 +17,11 @@ import dynamic from 'next/dynamic';
 const EnrichmentTable = dynamic(
     () => import('./EnrichmentTable')
 );
-const CustomEnrichment = dynamic(
+/*const CustomEnrichment = dynamic(
     () => import('./CustomEnrichment')
-);
+);*/
 //import EnrichmentTable from './EnrichmentTable';
-//import CustomEnrichment from './CustomEnrichment';
+import CustomEnrichment from './CustomEnrichment';
 
 /*
 Constants
@@ -263,8 +263,9 @@ function GSEAomic({ omic }) {
             let gseaRes = null;
             if (resJson.status == 'ok') {
                 if (isM && ['pos', 'neg'].includes(mydb)) {
-                    gseaRes = await tsvToDanfo(resJson.gseaRes, '\t', false);
-                    const EC2fid = await tsvToDanfo(resJson.usrInput2EC, '\t', false);
+                    let _i;
+                    [gseaRes, _i] = await tsvToDanfo(resJson.gseaRes, '\t', false);
+                    const [EC2fid, _j] = await tsvToDanfo(resJson.usrInput2EC, '\t', false);
 
                     gseaRes = gseaRes.map(e => {
                         if (!e['overlap_EmpiricalCompounds (id)']) {
@@ -405,7 +406,6 @@ function GSEAomic({ omic }) {
     useEffect(() => {
         console.log('Ending useEffect - did finished?', backendStatus, db);
 
-
         if (db.every(e => e.status != 'waiting') && backendStatus == 'sendJob') {
             console.log('useEffect will handle GSEA finish');
 
@@ -418,6 +418,7 @@ function GSEAomic({ omic }) {
             setWaitingGsea(prev => prev.slice(1));
             setBackendStatus('ready');
         }
+
     }, [waitingGsea, db, backendStatus]);
 
     /*
