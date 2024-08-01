@@ -21,9 +21,13 @@ const MOFA = dynamic(
 const GSEA = dynamic(
     () => import('./GSEA/GSEA')
 );
+const PWA = dynamic(
+    () => import('./PWA/PWA')
+);
 // import PCA from './EDA/PCA/PCA';
 // import MOFA from './MOFA/MOFA';
 // import GSEA from './GSEA/GSEA';
+// import PWA from './PWA/PWA';
 
 export default function Results() {
 
@@ -126,8 +130,15 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='ENRICHMENT ANALYSIS' status='' />}
+                            label={<TabComponent text='PATHWAY ANALYSIS' status='' />}
                             value={2.1}
+                            sx={{ fontSize: 12, m: 0, p: 0 }}
+                            disabled={false}
+                        />
+
+                        <Tab
+                            label={<TabComponent text='ENRICHMENT ANALYSIS' status='' />}
+                            value={3.1}
                             sx={{ fontSize: 12, m: 0, p: 0 }}
                             disabled={false}
                         />
@@ -139,7 +150,8 @@ export default function Results() {
                     {value == 0.1 && <Box sx={{ p: 1 }}><DataDistribution /></Box>}
                     {value == 0.2 && <Box sx={{ p: 1 }}><PCA /></Box>}
                     {value == 1.1 && <Box sx={{ p: 1 }}><MOFA /></Box>}
-                    {value == 2.1 && <Box sx={{ p: 1 }}><GSEA /></Box>}
+                    {value == 2.1 && <Box sx={{ p: 1 }}><PWA /></Box>}
+                    {value == 3.1 && <Box sx={{ p: 1 }}><GSEA /></Box>}
                 </Box>
             </Box>
         </>

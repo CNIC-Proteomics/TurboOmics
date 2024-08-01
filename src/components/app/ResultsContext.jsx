@@ -230,6 +230,15 @@ function resultsReducer(draft, action) {
             break;
         }
 
+        /*
+        PWA
+        */
+        
+        case 'set-pwa-attr': {
+            draft.PWA[action.attr] = action.value;
+            break;
+        }
+
     }
 }
 
@@ -344,6 +353,9 @@ const resultsTemplate = {
             gidCol: null,
             g2info: null,
         }
+    },
+    'PWA': {
+        mdataCol: null
     }
 }
 
