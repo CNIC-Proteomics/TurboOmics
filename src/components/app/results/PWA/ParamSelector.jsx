@@ -30,10 +30,10 @@ const omicIdTypeOpts = {
 }
 
 
-function ParamSelector() {
+function ParamSelector({ setRId2info, fetchJobRun }) {
 
     // Get job data
-    const { omics, mdataType, OS } = useJob();
+    const { omics, mdataType, OS, f2x } = useJob();
     const jobUser = useJob().user;
 
     // Save section variables
@@ -42,7 +42,7 @@ function ParamSelector() {
 
     // Select metadata column
     const mdata = jobUser.mdata;
-    const [mdataCol, setMdataCol] = useState(savedResultsPWA.mdataCol);
+    const [mdataCol, setMdataCol] = useState(null);//savedResultsPWA.mdataCol);
     const [mdataCategorical, setMdataCategorical] = useState({
         isCategorical: false,
         colOpts: [],
@@ -78,6 +78,125 @@ function ParamSelector() {
         omics.reduce((prev, curr) => ({ ...prev, [curr]: omicIdTypeOpts[curr][0] }), {})
     );
 
+    const [omicIdR, setOmicIdR] = useState(
+        omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
+    );
+
+    const handleOmicIdChange = async (o, omicIdCol_i, omicIdType_i) => {
+        console.log(o, omicIdCol_i, omicIdType_i);
+
+        if (!omicIdCol_i) {
+            setOmicIdR(prev => ({ ...prev, [o]: null }));
+            setRId2info(prev => ({...prev, [o]: {}}));
+            return;
+        };
+
+        const f2iColSerie = jobUser[`${o}2i`].column(omicIdCol_i.id);
+        let f2x_i = f2x[o];
+        let xId = f2iColSerie.index.filter((e, i) => f2x_i[i]); // X id
+        let uId = f2iColSerie.values.filter((e, i) => f2x_i[i]); // User selected id
+        let rId = []; // Reactome id (completed from uId)
+        let omicIdR_i = {}; // xId -> rId
+        let _rId2info = {}; // rId -> xId && name of compund/protein/transcript
+
+        if (o == 'm') {
+
+            if (omicIdType_i.id == 'ChEBI' && false) {
+
+                rId = uId;
+
+            } else {
+
+                const MetaboID = require('@/utils/MetaboID.json');
+                let _index = uId.map( e => MetaboID[omicIdType_i.id].indexOf(e));
+                rId = _index.map(e => MetaboID['ChEBI'][e]);
+                rId.map((e, i) => {
+                    if (!e) return;
+                    _rId2info[e] = {xId: xId[i], uId: uId[i], Name: MetaboID['Name'][i]}
+                })
+
+            }
+
+        } else if (o == 'q' || o == 't') {
+
+            if (omicIdType_i.id == 'Uniprot Protein ID' && false) {
+
+                rId = uId;
+
+            } else {
+
+                let GPresult = [];
+
+                // First search in SwissProt
+                const res = await fetch(
+                    'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            "organism": OS.id,
+                            "query": uId,
+                            "target": "UNIPROTSWISSPROT_ACC"
+                        })
+                    }
+                );
+                const resJson = await res.json();
+                GPresult = resJson.result.filter(e => e.converted != 'None' && e.n_converted == 1);
+
+                // Second search in Trembl
+                const _targeted = GPresult.map(e => e.incoming);
+                const res2 = await fetch(
+                    'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            "organism": OS.id,
+                            "query": uId.filter(e => !_targeted.includes(e)),
+                            "target": "UNIPROTSPTREMBL_ACC"
+                        })
+                    }
+                );
+                const res2Json = await res2.json();
+                GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
+
+                // Generate rId preserving order
+                let _xId2uId = {};
+                xId.map((e, i) => _xId2uId[e] = uId[i]);
+                let _uId2rId = {};
+                GPresult.map(e => _uId2rId[e.incoming] = e.converted);
+                rId = xId.map(e => _uId2rId[_xId2uId[e]]);
+
+                // Generate rId2info
+                let _uId2xId = {}
+                let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
+                _ui.map((e, i) => {
+                    if (!e) return;
+                    _uId2xId[e] = _xi[i];
+                });
+
+                GPresult.map( e=> {
+                    _rId2info[e.converted] = {
+                        uId: e.incoming,
+                        xId: _uId2xId[e.incoming],
+                        name: e.name,
+                        description: e.description
+                    } 
+                })
+            }
+
+        }
+
+        xId.map((e, i) => {
+            if (!rId[i]) return;
+            omicIdR_i[e] = rId[i];
+        });
+
+        setOmicIdR(prev => ({ ...prev, [o]: omicIdR_i }));
+        setRId2info(prev => ({...prev, [o]: _rId2info}));
+
+    }
+
     return (
         <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mt: 4 }}>
 
@@ -92,7 +211,7 @@ function ParamSelector() {
                             mdataCol && (!mdataCategorical.isCategorical || (mdataCategorical.g1 && mdataCategorical.g2)) &&
                             (Object.values(omicIdCol).some(e => e))
                         )}
-                        onClick={() => console.log('Run Analysis')}
+                        onClick={() => fetchJobRun(mdataCol, mdataCategorical, omicIdR)}
                     >
                         Run Analysis
                     </Button>
@@ -116,50 +235,49 @@ function ParamSelector() {
                         }}
                     />
                 </Box>
-                {true && <>
-                    <Box sx={{ display: 'flex', mt: 4, alignItems: 'center', 
-                        opacity: mdataCategorical.isCategorical ? 1 : 0,
-                        transition: 'all 0.5s ease'
-                        }}>
-                        <Box>
-                            <Autocomplete
-                                value={mdataCategorical.g1}
-                                onChange={(e, newValue) => setMdataCategorical(prev => ({ ...prev, g1: newValue }))}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                id="metadata-column"
-                                options={mdataCategorical.colOpts}
-                                sx={{ width: 150 }}
-                                renderInput={(params) => <TextField {...params} label="First Group" />}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.label}>
-                                            {option.label}
-                                        </li>
-                                    );
-                                }}
-                            />
-                        </Box>
-                        <Box sx={{ px: 2 }}><Typography>vs</Typography></Box>
-                        <Box>
-                            <Autocomplete
-                                value={mdataCategorical.g2}
-                                onChange={(e, newValue) => setMdataCategorical(prev => ({ ...prev, g2: newValue }))}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
-                                id="metadata-column"
-                                options={mdataCategorical.colOpts}
-                                sx={{ width: 150 }}
-                                renderInput={(params) => <TextField {...params} label="Second Group" />}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.label}>
-                                            {option.label}
-                                        </li>
-                                    );
-                                }}
-                            />
-                        </Box>
+                <Box sx={{
+                    display: 'flex', mt: 4, alignItems: 'center',
+                    opacity: mdataCategorical.isCategorical ? 1 : 0,
+                    transition: 'all 0.5s ease'
+                }}>
+                    <Box>
+                        <Autocomplete
+                            value={mdataCategorical.g1}
+                            onChange={(e, newValue) => setMdataCategorical(prev => ({ ...prev, g1: newValue }))}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            id="metadata-column"
+                            options={mdataCategorical.colOpts}
+                            sx={{ width: 150 }}
+                            renderInput={(params) => <TextField {...params} label="First Group" />}
+                            renderOption={(props, option) => {
+                                return (
+                                    <li {...props} key={option.label}>
+                                        {option.label}
+                                    </li>
+                                );
+                            }}
+                        />
                     </Box>
-                </>}
+                    <Box sx={{ px: 2 }}><Typography>vs</Typography></Box>
+                    <Box>
+                        <Autocomplete
+                            value={mdataCategorical.g2}
+                            onChange={(e, newValue) => setMdataCategorical(prev => ({ ...prev, g2: newValue }))}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            id="metadata-column"
+                            options={mdataCategorical.colOpts}
+                            sx={{ width: 150 }}
+                            renderInput={(params) => <TextField {...params} label="Second Group" />}
+                            renderOption={(props, option) => {
+                                return (
+                                    <li {...props} key={option.label}>
+                                        {option.label}
+                                    </li>
+                                );
+                            }}
+                        />
+                    </Box>
+                </Box>
             </Box>
 
             <Box sx={{ width: '2%', borderWidth: '0px 1.5px 0px 0px', borderStyle: 'dashed', borderColor: '#aaaaaa' }}></Box>
@@ -173,6 +291,7 @@ function ParamSelector() {
                         setOmicIdCol_i={(e) => setOmicIdCol(prev => ({ ...prev, [o]: e }))}
                         omicIdType_i={omicIdType[o]}
                         setOmicIdType_i={(e) => setOmicIdType(prev => ({ ...prev, [o]: e }))}
+                        handleOmicIdChange={handleOmicIdChange}
                     />
                 ))}
             </Box>
@@ -181,7 +300,12 @@ function ParamSelector() {
     )
 }
 
-const OmicIdSelector = ({ o, omicIdCol_i, setOmicIdCol_i, omicIdType_i, setOmicIdType_i }) => {
+const OmicIdSelector = ({
+    o,
+    omicIdCol_i, setOmicIdCol_i,
+    omicIdType_i, setOmicIdType_i,
+    handleOmicIdChange
+}) => {
 
     const { OMIC2NAME } = useVars();
     const omicIdColOpts = useJob().user[`${o}2i`].columns.map(e => ({ label: e, id: e }));
@@ -191,7 +315,12 @@ const OmicIdSelector = ({ o, omicIdCol_i, setOmicIdCol_i, omicIdType_i, setOmicI
             <Box>
                 <Autocomplete
                     value={omicIdCol_i}
-                    onChange={(event, newValue) => setOmicIdCol_i(newValue)}
+                    onChange={
+                        (event, newValue) => {
+                            setOmicIdCol_i(newValue);
+                            handleOmicIdChange(o, newValue, omicIdType_i);
+                        }
+                    }
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     id="omic-id-column"
                     options={omicIdColOpts}
@@ -215,7 +344,12 @@ const OmicIdSelector = ({ o, omicIdCol_i, setOmicIdCol_i, omicIdType_i, setOmicI
                         id="demo-controlled-open-select"
                         value={omicIdType_i}
                         label="ID Type"
-                        onChange={(event) => setOmicIdType_i(event.target.value)}
+                        onChange={
+                            (event) => {
+                                setOmicIdType_i(event.target.value);
+                                handleOmicIdChange(o, omicIdCol_i, event.target.value);
+                            }
+                        }
                     >
                         {omicIdTypeOpts[o].map(e => (
                             <MenuItem key={e.id} value={e}>{e.label}</MenuItem>
