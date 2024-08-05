@@ -87,7 +87,7 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
 
         if (!omicIdCol_i) {
             setOmicIdR(prev => ({ ...prev, [o]: null }));
-            setRId2info(prev => ({...prev, [o]: {}}));
+            setRId2info(prev => ({ ...prev, [o]: {} }));
             return;
         };
 
@@ -108,12 +108,12 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
             } else {
 
                 const MetaboID = require('@/utils/MetaboID.json');
-                let _index = uId.map( e => MetaboID[omicIdType_i.id].indexOf(e));
+                let _index = uId.map(e => MetaboID[omicIdType_i.id].indexOf(e));
                 rId = _index.map(e => MetaboID['ChEBI'][e]);
                 rId.map((e, i) => {
                     if (!e) return;
-                    _rId2info[e] = {xId: xId[i], uId: uId[i], Name: MetaboID['Name'][i]}
-                })
+                    _rId2info[e] = { xId: xId[i], uId: uId[i], Name: MetaboID['Name'][_index[i]] }
+                });
 
             }
 
@@ -169,19 +169,21 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
 
                 // Generate rId2info
                 let _uId2xId = {}
-                let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
+                uId.map((e, i) => _uId2xId[e] = xId[i]);
+
+                /*let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
                 _ui.map((e, i) => {
                     if (!e) return;
                     _uId2xId[e] = _xi[i];
-                });
+                });*/
 
-                GPresult.map( e=> {
+                GPresult.map(e => {
                     _rId2info[e.converted] = {
                         uId: e.incoming,
                         xId: _uId2xId[e.incoming],
                         name: e.name,
                         description: e.description
-                    } 
+                    }
                 })
             }
 
@@ -193,7 +195,7 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
         });
 
         setOmicIdR(prev => ({ ...prev, [o]: omicIdR_i }));
-        setRId2info(prev => ({...prev, [o]: _rId2info}));
+        setRId2info(prev => ({ ...prev, [o]: _rId2info }));
 
     }
 
@@ -280,7 +282,13 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
                 </Box>
             </Box>
 
-            <Box sx={{ width: '2%', borderWidth: '0px 1.5px 0px 0px', borderStyle: 'dashed', borderColor: '#aaaaaa' }}></Box>
+            <Box sx={{
+                width: '2%',
+                borderWidth: '0px 1.5px 0px 0px',
+                borderStyle: 'dashed',
+                borderColor: '#aaaaaa'
+            }}
+            ></Box>
 
             <Box sx={{ width: '55%', display: 'flex', justifyContent: 'space-evenly' }}>
                 {omics.map(o => (
