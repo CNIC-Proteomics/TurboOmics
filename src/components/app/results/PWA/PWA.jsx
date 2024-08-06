@@ -7,8 +7,13 @@ import { useVars } from '../../../VarsContext';
 import SendIcon from '@mui/icons-material/Send';
 import ParamSelector from './ParamSelector';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import Results from './Results';
 
+import dynamic from 'next/dynamic'
+
+const Results = dynamic(
+    () => import('./Results')
+);
+//import Results from './Results';
 
 // Main
 function PWA() {
@@ -27,15 +32,36 @@ function PWA() {
     );
 
     // Job status and results
-    const [jobStatus, setJobStatus] = useState({ status: '', res: null });
+    const getResIntervalRef = useRef();
+
+    const [jobStatus, setJobStatus] = useState({ status: '', res: null, runId: null });
+
+    // Which omics are being used in the analysis
+    const [workingOmics, setWorkingOmics] = useState([]);
+
+    // Capture mdataCategorical (it comes from ParamSelector)
+    const [mdataCategorical, setMdataCategorical] = useState();
+
+    // Get job results from back-end
+    const fetchResults = useCallback(async (runId) => {
+        const res = await fetch(`${API_URL}/get_pathway_analysis/${jobID}/${view}/${runId}`);
+        const resJson = await res.json();
+
+        if (resJson.status != 'waiting') {
+            console.log('Pathway analysis finished: ', resJson);
+            setJobStatus(resJson);
+            clearInterval(getResIntervalRef.current)
+        }
+
+    }, [getResIntervalRef, view, API_URL, jobID]);
 
     // Send job to back-end
     const fetchJobRun = useCallback(async (mdataCol, mdataCategorical, omicIdR) => {
         console.log('Send job to back-end');
-        console.log(mdataCol, mdataCategorical, omicIdR);
+        const runId = (new Date()).getTime();
 
         const res = await fetch(
-            `${API_URL}/run_pathway_analysis/${jobID}`,
+            `${API_URL}/run_pathway_analysis/${jobID}/${runId}`,
             {
                 method: 'POST',
                 headers: {
@@ -57,29 +83,24 @@ function PWA() {
         console.log(resJson);
 
         // Start asking for results
-        setJobStatus({ status: 'waiting', res: null });
+        setJobStatus({ status: 'waiting', res: null, runId: resJson.runId });
         getResIntervalRef.current = setInterval(() => fetchResults(resJson.runId), 5000);
 
-    }, [view]);
+        // Set working omics
+        setWorkingOmics(Object.keys(omicIdR).filter(e => omicIdR[e]));
+        setMdataCategorical({ ...mdataCategorical, mdataCol: mdataCol.id })
 
-    // Ask results to back-end
-    const getResIntervalRef = useRef();
-
-    const fetchResults = useCallback(async (runId) => {
-        const res = await fetch(`${API_URL}/get_pathway_analysis/${jobID}/${view}/${runId}`);
-        const resJson = await res.json();
-
-        if (resJson.status != 'waiting') {
-            console.log('Pathway analysis finished: ', resJson);
-            setJobStatus(resJson);
-            clearInterval(getResIntervalRef.current)
-        }
-
-    }, [getResIntervalRef]);
+    }, [view, setWorkingOmics, setJobStatus, setMdataCategorical, API_URL, OS, fetchResults, jobID]);
 
     return (
         <Box>
-            <Box sx={{ pt: 3 }}><ViewSelector view={view} setView={setView} /></Box>
+            <Box sx={{ pt: 3 }}>
+                <ViewSelector
+                    view={view}
+                    setView={setView}
+                    resetJobStatus={() => setJobStatus({ status: '', res: null, runId: null })}
+                />
+            </Box>
             <ParamSelector
                 setRId2info={setRId2info}
                 fetchJobRun={fetchJobRun}
@@ -93,13 +114,20 @@ function PWA() {
                 </Box>
             }
             {jobStatus.status == 'ok' &&
-                <Results pwa_res={jobStatus.pwa_res} rId2info={rId2info} />
+                <Results
+                    pwa_res={jobStatus.pwa_res}
+                    runId={jobStatus.runId}
+                    rId2info={rId2info}
+                    view={view}
+                    workingOmics={workingOmics}
+                    mdataCategorical={mdataCategorical}
+                />
             }
             {jobStatus.status == 'error' &&
                 <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems:'center', pt:10 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', pt: 10 }}>
                         <ReportProblemIcon sx={{ fontSize: 25 }} />
-                        <Typography variant='h6' sx={{px:2}}>
+                        <Typography variant='h6' sx={{ px: 2 }}>
                             An error occurred when executing Pathway Analysis.
                         </Typography>
                     </Box>

@@ -1,18 +1,18 @@
 import { Box, Typography } from '@mui/material'
 import React, { useState } from 'react'
 
-const ViewSelector = ({ view, setView }) => {
+const ViewSelector = ({ view, setView, resetJobStatus }) => {
     return (
         <Box sx={{display:'flex', justifyContent:'center'}}>
             <Box sx={{ display: 'flex', width: 350 }}>
-                <ViewButton title='Single-View' view={view} setView={setView} />
-                <ViewButton title='Multi-View' view={view} setView={setView} />
+                <ViewButton title='Single-View' view={view} setView={setView} resetJobStatus={resetJobStatus} />
+                <ViewButton title='Multi-View' view={view} setView={setView} resetJobStatus={resetJobStatus} />
             </Box>
         </Box>
     )
 }
 
-const ViewButton = ({ title, view, setView }) => {
+const ViewButton = ({ title, view, setView, resetJobStatus={resetJobStatus} }) => {
 
     const selected = title == view;
 
@@ -41,7 +41,7 @@ const ViewButton = ({ title, view, setView }) => {
             }}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            onClick={() => setView(title)}
+            onClick={() => {resetJobStatus(); setView(title)}}
         >
             {title}
         </Box>
