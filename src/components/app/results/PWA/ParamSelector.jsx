@@ -1,5 +1,5 @@
-import { Autocomplete, Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import { Autocomplete, Backdrop, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react'
 import { useJob } from '../../JobContext';
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '../../../VarsContext';
@@ -30,7 +30,7 @@ const omicIdTypeOpts = {
 }
 
 
-function ParamSelector({ setRId2info, fetchJobRun }) {
+function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
     // Get job data
     const { omics, mdataType, OS, f2x } = useJob();
@@ -38,7 +38,17 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
 
     // Save section variables
     const dispatchResults = useDispatchResults();
-    const savedResultsPWA = useResults().PWA;
+    //const savedResultsPWA = useResults().PWA;
+
+    // Load MetaboID and load
+    const [MetaboID, setMetaboID] = useState(null);
+    useEffect(() => {
+        import('@/utils/MetaboID.json').then(data => {
+            setMetaboID(data);
+            setLoading(false);
+            console.log('MetaboID loaded');
+        });
+    }, []);
 
     // Select metadata column
     const mdata = jobUser.mdata;
@@ -101,92 +111,77 @@ function ParamSelector({ setRId2info, fetchJobRun }) {
 
         if (o == 'm') {
 
-            if (omicIdType_i.id == 'ChEBI' && false) {
+            //const MetaboID = require('@/utils/MetaboID.json');
+            let _index = uId.map(e => MetaboID[omicIdType_i.id].indexOf(e));
+            rId = _index.map(e => MetaboID['ChEBI'][e]);
+            rId.map((e, i) => {
+                if (!e) return;
+                _rId2info[e] = { xId: xId[i], uId: uId[i], Name: MetaboID['Name'][_index[i]] }
+            });
 
-                rId = uId;
-
-            } else {
-
-                const MetaboID = require('@/utils/MetaboID.json');
-                let _index = uId.map(e => MetaboID[omicIdType_i.id].indexOf(e));
-                rId = _index.map(e => MetaboID['ChEBI'][e]);
-                rId.map((e, i) => {
-                    if (!e) return;
-                    _rId2info[e] = { xId: xId[i], uId: uId[i], Name: MetaboID['Name'][_index[i]] }
-                });
-
-            }
 
         } else if (o == 'q' || o == 't') {
 
-            if (omicIdType_i.id == 'Uniprot Protein ID' && false) {
+            let GPresult = [];
 
-                rId = uId;
+            // First search in SwissProt
+            const res = await fetch(
+                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        "organism": OS.id,
+                        "query": uId,
+                        "target": "UNIPROTSWISSPROT_ACC"
+                    })
+                }
+            );
+            const resJson = await res.json();
+            GPresult = resJson.result.filter(e => e.converted != 'None' && e.n_converted == 1);
 
-            } else {
+            // Second search in Trembl
+            const _targeted = GPresult.map(e => e.incoming);
+            const res2 = await fetch(
+                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        "organism": OS.id,
+                        "query": uId.filter(e => !_targeted.includes(e)),
+                        "target": "UNIPROTSPTREMBL_ACC"
+                    })
+                }
+            );
+            const res2Json = await res2.json();
+            GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
 
-                let GPresult = [];
+            // Generate rId preserving order
+            let _xId2uId = {};
+            xId.map((e, i) => _xId2uId[e] = uId[i]);
+            let _uId2rId = {};
+            GPresult.map(e => _uId2rId[e.incoming] = e.converted);
+            rId = xId.map(e => _uId2rId[_xId2uId[e]]);
 
-                // First search in SwissProt
-                const res = await fetch(
-                    'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            "organism": OS.id,
-                            "query": uId,
-                            "target": "UNIPROTSWISSPROT_ACC"
-                        })
-                    }
-                );
-                const resJson = await res.json();
-                GPresult = resJson.result.filter(e => e.converted != 'None' && e.n_converted == 1);
+            // Generate rId2info
+            let _uId2xId = {}
+            uId.map((e, i) => _uId2xId[e] = xId[i]);
 
-                // Second search in Trembl
-                const _targeted = GPresult.map(e => e.incoming);
-                const res2 = await fetch(
-                    'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            "organism": OS.id,
-                            "query": uId.filter(e => !_targeted.includes(e)),
-                            "target": "UNIPROTSPTREMBL_ACC"
-                        })
-                    }
-                );
-                const res2Json = await res2.json();
-                GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
+            /*let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
+            _ui.map((e, i) => {
+                if (!e) return;
+                _uId2xId[e] = _xi[i];
+            });*/
 
-                // Generate rId preserving order
-                let _xId2uId = {};
-                xId.map((e, i) => _xId2uId[e] = uId[i]);
-                let _uId2rId = {};
-                GPresult.map(e => _uId2rId[e.incoming] = e.converted);
-                rId = xId.map(e => _uId2rId[_xId2uId[e]]);
-
-                // Generate rId2info
-                let _uId2xId = {}
-                uId.map((e, i) => _uId2xId[e] = xId[i]);
-
-                /*let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
-                _ui.map((e, i) => {
-                    if (!e) return;
-                    _uId2xId[e] = _xi[i];
-                });*/
-
-                GPresult.map(e => {
-                    _rId2info[e.converted] = {
-                        uId: e.incoming,
-                        xId: _uId2xId[e.incoming],
-                        name: e.name,
-                        description: e.description
-                    }
-                })
-            }
-
+            GPresult.map(e => {
+                _rId2info[e.converted] = {
+                    uId: e.incoming,
+                    xId: _uId2xId[e.incoming],
+                    name: e.name,
+                    description: e.description
+                }
+            })
         }
 
         xId.map((e, i) => {

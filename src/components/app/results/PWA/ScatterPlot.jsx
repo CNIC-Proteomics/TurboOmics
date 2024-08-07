@@ -6,8 +6,6 @@ import { myPalette } from "@/utils/myPalette";
 
 function ScatterPlot({ projections, nLV, mdataCategorical }) {
 
-    console.log(mdataCategorical);
-
     // Get mdata value for each sample
     const mdataColSerie = useJob().user.mdata.column(mdataCategorical.mdataCol);
 
@@ -31,8 +29,6 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
 
     // State containing selected LV
     const [selectedLV, setSelectedLV] = useState({ x: projOpts[0], y: projOpts[1] });
-
-    console.log(selectedLV)
 
     return (
         <Box sx={{}}>

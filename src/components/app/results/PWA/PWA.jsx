@@ -1,14 +1,18 @@
-import { Box, Divider, LinearProgress, Typography } from '@mui/material'
+import { Backdrop, Box, CircularProgress, Divider, LinearProgress, Typography } from '@mui/material'
 import React, { useCallback, useRef, useState } from 'react'
 import ViewSelector from './ViewSelector';
 import { useJob } from '../../JobContext';
 import { useDispatchResults, useResults } from '../../ResultsContext';
 import { useVars } from '../../../VarsContext';
 import SendIcon from '@mui/icons-material/Send';
-import ParamSelector from './ParamSelector';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 import dynamic from 'next/dynamic'
+
+const ParamSelector = dynamic(
+    () => import('./ParamSelector')
+);
+//import ParamSelector from './ParamSelector';
 
 const Results = dynamic(
     () => import('./Results')
@@ -17,6 +21,8 @@ const Results = dynamic(
 
 // Main
 function PWA() {
+
+    const [loading, setLoading] = useState(true);
 
     const [view, setView] = useState('Single-View'); // Single-View, Multi-View
 
@@ -94,6 +100,17 @@ function PWA() {
 
     return (
         <Box>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loading}
+            >
+                <Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <CircularProgress color="inherit" />
+                    </Box>
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>Loading modules for Pathway Analysis...</Box>
+                </Box>
+            </Backdrop>
             <Box sx={{ pt: 3 }}>
                 <ViewSelector
                     view={view}
@@ -104,6 +121,7 @@ function PWA() {
             <ParamSelector
                 setRId2info={setRId2info}
                 fetchJobRun={fetchJobRun}
+                setLoading={setLoading}
             />
             <Divider sx={{ py: 4, color: 'black' }}> </Divider>
             {jobStatus.status == 'waiting' &&
