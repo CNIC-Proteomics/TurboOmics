@@ -1,7 +1,9 @@
-import { Box } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useVars } from '../../../VarsContext'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
+import handleExportData from '../../../../utils/exportDataTable';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
 
@@ -9,7 +11,7 @@ function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
     const { OMIC2NAME } = useVars();
 
     return (
-        <Box sx={{ border: '1px solid red' }}>
+        <Box sx={{ mt: 2 }}>
             {view == 'Single-View' &&
                 <ViewComponent
                     path_info={path_info}
@@ -18,13 +20,14 @@ function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
                 />
             }
             {view == 'Multi-View' &&
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly', border: '1px solid blue' }}>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly' }}>
                     {workingOmics.map(o => (
-                        <Box key={o} sx={{ border: '1px solid red' }}>
+                        <Box key={o} sx={{ px: 2, width: `${Math.max(100 / workingOmics.length, 50)}%` }}>
                             <ViewComponent
                                 path_info={Object.values(path_info[OMIC2NAME[o]])}
                                 rId2info={rId2info}
                                 view={view}
+                                omic={o}
                             />
                         </Box>
                     ))}
@@ -34,10 +37,7 @@ function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
     )
 }
 
-const ViewComponent = ({ path_info, rId2info, view }) => {
-
-    //console.log(path_info);
-    //console.log(rId2info)
+const ViewComponent = ({ path_info, rId2info, view, omic }) => {
 
     const [pathwaySelection, setPathwaySelection] = useState({});
 
@@ -48,59 +48,111 @@ const ViewComponent = ({ path_info, rId2info, view }) => {
             justifyContent: 'space-evenly'
         }}
         >
-            <PathwayTable
-                pathwaySelection={pathwaySelection}
-                setPathwaySelection={setPathwaySelection}
-                path_info={path_info}
-            />
-            <FeatureTable />
+            <Box sx={{ width: view == 'Single-View' ? '45%' : '98%' }}>
+                <PathwayTable
+                    pathwaySelection={pathwaySelection}
+                    setPathwaySelection={setPathwaySelection}
+                    path_info={path_info}
+                    omic={omic}
+                />
+            </Box>
+            <Box sx={{
+                width: view == 'Single-View' ? '45%' : '98%',
+                display: 'flex',
+                alignItems: 'center',
+                mt: view == 'Multi-View' ? 2 : 0
+            }}
+            >
+                {Object.keys(pathwaySelection).length > 0 &&
+                    <Box sx={{ width: '100%' }}>
+                        <FeatureTable
+                            pathway={Object.keys(pathwaySelection)}
+                            path_info={path_info}
+                            rId2info={rId2info}
+                            view={view}
+                        />
+                    </Box>
+                }
+                {Object.keys(pathwaySelection).length == 0 &&
+                    <Box
+                        sx={{
+                            border: '2px dashed grey', // Línea discontinua, gruesa y de color gris
+                            borderRadius: '16px', // Borde redondeado
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            //height: '100%', // Ajusta la altura según lo necesites
+                            width: '100%', // Puedes ajustar el ancho también
+                            textAlign: 'center',
+                            padding: '16px',
+                            boxSizing: 'border-box',
+                        }}
+                    >
+                        <Typography variant='body1'>Click pathway to show biomolecules</Typography>
+                    </Box>
+                }
+            </Box>
         </Box>
     )
 }
 
-const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info }) => {
+const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }) => {
 
-    const path_info_filtered = useMemo(() => path_info.filter(e => e.VIP > 1), [path_info]);
+    const { OMIC2NAME } = useVars();
+    const path_info_filtered = useMemo(
+        () => path_info.filter(e => e.VIP > 1).map(e=>({...e, N: e.molecular_importance.length})),
+        [path_info]
+    );
 
     const columns = useMemo(() => ([
         {
             accessorKey: 'Path_ID',
-            header: 'Path_ID'
+            header: 'Path_ID',
+            size: 100
         },
         {
             accessorKey: 'Name',
-            header: 'Name'
+            header: 'Name',
+        },
+        {
+            accessorKey: 'N',
+            header: 'N.',
+            size: 50
         },
         {
             id: 'VIP',
             accessorFn: (row) => row.VIP.toFixed(4),
             //accessorKey: 'VIP',
-            header: 'VIP'
+            header: 'VIP',
+            size: 60
         }
     ]), []);
 
+
+    // Virtualization
     const rowVirtualizerInstanceRef = useRef(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [sorting, setSorting] = useState([]);
-  
+    const [sorting, setSorting] = useState([{ id: 'VIP', desc: true }]);
+
     useEffect(() => {
-      if (typeof window !== 'undefined') {
-        setIsLoading(false);
-      }
+        if (typeof window !== 'undefined') {
+            setIsLoading(false);
+        }
     }, []);
-  
+
     useEffect(() => {
-      //scroll to the top of the table when the sorting changes
-      try {
-        rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-      } catch (error) {
-        console.error(error);
-      }
+        //scroll to the top of the table when the sorting changes
+        try {
+            rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+        } catch (error) {
+            console.error(error);
+        }
     }, [sorting]);
 
     const table = useMaterialReactTable({
         columns,
         data: path_info_filtered,
+        layoutMode: 'grid',
         enableRowSelection: true,
         enableMultiRowSelection: false, //use radio buttons instead of checkboxes
         getRowId: (row) => row.Path_ID, //give each row a more useful id
@@ -111,19 +163,46 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info }) => {
         }),
         enableStickyHeader: true,
         enablePagination: false,
-        muiTableContainerProps: { sx: { maxHeight: '600px' } },
+        muiTableContainerProps: { sx: { maxHeight: '400px' } },
         enableBottomToolbar: false,
-        enableTopToolbar: false,
+        enableTopToolbar: true,
         //positionToolbarAlertBanner: 'bottom', //move the alert banner to the bottom
         onRowSelectionChange: setPathwaySelection, //connect internal row selection state to your own
-        state: { rowSelection: pathwaySelection, isLoading, sorting }, //pass our managed row selection state to the table to use
+        state: {
+            rowSelection: pathwaySelection,
+            sorting,
+            isLoading
+        }, //pass our managed row selection state to the table to use
         rowVirtualizerInstanceRef, //optional
         rowVirtualizerOptions: { overscan: 5 },
         onSortingChange: setSorting,
         enableRowVirtualization: true,
-        state: {
-            sorting: [{id: 'VIP', desc: true}]
-        }
+        enableDensityToggle: false,
+        enableHiding: false,
+        enableFullScreenToggle: false,
+        enableFilters: false,
+        positionToolbarAlertBanner: 'none',
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <Box sx={{ width: '33%' }}><Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={() => handleExportData(
+                        path_info_filtered,//table.getRowModel().rows.map(e => e._valuesCache),
+                        table.getAllColumns().map(
+                            e => ({ key: e.columnDef.id, displayLabel: e.columnDef.header })
+                        ).filter(e => e.displayLabel != 'Select'),
+                        'PathwayImportance',
+                    )}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export Table
+                </Button></Box>
+                {omic && <Box sx={{ width: '33%', textAlign: 'center' }}>
+                    <Typography variant='h6'>{OMIC2NAME[omic]}</Typography>
+                </Box>}
+                <Box sx={{ width: '33%' }}></Box>
+            </Box>
+        )
     })
 
     return (
@@ -133,10 +212,131 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info }) => {
     )
 }
 
-const FeatureTable = () => {
+const FeatureTable = ({
+    pathway,
+    path_info,
+    rId2info,
+    view
+}) => {
+
+    const { OMIC2NAME } = useVars();
+
+    const [pathwayInfo, featureInfo] = useMemo(() => {
+        const pathwayInfo = path_info.filter(e => e.Path_ID == pathway)[0];
+        const featureInfo = pathwayInfo.molecular_importance.map(e => ({
+            ...e,
+            ...rId2info[e.omic][e.fid]
+        })).map(e => ({
+            ...e,
+            Name: (e.omic == 'q' || e.omic == 't') ?
+                `${e.name} | ${e.description.replace(/\[.*\]$/, '')}` : e.Name,
+            omicName: OMIC2NAME[e.omic],
+        }))
+        return [pathwayInfo, featureInfo];
+    }, [pathway]);
+    console.log(pathwayInfo, featureInfo);
+
+
+
+    const columns = useMemo(() => {
+        const colOmic = view == 'Single-View' ? [{
+            header: 'Omic',
+            accessorKey: 'omicName',
+            size: 100
+        }] : [];
+        return [
+            {
+                header: '#',
+                accessorKey: 'xId',
+                size: 100,
+            },
+            ...colOmic,
+            {
+                header: 'ID',
+                accessorKey: 'uId',
+                size: 100,
+            },
+            {
+                header: 'Name',
+                accessorKey: 'Name'
+            },
+            {
+                header: 'Loading',
+                id: 'PC1_Loadings',
+                accessorFn: (row) => row.PC1_Loadings.toFixed(4),
+                size: 120,
+            }
+        ]
+    }, [view]);
+
+    // Virtualization
+    const rowVirtualizerInstanceRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [sorting, setSorting] = useState([{ id: 'PC1_Loadings', desc: true }]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        //scroll to the top of the table when the sorting changes
+        try {
+            rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+        } catch (error) {
+            console.error(error);
+        }
+    }, [sorting]);
+
+    console.log(sorting)
+
+    const table = useMaterialReactTable({
+        columns: columns,
+        data: featureInfo,
+        enableStickyHeader: true,
+        enablePagination: false,
+        muiTableContainerProps: { sx: { maxHeight: '400px', minHeight: '400px' } },
+        enableBottomToolbar: false,
+        enableTopToolbar: true,
+        enableSorting: true,
+        initialState: {
+        },
+        state: {
+            sorting,
+            isLoading
+        }, //pass our managed row selection state to the table to use
+        rowVirtualizerInstanceRef, //optional
+        rowVirtualizerOptions: { overscan: 5 },
+        onSortingChange: setSorting,
+        enableRowVirtualization: true,
+        enableDensityToggle: false,
+        enableHiding: false,
+        enableFullScreenToggle: false,
+        enableFilters: false,
+        renderTopToolbarCustomActions: ({ table }) => (
+            <Box>
+                <Button
+                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                    onClick={() => handleExportData(
+                        featureInfo,
+                        table.getAllColumns().map(
+                            e => ({ key: e.columnDef.id, displayLabel: e.columnDef.header })
+                        ),
+                        'Biomolecules',
+                    )}
+                    startIcon={<FileDownloadIcon />}
+                >
+                    Export Table
+                </Button>
+            </Box>
+        )
+    })
+
+
     return (
         <Box>
-            Feature Table
+            <MaterialReactTable table={table} />
         </Box>
     )
 }

@@ -114,7 +114,7 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
                     justifyContent: 'space-between',
                 }}
             >
-                <Box sx={{ border: '0px solid red' }}>
+                <Box>
                     <Button
                         //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
                         onClick={() => handleExportData(

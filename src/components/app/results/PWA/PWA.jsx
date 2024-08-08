@@ -62,9 +62,10 @@ function PWA() {
     }, [getResIntervalRef, view, API_URL, jobID]);
 
     // Send job to back-end
-    const fetchJobRun = useCallback(async (mdataCol, mdataCategorical, omicIdR) => {
+    const fetchJobRun = useCallback(async (mdataCol, mdataCategorical, omicIdR, runId) => {
         console.log('Send job to back-end');
-        const runId = (new Date()).getTime();
+        //const runId = (new Date()).getTime();
+        console.log(`runId: ${runId}`);
 
         const res = await fetch(
             `${API_URL}/run_pathway_analysis/${jobID}/${runId}`,

@@ -1,4 +1,4 @@
-import { Autocomplete, Backdrop, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Autocomplete, Backdrop, Box, Button, CircularProgress, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useJob } from '../../JobContext';
 import { useDispatchResults, useResults } from '../../ResultsContext';
@@ -85,7 +85,8 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
     );
 
     const [omicIdType, setOmicIdType] = useState(
-        omics.reduce((prev, curr) => ({ ...prev, [curr]: omicIdTypeOpts[curr][0] }), {})
+        //omics.reduce((prev, curr) => ({ ...prev, [curr]: omicIdTypeOpts[curr][0] }), {})
+        omics.reduce((prev, curr) => ({ ...prev, [curr]: "" }), {})
     );
 
     const [omicIdR, setOmicIdR] = useState(
@@ -108,6 +109,13 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
         let rId = []; // Reactome id (completed from uId)
         let omicIdR_i = {}; // xId -> rId
         let _rId2info = {}; // rId -> xId && name of compund/protein/transcript
+
+        // If no omic type is selected, estimate it
+        if (!omicIdType_i) {
+            omicIdType_i = getOmicIdType(uId, o);
+            if (!omicIdType_i) return;
+            setOmicIdType(prev => ({ ...prev, [o]: omicIdType_i }))
+        }
 
         if (o == 'm') {
 
@@ -168,12 +176,6 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             let _uId2xId = {}
             uId.map((e, i) => _uId2xId[e] = xId[i]);
 
-            /*let _xi = Object.keys(_xId2uId), _ui = Object.values(_xId2uId);
-            _ui.map((e, i) => {
-                if (!e) return;
-                _uId2xId[e] = _xi[i];
-            });*/
-
             GPresult.map(e => {
                 _rId2info[e.converted] = {
                     uId: e.incoming,
@@ -208,7 +210,12 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                             mdataCol && (!mdataCategorical.isCategorical || (mdataCategorical.g1 && mdataCategorical.g2)) &&
                             (Object.values(omicIdCol).some(e => e))
                         )}
-                        onClick={() => fetchJobRun(mdataCol, mdataCategorical, omicIdR)}
+                        onClick={() => fetchJobRun(
+                            mdataCol, 
+                            mdataCategorical, 
+                            omicIdR,
+                            getRunId(mdataCol, mdataCategorical, omicIdCol, omicIdType)
+                        )}
                     >
                         Run Analysis
                     </Button>
@@ -336,11 +343,12 @@ const OmicIdSelector = ({
                             </li>
                         );
                     }}
-                /></Box>
+                />
+            </Box>
 
             <Box sx={{ mt: 4 }}>
-                <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">ID Type</InputLabel>
+                <FormControl variant="standard" fullWidth>
+                    <InputLabel shrink id="demo-simple-select-label"></InputLabel>
                     <Select
                         sx={{ minWidth: '180px' }}
                         labelId="demo-controlled-open-select-label"
@@ -354,10 +362,12 @@ const OmicIdSelector = ({
                             }
                         }
                     >
+                        <MenuItem value=""><em>None</em></MenuItem>
                         {omicIdTypeOpts[o].map(e => (
                             <MenuItem key={e.id} value={e}>{e.label}</MenuItem>
                         ))}
                     </Select>
+                    <FormHelperText>ID Type</FormHelperText>
                 </FormControl>
             </Box>
 
@@ -365,5 +375,54 @@ const OmicIdSelector = ({
     )
 }
 
+const getOmicIdType = (uId, o) => {
+    const uIdf = uId.filter(e => e);
+    if (o == 'm') {
+        if (/^[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts.m[0]//{ label: 'ChEBI', id: 'ChEBI' }
+        }
+        if (/^C[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts.m[1] //{ label: 'KEGG', id: 'KEGG' }
+        }
+        if (/^HMDB[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts.m[3] //{ label: 'HMDB', id: 'HMDB' }
+        }
+        return null
+
+    } else {
+        if (/^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/.test(uIdf[0])) {
+            return omicIdTypeOpts[o][0]//{ label: 'Uniprot Protein ID', id: 'Uniprot Protein ID' };
+        }
+        if (/^[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts[o][1]//{ label: 'Entrez ID', id: 'Entrez ID' };
+        }
+        if (/^ENS[A-Z]{0,3}G[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts[o][2]//{ label: 'Ensembl Gene ID', id: 'Ensembl Gene ID' };
+        }
+        if (/^ENS[A-Z]{0,3}T[0-9]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts[o][3]//{ label: 'Ensembl Transcript ID ', id: 'Ensembl Transcript ID' };
+        }
+        if (/^[A-Z]+$/.test(uIdf[0])) {
+            return omicIdTypeOpts[o][4]//{ label: 'Official Gene Symbol', id: 'Official Gene Symbol' };
+        }
+        return null
+    }
+}
+
+const getRunId = (mdataCol, mdataCategorical, omicIdCol, omicIdType) => {
+    let runId = '';
+    runId += mdataCol.id;
+    if(mdataCategorical.isCategorical) {
+        runId += '_' + mdataCategorical.g1.id;
+        runId += '_' + mdataCategorical.g2.id;
+    }
+    Object.keys(omicIdCol).map(omic => {
+        if (omicIdCol[omic] && omicIdType[omic]) {
+            runId += '_' + omic + '_' + omicIdCol[omic].id + '_' + omicIdType[omic].id;
+        }
+    });
+    runId = runId.replace(/[^a-zA-Z0-9]/g, '_');
+    return runId;
+}
 
 export default ParamSelector
