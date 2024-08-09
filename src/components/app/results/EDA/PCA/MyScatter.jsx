@@ -36,8 +36,9 @@ export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
     return (
         <Box>
             <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]} />
-            <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
+                    width={600}
+                    height={550}
                     ref={scatterRef}
                     margin={{
                         top: 20,
@@ -68,7 +69,6 @@ export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
                         }
                     </Scatter>
                 </ScatterChart>
-            </ResponsiveContainer>
             <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
         </Box>
     )
@@ -84,61 +84,61 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
     return (
         <Box>
             <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]} />
-            <ResponsiveContainer width="100%" height={400}>
-                <ScatterChart
-                    ref={scatterRef}
-                    margin={{
-                        top: 20,
-                        right: 20,
-                        bottom: 20,
-                        left: 20
-                    }}
+            <ScatterChart
+                ref={scatterRef}
+                width={600}
+                height={550}
+                margin={{
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20
+                }}
+            >
+                <CartesianGrid />
+                <XAxis
+                    type="number"
+                    dataKey="x"
+                    name={`PCA ${selectedPlot2D.x}`}
+                //allowDuplicatedCategory={false}
                 >
-                    <CartesianGrid />
-                    <XAxis
-                        type="number"
-                        dataKey="x"
-                        name={`PCA ${selectedPlot2D.x}`}
-                    //allowDuplicatedCategory={false}
-                    >
-                        <Label value={`PCA ${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
-                    </XAxis>
-                    <YAxis
-                        type="number"
-                        dataKey="y"
-                        name={`PCA ${selectedPlot2D.y}`}
-                    >
-                        <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
-                    </YAxis>
-                    <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-                    {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
-                    {
-                        Object.keys(scatterData).map((level, i) => {
-                            return (
-                                <Scatter
-                                    key={level}
-                                    data={scatterData[level]}
-                                    fill={myPalette[i % myPalette.length]}
-                                    name={level}
-                                >
-                                    {showLabels &&
-                                        <LabelList
-                                            dataKey="element"
-                                            position="top"
-                                        />
-                                    }
-                                </Scatter>
-                            )
-                        })
-                    }
-                </ScatterChart>
-            </ResponsiveContainer>
-            <Box sx={{mt:1}}><ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} /></Box>
+                    <Label value={`PCA ${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
+                </XAxis>
+                <YAxis
+                    type="number"
+                    dataKey="y"
+                    name={`PCA ${selectedPlot2D.y}`}
+                >
+                    <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
+                </YAxis>
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
+                {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
+                {
+                    Object.keys(scatterData).map((level, i) => {
+                        return (
+                            <Scatter
+                                key={level}
+                                data={scatterData[level]}
+                                fill={myPalette[i % myPalette.length]}
+                                name={level}
+                            >
+                                {showLabels &&
+                                    <LabelList
+                                        dataKey="element"
+                                        position="top"
+                                    />
+                                }
+                            </Scatter>
+                        )
+                    })
+                }
+            </ScatterChart>
+            <Box sx={{ mt: 1 }}><ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} /></Box>
         </Box>
     )
 }
 
-export const ShowLabels = ({showLabels, setShowLabels}) => {
+export const ShowLabels = ({ showLabels, setShowLabels }) => {
     return (
         <Box sx={{ mt: 0, display: 'flex', justifyContent: 'center' }}>
             <Box sx={{ width: 100, textAlign: 'center', position: 'relative', left: 30, border: '0px solid red' }}>

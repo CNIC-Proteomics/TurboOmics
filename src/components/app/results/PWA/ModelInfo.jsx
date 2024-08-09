@@ -5,6 +5,7 @@ import { useVars } from '../../../VarsContext';
 import handleExportData from '../../../../utils/exportDataTable';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useJob } from '../../JobContext';
+import { calculateBackgroundColor, calculateBackgroundColorRed } from '../../../../utils/numberToColor';
 
 const generealProps = {
     muiTableHeadCellProps: {
@@ -25,7 +26,7 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
     const { jobID } = useJob();
 
     // Get model pvalue
-    const [statsModel, setStatsModel] = useState({status: 'ready'});
+    const [statsModel, setStatsModel] = useState({ status: 'ready' });
     const getStatsIntervalRef = useRef();
 
     const fetchStatsModel = useCallback(async (runId) => {
@@ -56,7 +57,17 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
                 header: `${OMIC2NAME[e]} (%)`,
                 id: e,
                 accessorFn: (row) => (row.omic_weight[OMIC2NAME[e]] * 100).toFixed(2),
-                ...generealProps
+                ...generealProps,
+                Cell: ({ renderedCellValue, row }) => (
+                    <Box sx={{
+                        backgroundColor: calculateBackgroundColorRed(renderedCellValue, 0, 100),
+                        border: '0px solid red',
+                        py: 1,
+                    }}
+                    >
+                        {renderedCellValue}
+                    </Box>
+                )
             }));
         }
         return mv;
@@ -73,20 +84,45 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
             id: 'R2',
             header: 'R2',
             accessorFn: (row) => `${Math.round(row.R2 * (10 ** 4)) / (10 ** 4)}`,
-            ...generealProps
+            ...generealProps,
+            Cell: ({ renderedCellValue, row }) => (
+                <Box sx={{
+                    backgroundColor: calculateBackgroundColorRed(renderedCellValue, 0, 1),
+                    py: 1,
+                }}
+                >
+                    {renderedCellValue}
+                </Box>
+            )
         },
         {
             //accessorKey: 'R2',
             id: 'pv',
             header: 'p-value',
             accessorFn: (row) => `${row.pv < 0.0001 ? row.pv.toExponential(2) : row.pv.toFixed(5)}`,
-            ...generealProps
+            ...generealProps,
+            Cell: ({ renderedCellValue, row }) => (
+                <Box sx={{
+                    backgroundColor: calculateBackgroundColor(renderedCellValue),
+                    py: 1,
+                }}
+                >
+                    {renderedCellValue}
+                </Box>
+            )
         }
     ]), [mvColumns]);
 
     const table = useMaterialReactTable({
         columns: columns,
         data: model_info.LV, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+        //initialState: { density: 'compact' },
+        muiTableBodyCellProps: {
+            sx: {
+                p: 0,
+                //borderRight: '2px solid #e0e0e0', //add a border between columns
+            }
+        },
         enableColumnFilterModes: false,
         enableColumnOrdering: false,
         enableGrouping: false,
@@ -129,12 +165,24 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
                         Export Table
                     </Button>
                 </Box>
+                <Box><Typography variant='h6'>Summary statistics</Typography></Box>
                 <Box sx={{ border: '0px solid red', textAlign: 'center' }}>
-                    <Typography variant='body1'>
-                        Model R2 = {model_info.model.R2.toFixed(4)}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography variant='body1' sx={{ border: '0px solid blue' }}>p-value {'≤'} </Typography>
+                    <Box sx={{
+                        backgroundColor: calculateBackgroundColorRed(model_info.model.R2, 0, 1, 0.1),
+                        borderRadius: 2, px: 2
+                    }}>
+                        <Typography variant='body1'>
+                            Model R2 = {model_info.model.R2.toFixed(4)}
+                        </Typography>
+                    </Box>
+                    <Box sx={{
+                        backgroundColor: statsModel.status == 'ok' ?
+                            statsModel.statsModel.R2pv <= 0.1 ? 'rgba(0,200,0,0.1)' : 'white' :
+                            'white',
+                        borderRadius: 2, transition: 'all 1s ease',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1
+                    }}>
+                        <Typography variant='body1'>p-value {'≤'} </Typography>
                         <Box sx={{ pl: 0.75 }}>
                             {['ready', 'waiting'].includes(statsModel.status) &&
                                 <Box sx={{ pt: 0.5 }}><CircularProgress size={15} disableShrink={true} /></Box>}

@@ -96,7 +96,7 @@ export default function PCAOmic({ omic }) {
                         />
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
-                        <Box sx={{ width: '45%' }}>
+                        <Box sx={{ width: '45%', mt:4 }}>
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
                                 <Box sx={{ mb: 2 }}>
                                     <ToggleButtonGroup
@@ -131,7 +131,7 @@ export default function PCAOmic({ omic }) {
                                 }
                             </Box>
                             {scatterData &&
-                                <Box>
+                                <Box sx={{ display: 'flex', 'justifyContent': 'center' }}>
                                     {scatterMode == '1D' ?
                                         <MyScatter
                                             omic={omic}

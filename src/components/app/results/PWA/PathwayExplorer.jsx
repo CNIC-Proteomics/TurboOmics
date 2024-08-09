@@ -4,6 +4,7 @@ import { useVars } from '../../../VarsContext'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import handleExportData from '../../../../utils/exportDataTable';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { calculateBackgroundColorBlueRed, calculateBackgroundColorRed } from '../../../../utils/numberToColor';
 
 function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
 
@@ -100,9 +101,17 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
 
     const { OMIC2NAME } = useVars();
     const path_info_filtered = useMemo(
-        () => path_info.filter(e => e.VIP > 1).map(e=>({...e, N: e.molecular_importance.length})),
+        () => path_info.filter(e => e.VIP > 1).map(e => ({ ...e, N: e.molecular_importance.length })),
         [path_info]
     );
+
+    const maxVIP = useMemo(() => {
+        let maxVIP = 0;
+        path_info_filtered.map(e => {
+            if(e.VIP > maxVIP) maxVIP = e.VIP;
+        });
+        return maxVIP
+    }, path_info_filtered);
 
     const columns = useMemo(() => ([
         {
@@ -117,14 +126,25 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
         {
             accessorKey: 'N',
             header: 'N.',
-            size: 50
+            size: 50,
+            muiTableBodyCellProps:{align:'center'},
         },
         {
             id: 'VIP',
             accessorFn: (row) => row.VIP.toFixed(4),
             //accessorKey: 'VIP',
             header: 'VIP',
-            size: 60
+            size: 60,
+            muiTableBodyCellProps:{align:'center'},
+            Cell: ({ renderedCellValue, row }) => (
+                <Box sx={{
+                    backgroundColor: calculateBackgroundColorRed(renderedCellValue, 1, maxVIP),
+                    py: 1.5, width:'100%', height:'100%'
+                }}
+                >
+                    {renderedCellValue}
+                </Box>
+            )
         }
     ]), []);
 
@@ -161,6 +181,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
             onClick: row.getToggleSelectedHandler(),
             sx: { cursor: 'pointer' },
         }),
+        muiTableBodyCellProps: {sx: {p: 0,}},
         enableStickyHeader: true,
         enablePagination: false,
         muiTableContainerProps: { sx: { maxHeight: '400px' } },
@@ -234,9 +255,16 @@ const FeatureTable = ({
         }))
         return [pathwayInfo, featureInfo];
     }, [pathway]);
-    console.log(pathwayInfo, featureInfo);
 
-
+    const maxLoading = useMemo(() => {
+        let maxLoading = 0;
+        featureInfo.map( e => {
+            if (Math.abs(e.PC1_Loadings) > maxLoading) {
+                maxLoading = Math.abs(e.PC1_Loadings);
+            }
+        });
+        return maxLoading;
+    }, []);
 
     const columns = useMemo(() => {
         const colOmic = view == 'Single-View' ? [{
@@ -249,6 +277,7 @@ const FeatureTable = ({
                 header: '#',
                 accessorKey: 'xId',
                 size: 100,
+                muiTableBodyCellProps: {sx: {px: 2, py:0}},
             },
             ...colOmic,
             {
@@ -263,8 +292,20 @@ const FeatureTable = ({
             {
                 header: 'Loading',
                 id: 'PC1_Loadings',
-                accessorFn: (row) => row.PC1_Loadings.toFixed(4),
+                accessorFn: (row) => Number(row.PC1_Loadings.toFixed(4)),
                 size: 120,
+                muiTableBodyCellProps: {
+                    align: 'center',
+                },
+                Cell: ({ renderedCellValue, row }) => (
+                    <Box sx={{
+                        backgroundColor: calculateBackgroundColorBlueRed(renderedCellValue, -maxLoading, maxLoading),
+                        py: 1.5, width:'100%', height:'100%'
+                    }}
+                    >
+                        {renderedCellValue}
+                    </Box>
+                )
             }
         ]
     }, [view]);
@@ -289,8 +330,6 @@ const FeatureTable = ({
         }
     }, [sorting]);
 
-    console.log(sorting)
-
     const table = useMaterialReactTable({
         columns: columns,
         data: featureInfo,
@@ -314,21 +353,26 @@ const FeatureTable = ({
         enableHiding: false,
         enableFullScreenToggle: false,
         enableFilters: false,
+        muiTableBodyCellProps: {sx: {px: 0, py:0}},
         renderTopToolbarCustomActions: ({ table }) => (
-            <Box>
-                <Button
-                    //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                    onClick={() => handleExportData(
-                        featureInfo,
-                        table.getAllColumns().map(
-                            e => ({ key: e.columnDef.id, displayLabel: e.columnDef.header })
-                        ),
-                        'Biomolecules',
-                    )}
-                    startIcon={<FileDownloadIcon />}
-                >
-                    Export Table
-                </Button>
+            <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%'}}>
+                <Box>
+                    <Button
+                        //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                        onClick={() => handleExportData(
+                            featureInfo,
+                            table.getAllColumns().map(
+                                e => ({ key: e.columnDef.id, displayLabel: e.columnDef.header })
+                            ),
+                            'Biomolecules',
+                        )}
+                        startIcon={<FileDownloadIcon />}
+                    >
+                        Export Table
+                    </Button>
+                </Box>
+                <Box><Typography variant='body1'>{pathwayInfo.Name}</Typography></Box>
+                <Box><Typography variant='body1'>{pathway}</Typography></Box>
             </Box>
         )
     })

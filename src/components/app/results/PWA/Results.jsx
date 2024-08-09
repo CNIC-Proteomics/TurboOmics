@@ -25,7 +25,7 @@ function Results({ pwa_res, runId, rId2info, view, workingOmics, mdataCategorica
                     />
                 </Box>
             </Box>
-            <Box>
+            <Box sx={{mt:4}}>
                 <PathwayExplorer
                     view={view}
                     path_info={pwa_res.path_info}

@@ -233,11 +233,21 @@ function resultsReducer(draft, action) {
         /*
         PWA
         */
+       
+        case 'set-pwa-params': {
+            draft.PWA.mdataCol = action.mdataCol;
+            draft.PWA.mdataCategorical = action.mdataCategorical;
+            draft.PWA.omicIdCol = action.omicIdCol;
+            draft.PWA.omicIdType = action.omicIdType;
+            draft.PWA.omicIdR = action.omicIdR;
+            break;
+        }
         
         case 'set-pwa-attr': {
             draft.PWA[action.attr] = action.value;
             break;
         }
+
 
     }
 }
@@ -355,7 +365,20 @@ const resultsTemplate = {
         }
     },
     'PWA': {
-        mdataCol: null
+        view: 'Single-View',
+        mdataCol: null,
+        mdataCategorical: {
+            isCategorical: false,
+            colOpts: [],
+            g1: null, g2: null
+        },
+        omicIdCol: null,
+        omicIdType: null,
+        omicIdR: null,
+        workingOmics: [],
+        mdataCategoricalRes: null,
+        jobStatus: { status: '', pwa_res: null, runId: null },
+        rId2info: null
     }
 }
 

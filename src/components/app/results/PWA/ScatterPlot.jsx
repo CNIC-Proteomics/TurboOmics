@@ -1,8 +1,9 @@
 import { Autocomplete, Box, TextField } from '@mui/material'
 import React, { useMemo, useState } from 'react'
-import { CartesianGrid, Label, Legend, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Label, LabelList, Legend, ResponsiveContainer, Scatter, ScatterChart, XAxis, YAxis } from 'recharts';
 import { useJob } from '../../JobContext';
 import { myPalette } from "@/utils/myPalette";
+import { ShowLabels } from '../EDA/PCA/MyScatter';
 
 function ScatterPlot({ projections, nLV, mdataCategorical }) {
 
@@ -30,63 +31,81 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
     // State containing selected LV
     const [selectedLV, setSelectedLV] = useState({ x: projOpts[0], y: projOpts[1] });
 
+    // Show Labels
+    const [showLabels, setShowLabels] = useState(false);
+
     return (
         <Box sx={{}}>
-            <Box>
-                <AxisSelector
-                    selectedLV={selectedLV}
-                    setSelectedLV={setSelectedLV}
-                    projOpts={projOpts}
-                />
-            </Box>
-            <Box>
-                <ResponsiveContainer width="100%" height={400}>
-                    <ScatterChart
-                        margin={{
-                            top: 5, right: 20, bottom: 20, left: 20
-                        }}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+                <ScatterChart
+                    width={540} height={500}
+                    margin={{
+                        top: 5, right: 20, bottom: 20, left: 20
+                    }}
+                >
+                    <CartesianGrid />
+                    <XAxis
+                        type="number" dataKey={selectedLV.x.label} name={selectedLV.x.label}
                     >
-                        <CartesianGrid />
-                        <XAxis
-                            type="number" dataKey={selectedLV.x.label} name={selectedLV.x.label}
-                        >
-                            <Label value={`${selectedLV.x.label}`} offset={-10} position="insideBottom" />
-                        </XAxis>
-                        <YAxis
-                            type="number" dataKey={selectedLV.y.label} name={selectedLV.y.label}
-                        >
-                            <Label value={selectedLV.y.label} offset={20} position="insideLeft" angle={-90} />
-                        </YAxis>
-                        <Legend verticalAlign="top" />
-                        <Scatter
-                            name={mdataCategorical.g1.id}
-                            data={data.filter(e => e.g==mdataCategorical.g1.id)}
-                            fill={myPalette[0]}
-                        />
-                        <Scatter
-                            name={mdataCategorical.g2.id}
-                            data={data.filter(e => e.g==mdataCategorical.g2.id)}
-                            fill={myPalette[1]}
-                        />
-                    </ScatterChart>
-                </ResponsiveContainer>
+                        <Label value={`${selectedLV.x.label}`} offset={-10} position="insideBottom" />
+                    </XAxis>
+                    <YAxis
+                        type="number" dataKey={selectedLV.y.label} name={selectedLV.y.label}
+                    >
+                        <Label value={selectedLV.y.label} offset={20} position="insideLeft" angle={-90} />
+                    </YAxis>
+                    <Legend verticalAlign="top" />
+                    <Scatter
+                        name={mdataCategorical.g1.id}
+                        data={data.filter(e => e.g == mdataCategorical.g1.id)}
+                        fill={myPalette[0]}
+                    >
+                        {showLabels && <LabelList dataKey="sample" position='top' />}
+                    </Scatter>
+                    <Scatter
+                        name={mdataCategorical.g2.id}
+                        data={data.filter(e => e.g == mdataCategorical.g2.id)}
+                        fill={myPalette[1]}
+                    >
+                        {showLabels && <LabelList dataKey="sample" position='top' />}
+                    </Scatter>
+                </ScatterChart>
+                <Box sx={{}}>
+                    <AxisSelector
+                        selectedLV={selectedLV}
+                        setSelectedLV={setSelectedLV}
+                        projOpts={projOpts}
+                        showLabels={showLabels}
+                        setShowLabels={setShowLabels}
+                    />
+                </Box>
             </Box>
         </Box>
     )
 }
 
 
-const AxisSelector = ({ selectedLV, setSelectedLV, projOpts }) => {
+const AxisSelector = ({ selectedLV, setSelectedLV, projOpts, showLabels, setShowLabels }) => {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Box sx={{ px: 2 }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}
+        >
+            <Box sx={{ position: 'relative', top:-50, left:-30 }}>
+                <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
+            </Box>
+            <Box sx={{ px: 4 }}>
                 <Autocomplete
                     value={selectedLV.x}//{mdataCol}
                     onChange={(e, newValue) => newValue && setSelectedLV(prev => ({ ...prev, x: newValue }))}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     id="xAxis"
                     options={projOpts}
-                    sx={{ width: 120 }}
+                    sx={{ width: 200 }}
                     renderInput={(params) => <TextField {...params} label="X Axis" />}
                     renderOption={(props, option) => {
                         return (
@@ -97,14 +116,14 @@ const AxisSelector = ({ selectedLV, setSelectedLV, projOpts }) => {
                     }}
                 />
             </Box>
-            <Box sx={{ px: 2 }}>
+            <Box sx={{ p: 4 }}>
                 <Autocomplete
                     value={selectedLV.y}//{mdataCol}
                     onChange={(e, newValue) => newValue && setSelectedLV(prev => ({ ...prev, y: newValue }))}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     id="yAxis"
                     options={projOpts}
-                    sx={{ width: 120 }}
+                    sx={{ width: 200 }}
                     renderInput={(params) => <TextField {...params} label="Y Axis" />}
                     renderOption={(props, option) => {
                         return (

@@ -22,9 +22,13 @@ const Results = dynamic(
 // Main
 function PWA() {
 
-    const [loading, setLoading] = useState(true);
+    // Get results variables
+    const dispatchResults = useDispatchResults();
+    const savedResultsPWA = useResults().PWA;
 
-    const [view, setView] = useState('Single-View'); // Single-View, Multi-View
+    // Local states
+    const [loading, setLoading] = useState(true);
+    const [view, setView] = useState(savedResultsPWA.view); // Single-View, Multi-View
 
     // Get general variables
     const { API_URL } = useVars();
@@ -32,29 +36,33 @@ function PWA() {
     // Get job variables
     const { omics, jobID, OS } = useJob();
 
+
     // From Reactome identifiers to info
     const [rId2info, setRId2info] = useState(
+        savedResultsPWA.rId2info ? savedResultsPWA.rId2info :
         omics.reduce((prev, curr) => ({ ...prev, [curr]: {} }), {})
     );
 
     // Job status and results
     const getResIntervalRef = useRef();
-
-    const [jobStatus, setJobStatus] = useState({ status: '', res: null, runId: null });
+    const [jobStatus, setJobStatus] = useState(savedResultsPWA.jobStatus)
+    //({ status: '', pwa_res: null, runId: null });
 
     // Which omics are being used in the analysis
-    const [workingOmics, setWorkingOmics] = useState([]);
+    const [workingOmics, setWorkingOmics] = useState(savedResultsPWA.workingOmics);
 
     // Capture mdataCategorical (it comes from ParamSelector)
-    const [mdataCategorical, setMdataCategorical] = useState();
+    const [mdataCategorical, setMdataCategorical] = useState(savedResultsPWA.mdataCategoricalRes);
 
     // Get job results from back-end
     const fetchResults = useCallback(async (runId) => {
+        console.log('fetching')
         const res = await fetch(`${API_URL}/get_pathway_analysis/${jobID}/${view}/${runId}`);
         const resJson = await res.json();
 
         if (resJson.status != 'waiting') {
             console.log('Pathway analysis finished: ', resJson);
+            dispatchResults({type: 'set-pwa-attr', attr:'jobStatus', value:resJson});
             setJobStatus(resJson);
             clearInterval(getResIntervalRef.current)
         }
@@ -90,14 +98,24 @@ function PWA() {
         console.log(resJson);
 
         // Start asking for results
-        setJobStatus({ status: 'waiting', res: null, runId: resJson.runId });
+        setJobStatus({ status: 'waiting', pwa_res: null, runId: resJson.runId });
+        clearInterval(getResIntervalRef.current); // clear what was saved
         getResIntervalRef.current = setInterval(() => fetchResults(resJson.runId), 5000);
 
         // Set working omics
-        setWorkingOmics(Object.keys(omicIdR).filter(e => omicIdR[e]));
-        setMdataCategorical({ ...mdataCategorical, mdataCol: mdataCol.id })
+        const _workingOmics = Object.keys(omicIdR).filter(e => omicIdR[e]);
+        setWorkingOmics(_workingOmics);
+        dispatchResults({ type: 'set-pwa-attr', attr: 'workingOmics', value: _workingOmics });
 
-    }, [view, setWorkingOmics, setJobStatus, setMdataCategorical, API_URL, OS, fetchResults, jobID]);
+        const _mdataCategorical = { ...mdataCategorical, mdataCol: mdataCol.id }
+        dispatchResults({ type: 'set-pwa-attr', attr: 'mdataCategoricalRes', value: _mdataCategorical });
+        setMdataCategorical(_mdataCategorical);
+
+        dispatchResults({type: 'set-pwa-attr', attr: 'rId2info', value: rId2info});
+
+
+    }, [view, setWorkingOmics, setJobStatus, setMdataCategorical, 
+        API_URL, OS, fetchResults, jobID, rId2info]);
 
     return (
         <Box>
@@ -109,14 +127,16 @@ function PWA() {
                     <Box sx={{ textAlign: 'center' }}>
                         <CircularProgress color="inherit" />
                     </Box>
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>Loading modules for Pathway Analysis...</Box>
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        Loading modules for Pathway Analysis...
+                    </Box>
                 </Box>
             </Backdrop>
             <Box sx={{ pt: 3 }}>
                 <ViewSelector
                     view={view}
                     setView={setView}
-                    resetJobStatus={() => setJobStatus({ status: '', res: null, runId: null })}
+                    resetJobStatus={() => setJobStatus(prev => ({ ...prev, status: '' }))}
                 />
             </Box>
             <ParamSelector

@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import React, { useState } from 'react'
+import {  useDispatchResults } from '../../ResultsContext'
 
 const ViewSelector = ({ view, setView, resetJobStatus }) => {
     return (
@@ -13,6 +14,8 @@ const ViewSelector = ({ view, setView, resetJobStatus }) => {
 }
 
 const ViewButton = ({ title, view, setView, resetJobStatus={resetJobStatus} }) => {
+
+    const dispatchResults = useDispatchResults();
 
     const selected = title == view;
 
@@ -41,7 +44,11 @@ const ViewButton = ({ title, view, setView, resetJobStatus={resetJobStatus} }) =
             }}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            onClick={() => {resetJobStatus(); setView(title)}}
+            onClick={() => {
+                resetJobStatus(); 
+                setView(title); 
+                dispatchResults({type:'set-pwa-attr', attr:'view', value: title});
+            }}
         >
             {title}
         </Box>

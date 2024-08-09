@@ -93,7 +93,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
-            <Box sx={{ display: 'flex', height: '10vh' }}>
+            <Box sx={{ display: 'flex', height: '6vh' }}>
                 <Box sx={{ mt: 4, ml: 0 }}>
                     <IconButton
                         aria-label="download"
@@ -130,7 +130,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                     </Box></MyMotion>
                 }
             </Box>
-            <Box sx={{ mt: 0 }}>
+            <Box sx={{ mt: 0, border:'0px solid red' }}>
                 <FilterTable data={filteredFeatures} columns={columns} />
             </Box>
         </Box>

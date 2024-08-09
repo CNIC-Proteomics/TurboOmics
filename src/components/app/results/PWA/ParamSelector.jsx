@@ -38,7 +38,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
     // Save section variables
     const dispatchResults = useDispatchResults();
-    //const savedResultsPWA = useResults().PWA;
+    const savedResultsPWA = useResults().PWA;
 
     // Load MetaboID and load
     const [MetaboID, setMetaboID] = useState(null);
@@ -52,17 +52,18 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
     // Select metadata column
     const mdata = jobUser.mdata;
-    const [mdataCol, setMdataCol] = useState(null);//savedResultsPWA.mdataCol);
-    const [mdataCategorical, setMdataCategorical] = useState({
+    const [mdataCol, setMdataCol] = useState(savedResultsPWA.mdataCol);//useState(null);//
+    const [mdataCategorical, setMdataCategorical] = useState(savedResultsPWA.mdataCategorical)
+    /*useState({
         isCategorical: false,
         colOpts: [],
         g1: null, g2: null
-    });
+    });*/
 
     const handleMdataAutocomplete = (event, newValue) => {
         if (!newValue) return;
         setMdataCol(newValue);
-        dispatchResults({ type: 'set-pwa-attr', attr: 'mdataCol', value: newValue });
+        //dispatchResults({ type: 'set-pwa-attr', attr: 'mdataCol', value: newValue });
 
         if (mdataType[newValue.id].type == 'categorical') {
             setMdataCategorical(prev => ({
@@ -81,15 +82,17 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
     // Select omic identifier column
     const [omicIdCol, setOmicIdCol] = useState(
-        omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
+        savedResultsPWA.omicIdCol ? savedResultsPWA.omicIdCol :
+            omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
     );
 
     const [omicIdType, setOmicIdType] = useState(
-        //omics.reduce((prev, curr) => ({ ...prev, [curr]: omicIdTypeOpts[curr][0] }), {})
-        omics.reduce((prev, curr) => ({ ...prev, [curr]: "" }), {})
+        savedResultsPWA.omicIdType ? savedResultsPWA.omicIdType :
+            omics.reduce((prev, curr) => ({ ...prev, [curr]: "" }), {})
     );
 
     const [omicIdR, setOmicIdR] = useState(
+        savedResultsPWA.omicIdR ? savedResultsPWA.omicIdR :
         omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
     );
 
@@ -193,7 +196,6 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
         setOmicIdR(prev => ({ ...prev, [o]: omicIdR_i }));
         setRId2info(prev => ({ ...prev, [o]: _rId2info }));
-
     }
 
     return (
@@ -210,12 +212,23 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                             mdataCol && (!mdataCategorical.isCategorical || (mdataCategorical.g1 && mdataCategorical.g2)) &&
                             (Object.values(omicIdCol).some(e => e))
                         )}
-                        onClick={() => fetchJobRun(
-                            mdataCol, 
-                            mdataCategorical, 
-                            omicIdR,
-                            getRunId(mdataCol, mdataCategorical, omicIdCol, omicIdType)
-                        )}
+                        onClick={() => {
+                            dispatchResults({
+                                type: 'set-pwa-params',
+                                mdataCol,
+                                mdataCategorical,
+                                omicIdCol,
+                                omicIdType,
+                                omicIdR
+                            })
+                            fetchJobRun(
+                                mdataCol,
+                                mdataCategorical,
+                                omicIdR,
+                                getRunId(mdataCol, mdataCategorical, omicIdCol, omicIdType)
+                            )
+                        }
+                        }
                     >
                         Run Analysis
                     </Button>
@@ -227,7 +240,11 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                         onChange={handleMdataAutocomplete}
                         isOptionEqualToValue={(option, value) => option.id === value.id}
                         id="metadata-column"
-                        options={mdata.columns.map(e => ({ label: e, id: e }))}
+                        options={
+                            mdata.columns.filter(
+                                e => mdataType[e].type == 'categorical'
+                            ).map(e => ({ label: e, id: e }))
+                        }
                         sx={{ width: 300 }}
                         renderInput={(params) => <TextField {...params} label="Metadata Column" />}
                         renderOption={(props, option) => {
@@ -412,7 +429,7 @@ const getOmicIdType = (uId, o) => {
 const getRunId = (mdataCol, mdataCategorical, omicIdCol, omicIdType) => {
     let runId = '';
     runId += mdataCol.id;
-    if(mdataCategorical.isCategorical) {
+    if (mdataCategorical.isCategorical) {
         runId += '_' + mdataCategorical.g1.id;
         runId += '_' + mdataCategorical.g2.id;
     }
