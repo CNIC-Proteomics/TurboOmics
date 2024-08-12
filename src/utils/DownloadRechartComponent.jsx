@@ -5,6 +5,7 @@ import downloadSVG from "./downloadSVG";
 
 
 export const DownloadComponent = ({ scatterRef, fileName }) => {
+
     const downloadScatter = () => {
         const scatterComp = scatterRef.current.container.cloneNode(true);
         const fullFig = window.document.createElement('div');

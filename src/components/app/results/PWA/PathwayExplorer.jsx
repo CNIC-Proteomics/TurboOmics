@@ -23,7 +23,7 @@ function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
             {view == 'Multi-View' &&
                 <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-evenly' }}>
                     {workingOmics.map(o => (
-                        <Box key={o} sx={{ px: 2, width: `${Math.max(100 / workingOmics.length, 50)}%` }}>
+                        <Box key={o} sx={{ px: 2, width: `${Math.min(100 / workingOmics.length, 50)}%` }}>
                             <ViewComponent
                                 path_info={Object.values(path_info[OMIC2NAME[o]])}
                                 rId2info={rId2info}
@@ -111,7 +111,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
             if(e.VIP > maxVIP) maxVIP = e.VIP;
         });
         return maxVIP
-    }, path_info_filtered);
+    }, [path_info_filtered]);
 
     const columns = useMemo(() => ([
         {
@@ -146,7 +146,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
                 </Box>
             )
         }
-    ]), []);
+    ]), [maxVIP]);
 
 
     // Virtualization
@@ -184,7 +184,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
         muiTableBodyCellProps: {sx: {p: 0,}},
         enableStickyHeader: true,
         enablePagination: false,
-        muiTableContainerProps: { sx: { maxHeight: '400px' } },
+        muiTableContainerProps: { sx: { minHeight: '400px', maxHeight: '400px' } },
         enableBottomToolbar: false,
         enableTopToolbar: true,
         //positionToolbarAlertBanner: 'bottom', //move the alert banner to the bottom
@@ -254,7 +254,7 @@ const FeatureTable = ({
             omicName: OMIC2NAME[e.omic],
         }))
         return [pathwayInfo, featureInfo];
-    }, [pathway]);
+    }, [pathway, OMIC2NAME, path_info, rId2info]);
 
     const maxLoading = useMemo(() => {
         let maxLoading = 0;
@@ -264,7 +264,7 @@ const FeatureTable = ({
             }
         });
         return maxLoading;
-    }, []);
+    }, [featureInfo]);
 
     const columns = useMemo(() => {
         const colOmic = view == 'Single-View' ? [{
@@ -308,7 +308,7 @@ const FeatureTable = ({
                 )
             }
         ]
-    }, [view]);
+    }, [view, maxLoading]);
 
     // Virtualization
     const rowVirtualizerInstanceRef = useRef(null);
@@ -364,7 +364,7 @@ const FeatureTable = ({
                             table.getAllColumns().map(
                                 e => ({ key: e.columnDef.id, displayLabel: e.columnDef.header })
                             ),
-                            'Biomolecules',
+                            `Biomolecules_${pathway}`,
                         )}
                         startIcon={<FileDownloadIcon />}
                     >

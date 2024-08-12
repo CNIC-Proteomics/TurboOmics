@@ -257,7 +257,16 @@ Define functions
 const getFactorNames = (dataMOFA) => {
     if (dataMOFA == null) return [null, null];
 
-    const factorNames = Object.keys(dataMOFA.anova);
+    let factorNames = Object.keys(dataMOFA.anova);
+    const _omics = Object.keys(dataMOFA.explained_variance);
+
+    factorNames = factorNames.map(e => ({
+        f: e,
+        var: _omics.reduce(
+            (prev, curr) => prev + dataMOFA.explained_variance[curr][e].Explained_Variance, 0
+        )
+    })).filter(e => e.var > 2).map(e => e.f)
+
     const colNames = factorNames.map((e, i) => i + 1);
     return [colNames, factorNames]
 }

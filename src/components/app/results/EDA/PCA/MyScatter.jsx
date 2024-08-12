@@ -164,11 +164,13 @@ const CustomTooltip = ({ active, payload }) => {
             <Box
                 className="custom-tooltip"
                 sx={{
-                    backgroundColor: 'rgba(255,255,255,0.5)',
+                    //backgroundColor: 'rgba(255,255,255,0.5)',
+                    //color: 'rgba(50,50,50,0.8)',
+                    backgroundColor: 'rgba(5,5,5,0.8)',
+                    color: 'rgba(250,250,250,0.8)',
                     border: '1px solid rgba(50, 50, 50, 0.8)',
                     padding: 1,
                     borderRadius: 1,
-                    color: 'rgba(50,50,50,0.8)'
                 }}
             >
                 <Typography variant='h8' sx={{ display: 'block' }}>

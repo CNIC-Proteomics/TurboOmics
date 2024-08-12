@@ -48,22 +48,16 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             setLoading(false);
             console.log('MetaboID loaded');
         });
-    }, []);
+    }, [setLoading, setMetaboID]);
 
     // Select metadata column
     const mdata = jobUser.mdata;
-    const [mdataCol, setMdataCol] = useState(savedResultsPWA.mdataCol);//useState(null);//
+    const [mdataCol, setMdataCol] = useState(savedResultsPWA.mdataCol);
     const [mdataCategorical, setMdataCategorical] = useState(savedResultsPWA.mdataCategorical)
-    /*useState({
-        isCategorical: false,
-        colOpts: [],
-        g1: null, g2: null
-    });*/
 
     const handleMdataAutocomplete = (event, newValue) => {
         if (!newValue) return;
         setMdataCol(newValue);
-        //dispatchResults({ type: 'set-pwa-attr', attr: 'mdataCol', value: newValue });
 
         if (mdataType[newValue.id].type == 'categorical') {
             setMdataCategorical(prev => ({
@@ -71,7 +65,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                 colOpts: mdataType[newValue.id].levels.map(e => ({ label: e, id: e })),
                 g1: null, g2: null
             }));
-        } else {
+        } else { // working with numeric mdata variables still not available
             setMdataCategorical(prev => ({
                 isCategorical: false,
                 colOpts: [],
@@ -116,7 +110,11 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
         // If no omic type is selected, estimate it
         if (!omicIdType_i) {
             omicIdType_i = getOmicIdType(uId, o);
-            if (!omicIdType_i) return;
+            if (!omicIdType_i) {
+                setOmicIdR(prev => ({ ...prev, [o]: null }));
+                setRId2info(prev => ({ ...prev, [o]: {} }));
+                return;
+            };
             setOmicIdType(prev => ({ ...prev, [o]: omicIdType_i }))
         }
 
@@ -176,7 +174,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             rId = xId.map(e => _uId2rId[_xId2uId[e]]);
 
             // Generate rId2info
-            let _uId2xId = {}
+            let _uId2xId = {};
             uId.map((e, i) => _uId2xId[e] = xId[i]);
 
             GPresult.map(e => {
@@ -186,7 +184,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                     name: e.name,
                     description: e.description
                 }
-            })
+            });
         }
 
         xId.map((e, i) => {
@@ -303,7 +301,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
             <Box sx={{
                 width: '2%',
-                borderWidth: '0px 1.5px 0px 0px',
+                borderWidth: '0px 1px 0px 0px',
                 borderStyle: 'dashed',
                 borderColor: '#aaaaaa'
             }}

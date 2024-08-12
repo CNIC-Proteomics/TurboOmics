@@ -46,7 +46,6 @@ function PWA() {
     // Job status and results
     const getResIntervalRef = useRef();
     const [jobStatus, setJobStatus] = useState(savedResultsPWA.jobStatus)
-    //({ status: '', pwa_res: null, runId: null });
 
     // Which omics are being used in the analysis
     const [workingOmics, setWorkingOmics] = useState(savedResultsPWA.workingOmics);
@@ -56,18 +55,18 @@ function PWA() {
 
     // Get job results from back-end
     const fetchResults = useCallback(async (runId) => {
-        console.log('fetching')
+        console.log('Fetching Pathway Analysis results');
         const res = await fetch(`${API_URL}/get_pathway_analysis/${jobID}/${view}/${runId}`);
         const resJson = await res.json();
 
         if (resJson.status != 'waiting') {
-            console.log('Pathway analysis finished: ', resJson);
+            console.log('Pathway Analysis finished: ', resJson);
             dispatchResults({type: 'set-pwa-attr', attr:'jobStatus', value:resJson});
             setJobStatus(resJson);
             clearInterval(getResIntervalRef.current)
         }
 
-    }, [getResIntervalRef, view, API_URL, jobID]);
+    }, [getResIntervalRef, view, API_URL, jobID, dispatchResults]);
 
     // Send job to back-end
     const fetchJobRun = useCallback(async (mdataCol, mdataCategorical, omicIdR, runId) => {
@@ -115,7 +114,7 @@ function PWA() {
 
 
     }, [view, setWorkingOmics, setJobStatus, setMdataCategorical, 
-        API_URL, OS, fetchResults, jobID, rId2info]);
+        API_URL, OS, fetchResults, jobID, rId2info, dispatchResults]);
 
     return (
         <Box>

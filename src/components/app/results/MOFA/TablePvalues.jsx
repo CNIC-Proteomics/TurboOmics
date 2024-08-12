@@ -171,7 +171,7 @@ export default function TablePvalues({
                                     {colNames.map((e, index) => (
                                         <TableCell
                                             key={index}
-                                            sx={{ padding: 0, textAlign: 'center', width: 50, userSelect: 'none', }}
+                                            sx={{ padding: 0, textAlign: 'center', userSelect: 'none', }}
                                         >
                                             {e}
                                         </TableCell>
@@ -207,6 +207,7 @@ export default function TablePvalues({
                                                 key={colIndex}
                                                 sx={{ padding: 0, border: 0 }}
                                                 onClick={() => handleCellClick(rowIndex, colIndex)}
+                                                style={{minWidth: 100}}
                                             >
                                                 <Box sx={
                                                     selectedCell &&

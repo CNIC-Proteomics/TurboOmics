@@ -61,7 +61,6 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
                 Cell: ({ renderedCellValue, row }) => (
                     <Box sx={{
                         backgroundColor: calculateBackgroundColorRed(renderedCellValue, 0, 100),
-                        border: '0px solid red',
                         py: 1,
                     }}
                     >
@@ -120,7 +119,6 @@ function ModelInfo({ runId, model_info, view, workingOmics }) {
         muiTableBodyCellProps: {
             sx: {
                 p: 0,
-                //borderRight: '2px solid #e0e0e0', //add a border between columns
             }
         },
         enableColumnFilterModes: false,

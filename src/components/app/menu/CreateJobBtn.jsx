@@ -42,7 +42,7 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
         job.omics.map(omic => {
             const xi = job.user[`x${omic}`];
             const f2i = job.user[`${omic}2i`];
-            const mvthr = job.results.PRE.MVThr[`x${omic}`]
+            const mvthr = job.results.PRE.MVThr[`x${omic}`];
             const xfSerie = xi.isNa().sum({ axis: 0 }).div(xi.shape[0]).le(mvthr);
             f2x[omic] = f2i.index.map(f => {
                 if (!xfSerie.index.includes(f)) return false;
