@@ -4,6 +4,7 @@ import {SelectorFactor2D, SelectorFactor} from './SelectorFactor'
 import ScatterModeSelector from './ScatterModeSelector'
 import { useJob } from '@/components/app/JobContext'
 import { MyScatter, MyScatter2D } from './MyScatter'
+import HelpSection from './HelpSection'
 
 function ScatterPlotContainer({
     scatterMode,
@@ -35,6 +36,7 @@ function ScatterPlotContainer({
 
     return (
         <Grid container>
+            <Box><HelpSection/></Box>
             <Grid sx={{ pt: 2 }} item xs={6}>
                 <ScatterModeSelector
                     scatterMode={scatterMode}

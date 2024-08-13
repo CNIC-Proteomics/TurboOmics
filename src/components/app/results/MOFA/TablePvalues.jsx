@@ -16,6 +16,7 @@ import { CSVLink } from 'react-csv';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import { useJob } from '../../JobContext';
 import { useVars } from '@/components/VarsContext';
+import HelpSection from './HelpSection';
 
 
 const separator = ",";

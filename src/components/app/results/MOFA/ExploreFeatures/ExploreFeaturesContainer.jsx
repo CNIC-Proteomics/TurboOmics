@@ -12,6 +12,7 @@ const MainContent = dynamic(
     () => import('./MainContent')
 )*/
 import MainContent from './MainContent';
+import HelpSection from './HelpSection';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -55,7 +56,8 @@ function ExploreFeaturesContainer({
                 selectedOmic={selectedOmic}
                 setSelectedOmic={setSelectedOmic}
                 scrollOmic={scrollOmic}
-            />
+            /> 
+            <Box sx={{height:0, zIndex:1000}}><HelpSection/></Box>
             <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
                 <Box
                     sx={{ display: 'flex', width: `${100 * omics.length}%` }}

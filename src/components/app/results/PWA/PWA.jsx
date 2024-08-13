@@ -8,6 +8,8 @@ import SendIcon from '@mui/icons-material/Send';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 import dynamic from 'next/dynamic'
+import HelpSectionParams from './HelpSectionParams';
+import HelpSectionResults from './HelpSectionResults';
 
 const ParamSelector = dynamic(
     () => import('./ParamSelector')
@@ -118,6 +120,7 @@ function PWA() {
 
     return (
         <Box>
+            <Box sx={{height:0}}><HelpSectionParams/></Box>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loading}
@@ -152,6 +155,8 @@ function PWA() {
                 </Box>
             }
             {jobStatus.status == 'ok' &&
+            <>
+            <Box sx={{height:0}}><HelpSectionResults/></Box>
                 <Results
                     pwa_res={jobStatus.pwa_res}
                     runId={jobStatus.runId}
@@ -160,6 +165,7 @@ function PWA() {
                     workingOmics={workingOmics}
                     mdataCategorical={mdataCategorical}
                 />
+                </>
             }
             {jobStatus.status == 'error' &&
                 <Box>

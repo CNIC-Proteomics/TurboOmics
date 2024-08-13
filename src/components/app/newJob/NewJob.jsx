@@ -22,7 +22,7 @@ export default function NewJob() {
 
             <Box sx={{ mt: 1, mb: 3, display: 'flex', justifyContent: 'space-between' }}>
                 <Box sx={{ width: '30%' }}><MyAutocomplete /></Box>
-                <DragFile title="Metadata" fileType="mdata" />
+                <DragFile title="Experimental Metadata" fileType="mdata" />
                 <Box sx={{ width: '30%' }}><SummaryTable /></Box>
             </Box>
 

@@ -92,7 +92,7 @@ export default function FilterFeatures({ omic, setFilteredID, updatePlot }) {
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
-            <Box sx={{ display: 'flex', height: '10vh' }}>
+            <Box sx={{ display: 'flex', height:80 }}>
                 <Box sx={{ width: '40%', pt: 1 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...fx2i.columns.map(c => ({ label: c, value: c }))]}
@@ -113,7 +113,7 @@ export default function FilterFeatures({ omic, setFilteredID, updatePlot }) {
                     </Box></MyMotion>
                 }
             </Box>
-            <Box sx={{ mt: 0 }}>
+            <Box sx={{ mt: 2 }}>
                 <FilterTable data={filteredFeatures} columns={columns} />
             </Box>
         </Box>

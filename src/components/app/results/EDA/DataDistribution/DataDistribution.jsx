@@ -2,18 +2,13 @@ import { Box, Button, CircularProgress, FormControlLabel, IconButton, Switch, Ty
 import Grid from '@mui/material/Grid';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useJob } from '../../../JobContext';
-import PlotData from './PlotData';
 import { MySwitch, MySelectGroupby } from './MyFormComponents';
-import FilterFeatures from './FilterFeatures';
-import DownloadIcon from '@mui/icons-material/Download';
-import ImageIcon from '@mui/icons-material/Image';
 
 
-import downloadImage from './downloadImage';
 import { useResults, useDispatchResults } from '@/components/app/ResultsContext';
-import { MySection, MySectionContainer } from '@/components/MySection';
 import OmicView from './OmicView';
 import OmicSelector from './OmicSelector';
+import HelpSection from './HelpSection';
 
 export default function DataDistribution() {
 
@@ -78,6 +73,7 @@ export default function DataDistribution() {
 
     return (
         <Box>
+            <Box sx={{position:'absolute'}}><HelpSection/></Box>
             <OmicSelector
                 selOmic={selOmic}
                 setSelOmic={setSelOmic}

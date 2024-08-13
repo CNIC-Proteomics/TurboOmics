@@ -12,8 +12,6 @@ function OmicView({
     figRef,
     showPlot,
     showNorm,
-    //filteredID,
-    //setFilteredID,
     updatePlot,
     groupby
 }) {

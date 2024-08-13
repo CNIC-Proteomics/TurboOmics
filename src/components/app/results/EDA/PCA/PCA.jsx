@@ -5,6 +5,7 @@ import { MySectionContainer } from '@/components/MySection'
 import { useJob } from '@/components/app/JobContext'
 import { useVars } from '@/components/VarsContext'
 import OmicSelector from '../DataDistribution/OmicSelector';
+import HelpSection from './HelpSection'
 
 export default function PCA() {
 
@@ -14,6 +15,7 @@ export default function PCA() {
 
     return (
         <Box>
+            <Box sx={{position:'absolute'}}><HelpSection/></Box>
             <OmicSelector
                 selOmic={selOmic}
                 setSelOmic={setSelOmic}

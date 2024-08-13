@@ -11,6 +11,7 @@ import LoadingPlotContainer from './LoadingPlot/LoadingPlotContainer';
 import HeatMapContainer from './HeatMap/HeatMapContainer';
 
 import dynamic from 'next/dynamic';
+import HelpSection from './HelpSection';
 const ExploreFeaturesContainer = dynamic(
     () => import('./ExploreFeatures/ExploreFeaturesContainer')
 )
@@ -154,6 +155,7 @@ function MOFA() {
             <MySectionContainer height="80vh">
                 {dataMOFA != null && selectedPlot != null && <>
                     <MySection>
+                        <Box sx={{height:3}}><HelpSection /></Box>
                         <Box sx={{ p: 5 }}>
                             <TablePvalues
                                 anova={dataMOFA.anova}

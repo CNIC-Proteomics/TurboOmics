@@ -6,6 +6,7 @@ import HeatMapHeader from './HeatMapHeader';
 import HeatMapLegend from './HeatMapLegend';
 import { useImmer } from 'use-immer';
 import { useResults } from '@/components/app/ResultsContext';
+import HelpSection from './HelpSection';
 
 function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
 
@@ -52,6 +53,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
 
     return (
         <Box>
+            <Box><HelpSection/></Box>
             <HeatMapHeader nFeatRef={nFeatRef} />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>

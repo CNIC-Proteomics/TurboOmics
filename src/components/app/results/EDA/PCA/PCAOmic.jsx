@@ -118,7 +118,7 @@ export default function PCAOmic({ omic }) {
                             <Box sx={{ textAlign: 'center' }}>
                                 {scatterMode == '1D' ?
                                     <Box sx={{ height: 75, pt: 3 }}>
-                                        <Typography variant='body1'>Select a pvalue cell to plot PCA</Typography>
+                                        <Typography variant='body1'>Select a p-value cell to plot PCA</Typography>
                                     </Box>
                                     :
                                     <SelectorPCA2D
