@@ -22,6 +22,7 @@ const EnrichmentTable = dynamic(
 );*/
 //import EnrichmentTable from './EnrichmentTable';
 import CustomEnrichment from './CustomEnrichment';
+import HelpSectionResults from './utils/HelpSectionParamsResults';
 
 /*
 Constants
@@ -446,6 +447,7 @@ function GSEAomic({ omic }) {
                     <Divider sx={{ my: 4 }}>
                         <Typography variant='body2'>{titleGsea}</Typography>
                     </Divider>
+                    <Box sx={{ height: 0, position:'relative', top:-25}}><HelpSectionResults /></Box>
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                             <DbSelector

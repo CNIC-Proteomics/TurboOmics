@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
 import CloseIcon from '@mui/icons-material/Close';
-import { useVars } from '../../VarsContext';
-import Image from 'next/image';
+import { useVars } from '../../../VarsContext';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -21,7 +22,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-export default function DialogHelp({ title }) {
+export default function HelpOmicQuant({ title, tableFile }) {
 
     const [open, setOpen] = useState(false);
     const closeDialog = () => setOpen(false);
@@ -30,8 +31,8 @@ export default function DialogHelp({ title }) {
     const BASE_URL = useVars().BASE_URL;
 
     return (
-        <div className="mt-0 pt-0">
-            <IconButton onClick={openDialog} disabled>
+        <Box>
+            <IconButton sx={{p:0, pb:1}} onClick={openDialog}>
                 <InfoOutlinedIcon />
             </IconButton>
             <BootstrapDialog
@@ -41,7 +42,7 @@ export default function DialogHelp({ title }) {
                 maxWidth='md'
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                    {title} Table
+                    {title}
                 </DialogTitle>
                 <IconButton
                     aria-label="close"
@@ -55,18 +56,29 @@ export default function DialogHelp({ title }) {
                 >
                     <CloseIcon />
                 </IconButton>
-                <DialogContent dividers>
+                <DialogContent sx={{ textAlign: 'justify' }} dividers>
                     <Typography gutterBottom>
-                        Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1Paragraph 1
+                        The Quantitative Table is where the core data for your analysis is stored.
+                        It contains the quantitative values of each biomolecule across all samples,
+                        serving as the foundation for the analyses within the TurboOmics platform.
                     </Typography>
                     <Typography gutterBottom>
-                        Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2Paragraph 2
+                        <strong>Each row represents a different biomolecule</strong> in your dataset (transcripts, proteins, or metabolites).
+                        <strong> The first column must contain the unique identifier</strong> for each biomolecule. This identifier is crucial
+                        for linking the quantitative values to the corresponding metadata.
                     </Typography>
-                    <div className='text-center mt-3'>
-                        <img src={`${BASE_URL}/table.png`} alt="Table" />
+                    <Typography gutterBottom>
+                        Each column, after the first, corresponds to a different sample in your study.
+                        <strong> The first row must contain the unique identifier for each sample</strong>. This ensures
+                        that the quantitative values are correctly matched with the corresponding samples
+                        in the metadata tables.
+                    </Typography>
+
+                    <div style={{textAlign: 'center', padding:3}}>
+                        <img src={`${BASE_URL}/${tableFile}`} alt="OmicMetadataTable" />
                     </div>
                 </DialogContent>
             </BootstrapDialog>
-        </div>
+        </Box>
     )
 }

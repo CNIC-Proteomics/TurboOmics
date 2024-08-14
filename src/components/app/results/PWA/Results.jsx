@@ -3,12 +3,15 @@ import React, { useState } from 'react'
 import ModelInfo from './ModelInfo'
 import ScatterPlot from './ScatterPlot'
 import PathwayExplorer from './PathwayExplorer'
+import HelpSectionTop from './HelpSection/HelpSectionTop';
+import HelpSectionBottom from './HelpSection/HelpSectionBottom'
 
 function Results({ pwa_res, runId, rId2info, view, workingOmics, mdataCategorical }) {
 
     return (
         <Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ height: 0, width: 0, alignSelf: 'start' }}><HelpSectionTop/></Box>
                 <Box sx={{ width: '50%', px: 3 }}>
                     <ModelInfo
                         runId={runId}
@@ -25,7 +28,8 @@ function Results({ pwa_res, runId, rId2info, view, workingOmics, mdataCategorica
                     />
                 </Box>
             </Box>
-            <Box sx={{mt:4}}>
+            <Box sx={{ mt: 4 }}>
+                <Box sx={{width:0, height:0, position: 'relative', top:-35}}><HelpSectionBottom /></Box>
                 <PathwayExplorer
                     view={view}
                     path_info={pwa_res.path_info}

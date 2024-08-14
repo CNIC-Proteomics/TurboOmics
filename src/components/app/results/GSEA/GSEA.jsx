@@ -3,7 +3,7 @@ import { useJob } from '../../JobContext'
 import { Box } from '@mui/material'
 import OmicSelector from '../EDA/DataDistribution/OmicSelector';
 import GSEAomic from './GSEAomic';
-import useWindowSize from '@/hooks/useWindowSize';
+import HelpSectionParams from './utils/HelpSectionParams';
 
 function GSEA() {
 
@@ -13,6 +13,7 @@ function GSEA() {
 
     return (
         <Box>
+            <Box sx={{height:0}}><HelpSectionParams/></Box>
             <OmicSelector
                 selOmic={selOmic}
                 setSelOmic={setSelOmic}

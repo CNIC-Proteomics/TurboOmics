@@ -4,12 +4,11 @@ import { FileUploader } from "react-drag-drop-files";
 
 import { useDispatchJob, useJob } from "../JobContext";
 
-import DialogHelp from './DialogHelp';
 import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
 const fileFormat = ["TSV"];
 
 
-export default function DragFile({ title, fileType, traspose = false }) {
+export default function DragFile({ title, fileType, traspose = false, DialogHelp }) {
 
     const fileName = useJob().userFileNames[fileType];
     const dispatchJob = useDispatchJob();
@@ -33,8 +32,8 @@ export default function DragFile({ title, fileType, traspose = false }) {
                 transition: "all 1s ease",
                 backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)'
             }}>
-                <Typography variant="h6" className="pt-2">{title}</Typography>
-                <DialogHelp title={title} />
+                <Typography sx={{pt:2}} variant="h6" >{title}</Typography>
+                {DialogHelp}
                 <Box sx={{ width: 400, margin: 'auto' }}>
                     <FileUploader
                         multiple={false}
@@ -43,7 +42,7 @@ export default function DragFile({ title, fileType, traspose = false }) {
                         types={fileFormat}
                     />
                 </Box>
-                <p className="mt-3">{fileName ? `File name: ${fileName}` : "no files uploaded yet"}</p>
+                <Box sx={{py:2}}>{fileName ? `File name: ${fileName}` : "no files uploaded yet"}</Box>
             </Card>
         </div>
     );

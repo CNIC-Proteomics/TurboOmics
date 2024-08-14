@@ -71,7 +71,7 @@ export default function HelpSection() {
                                     <ListItem sx={{ display: 'list-item',  textAlign: 'justify' }}>
                                         <strong>Density Plot & Boxplot</strong>: Displays the distribution of quantitative values for                                        
                                         the selected biomolecules. The default view shows the overall distribution, but you can 
-                                        customize this view using the "Group by" selector and the right pane filter.
+                                        customize this view using the Group by selector and the right pane filter.
                                     </ListItem>
                                     <ListItem sx={{ display: 'list-item',  textAlign: 'justify' }}>
                                         <strong>Group by Selector</strong>: This button lets users choose a categorical variable from the 

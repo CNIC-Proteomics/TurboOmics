@@ -79,7 +79,7 @@ export default function HelpSection() {
                             </ListItem>
                         </List>
                         <Typography gutterBottom>
-                            Located at the bottom of the section, "Explore Features" button allows for an in-depth exploration of the
+                            Located at the bottom of the section, the Explore Features button allows for an in-depth exploration of the
                             biomolecules displayed in the heatmap. Clicking it will take you to a detailed analysis section,
                             where you can further investigate the selected biomolecules and delve into their biological significance.
                         </Typography>

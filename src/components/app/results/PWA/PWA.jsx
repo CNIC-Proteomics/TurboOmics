@@ -8,8 +8,8 @@ import SendIcon from '@mui/icons-material/Send';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 import dynamic from 'next/dynamic'
-import HelpSectionParams from './HelpSectionParams';
-import HelpSectionResults from './HelpSectionResults';
+import HelpSectionParams from './HelpSection/HelpSectionParams';
+
 
 const ParamSelector = dynamic(
     () => import('./ParamSelector')
@@ -156,7 +156,6 @@ function PWA() {
             }
             {jobStatus.status == 'ok' &&
             <>
-            <Box sx={{height:0}}><HelpSectionResults/></Box>
                 <Results
                     pwa_res={jobStatus.pwa_res}
                     runId={jobStatus.runId}
