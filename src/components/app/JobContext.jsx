@@ -42,6 +42,7 @@ function jobReducer(draft, action) {
             let df = new dfd.DataFrame(action.dfJson);
 
             df.setIndex({ column: action.idCol, inplace: true });
+            draft.idCol[action.fileType] = action.idCol;
 
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 const omic = action.fileType.slice(-1)
@@ -188,6 +189,9 @@ const jobTemplate = {
         ...fileInfoTemplate
     },
     "index": { // Index of danfo dataframes (we need it to preserve it after json conversion)
+        ...fileInfoTemplate
+    },
+    "idCol": { // Name of the column containing id
         ...fileInfoTemplate
     },
     "norm": { // Feature-center, scaled and imputed Danfo dataframes

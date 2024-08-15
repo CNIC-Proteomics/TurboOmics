@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatchJob, useJob } from '../../JobContext'
 import { useVars } from '@/components/VarsContext';
 
-const BATCH_SIZE = 2;
-const TIME_SLEEP = 5000; //in milliseconds
+const BATCH_SIZE = 3;
+const TIME_SLEEP = 6000; //in milliseconds
 //const PROXY = "https://corsproxy.io";
 //const CMM_URI = "http://ceumass.eps.uspceu.es/mediator/api/v3/batch";
 //const MY_FECTH = "https://truboomics.alwaysdata.net/get_cmm"
@@ -19,6 +19,7 @@ function Annotating() {
 
     // Get data from jobContext
     const { jobID } = useJob();
+    const m2i_idCol = useJob().idCol.m2i;
     const xm_mid = useJob().norm.xm.columns;
     const m2i_fileName = useJob().userFileNames.m2i;
     const { annParams } = useJob();
@@ -84,7 +85,8 @@ function Annotating() {
                 type: 'user-upload',
                 dfJson: resJson.m2i,
                 fileType: 'm2i',
-                userFileName: m2i_fileName
+                userFileName: m2i_fileName,
+                idCol: m2i_idCol
             });
         }
 
@@ -95,10 +97,10 @@ function Annotating() {
             console.log(resJson);
         }
 
-    }, [annParams, jobID, API_URL, m2i_fileName, getTPRef, dispatchJob])
+    }, [annParams, jobID, API_URL, m2i_fileName, getTPRef, dispatchJob, m2i_idCol])
 
     // Fetch putative annotations from CMM
-    const fetchCMM = useCallback((ion_mode, adducts, masses) => {
+    const fetchCMM = useCallback((ion_mode, adducts, masses, i) => {
         return new Promise(async (resolve, reject) => {
             const body = {
                 "metabolites_type": "all-except-peptides",
@@ -114,7 +116,7 @@ function Annotating() {
 
             try {
                 const res = await fetch(
-                    FETCH_CMM_URL,
+                    FETCH_CMM_URL[i%FETCH_CMM_URL.length],
                     //`${PROXY}/?${encodeURIComponent(CMM_URI)}`,
                     {
                         method: 'POST',
@@ -153,7 +155,7 @@ function Annotating() {
             for (let i = 0; i < mzBatches.pos.length; i++) {
                 //for (let i = 0; i < 1; i++) {
                 setProgress(100 * (i + 1) / mzBatches.pos.length);
-                const resCMM = await fetchCMM('positive', annParams.posAdd, mzBatches.pos[i]);
+                const resCMM = await fetchCMM('positive', annParams.posAdd, mzBatches.pos[i], i);
                 fullResCMM.pos = [...fullResCMM.pos, ...resCMM];
                 await new Promise(r => setTimeout(r, TIME_SLEEP));
             }
@@ -178,7 +180,7 @@ function Annotating() {
             for (let i = 0; i < mzBatches.neg.length; i++) {
                 //for (let i = 0; i < 1; i++) {
                 setProgress(100 * (i + 1) / mzBatches.neg.length);
-                const resCMM = await fetchCMM('negative', annParams.negAdd, mzBatches.neg[i]);
+                const resCMM = await fetchCMM('negative', annParams.negAdd, mzBatches.neg[i], i);
                 fullResCMM.neg = [...fullResCMM.neg, ...resCMM];
                 await new Promise(r => setTimeout(r, TIME_SLEEP));
             }
