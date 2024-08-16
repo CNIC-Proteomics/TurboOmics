@@ -130,7 +130,7 @@ export default function Results() {
                         />
 
                         <Tab
-                            label={<TabComponent text='PATHWAY ANALYSIS' status='' />}
+                            label={<TabComponent text='INTEGRATIVE PATHWAY ANALYSIS' status='' />}
                             value={2.1}
                             sx={{ fontSize: 12, m: 0, p: 0 }}
                             disabled={false}

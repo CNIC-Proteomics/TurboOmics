@@ -267,7 +267,7 @@ const getFactorNames = (dataMOFA) => {
         var: _omics.reduce(
             (prev, curr) => prev + dataMOFA.explained_variance[curr][e].Explained_Variance, 0
         )
-    })).filter(e => e.var > 2).map(e => e.f)
+    })).filter(e => e.var > 1.5).map(e => e.f)
 
     const colNames = factorNames.map((e, i) => i + 1);
     return [colNames, factorNames]
