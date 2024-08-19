@@ -1,10 +1,16 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useVars } from '../../../VarsContext'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import handleExportData from '../../../../utils/exportDataTable';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { calculateBackgroundColorBlueRed, calculateBackgroundColorRed } from '../../../../utils/numberToColor';
+import GradientIcon from '@mui/icons-material/Gradient';
+import { useJob } from '../../JobContext';
+import { useResults } from '../../ResultsContext';
+
+import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter'
+import { HeatMapCanvas, ResponsiveHeatMapCanvas } from '@nivo/heatmap';
 
 function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
 
@@ -67,7 +73,7 @@ const ViewComponent = ({ path_info, rId2info, view, omic }) => {
                 {Object.keys(pathwaySelection).length > 0 &&
                     <Box sx={{ width: '100%' }}>
                         <FeatureTable
-                            pathway={Object.keys(pathwaySelection)}
+                            pathway={Object.keys(pathwaySelection)[0]}
                             path_info={path_info}
                             rId2info={rId2info}
                             view={view}
@@ -108,7 +114,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
     const maxVIP = useMemo(() => {
         let maxVIP = 0;
         path_info_filtered.map(e => {
-            if(e.VIP > maxVIP) maxVIP = e.VIP;
+            if (e.VIP > maxVIP) maxVIP = e.VIP;
         });
         return maxVIP
     }, [path_info_filtered]);
@@ -127,7 +133,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
             accessorKey: 'N',
             header: 'N.',
             size: 50,
-            muiTableBodyCellProps:{align:'center'},
+            muiTableBodyCellProps: { align: 'center' },
         },
         {
             id: 'VIP',
@@ -135,11 +141,11 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
             //accessorKey: 'VIP',
             header: 'VIP',
             size: 60,
-            muiTableBodyCellProps:{align:'center'},
+            muiTableBodyCellProps: { align: 'center' },
             Cell: ({ renderedCellValue, row }) => (
                 <Box sx={{
                     backgroundColor: calculateBackgroundColorRed(renderedCellValue, 1, maxVIP),
-                    py: 1.5, width:'100%', height:'100%'
+                    py: 1.5, width: '100%', height: '100%'
                 }}
                 >
                     {renderedCellValue}
@@ -181,7 +187,7 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
             onClick: row.getToggleSelectedHandler(),
             sx: { cursor: 'pointer' },
         }),
-        muiTableBodyCellProps: {sx: {p: 0,}},
+        muiTableBodyCellProps: { sx: { p: 0, } },
         enableStickyHeader: true,
         enablePagination: false,
         muiTableContainerProps: { sx: { minHeight: '400px', maxHeight: '400px' } },
@@ -252,13 +258,13 @@ const FeatureTable = ({
             Name: (e.omic == 'q' || e.omic == 't') ?
                 `${e.name} | ${e.description.replace(/\[.*\]$/, '')}` : e.Name,
             omicName: OMIC2NAME[e.omic],
-        }))
+        }));
         return [pathwayInfo, featureInfo];
     }, [pathway, OMIC2NAME, path_info, rId2info]);
 
     const maxLoading = useMemo(() => {
         let maxLoading = 0;
-        featureInfo.map( e => {
+        featureInfo.map(e => {
             if (Math.abs(e.PC1_Loadings) > maxLoading) {
                 maxLoading = Math.abs(e.PC1_Loadings);
             }
@@ -277,7 +283,7 @@ const FeatureTable = ({
                 header: '#',
                 accessorKey: 'xId',
                 size: 100,
-                muiTableBodyCellProps: {sx: {px: 2, py:0}},
+                muiTableBodyCellProps: { sx: { px: 2, py: 0 } },
             },
             ...colOmic,
             {
@@ -300,7 +306,7 @@ const FeatureTable = ({
                 Cell: ({ renderedCellValue, row }) => (
                     <Box sx={{
                         backgroundColor: calculateBackgroundColorBlueRed(renderedCellValue, -maxLoading, maxLoading),
-                        py: 1.5, width:'100%', height:'100%'
+                        py: 1.5, width: '100%', height: '100%'
                     }}
                     >
                         {renderedCellValue}
@@ -330,6 +336,9 @@ const FeatureTable = ({
         }
     }, [sorting]);
 
+    // Show heatmap
+    const [showHeatmap, setShowHeatmap] = useState(false);
+
     const table = useMaterialReactTable({
         columns: columns,
         data: featureInfo,
@@ -353,9 +362,14 @@ const FeatureTable = ({
         enableHiding: false,
         enableFullScreenToggle: false,
         enableFilters: false,
-        muiTableBodyCellProps: {sx: {px: 0, py:0}},
+        muiTableBodyCellProps: { sx: { px: 0, py: 0 } },
         renderTopToolbarCustomActions: ({ table }) => (
-            <Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%'}}>
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%'
+            }}>
                 <Box>
                     <Button
                         //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
@@ -372,7 +386,15 @@ const FeatureTable = ({
                     </Button>
                 </Box>
                 <Box><Typography variant='body1'>{pathwayInfo.Name}</Typography></Box>
-                <Box><Typography variant='body1'>{pathway}</Typography></Box>
+                {false && <Box><Typography variant='body1'>{pathway}</Typography></Box>}
+                <Box>
+                    <Button
+                        onClick={() => setShowHeatmap(true)}
+                        startIcon={<GradientIcon />}
+                    >
+                        Plot Heatmap
+                    </Button>
+                </Box>
             </Box>
         )
     })
@@ -381,8 +403,252 @@ const FeatureTable = ({
     return (
         <Box>
             <MaterialReactTable table={table} />
+            <HeatMapDialog
+                showHeatmap={showHeatmap}
+                setShowHeatmap={setShowHeatmap}
+                featureInfo={featureInfo}
+                pathway={pathway}
+                pathwayInfo={pathwayInfo}
+            />
         </Box>
     )
 }
+
+const HeatMapDialog = ({
+    setShowHeatmap,
+    showHeatmap,
+    featureInfo,
+    pathway,
+    pathwayInfo
+}) => {
+
+    // Get general variables
+    const xi = useJob().norm;
+    const { mdataType } = useJob();
+    const { mdataCategoricalRes, workingOmics } = useResults().PWA;
+    const { projections } = useResults().PWA.jobStatus.pwa_res;
+
+    // Heatmap z legend
+    const [zLegend, setZLegend] = useState({ min: -2, max: 2 });
+
+    // Sort samples by first score (decresing)
+    const samplesSortedGroup = useMemo(() => {
+
+        mdataType[mdataCategoricalRes.mdataCol].level2id[mdataCategoricalRes.g1.id];
+        mdataType[mdataCategoricalRes.mdataCol].level2id[mdataCategoricalRes.g2.id];
+
+        let samplesSorted = projections.toSorted(
+            (a, b) => (a.proj[0] < b.proj[0] ? 1 : -1)
+        ).map(e => e.sample);
+
+        let samplesSortedGroup = {
+            g1: samplesSorted.filter(e =>
+                mdataType[mdataCategoricalRes.mdataCol].level2id[mdataCategoricalRes.g1.id].includes(e)
+            ),
+            g2: samplesSorted.filter(e =>
+                mdataType[mdataCategoricalRes.mdataCol].level2id[mdataCategoricalRes.g2.id].includes(e)
+            )
+        }
+
+        return samplesSortedGroup;
+    }, [projections, mdataType, mdataCategoricalRes]);
+
+    const hmDataGroup = useMemo(() => {
+        const xiJson = {}
+        workingOmics.map(omic => {
+            xiJson[omic] = danfo2RowColJson(xi[`x${omic}`]);
+        });
+
+        const hmDataGroup = {}
+
+        hmDataGroup.g1 = featureInfo.map(f => ({
+            id: f.xId,
+            data: samplesSortedGroup.g1.map(sample => ({
+                x: sample,
+                y: -xiJson[f.omic][sample][f.xId]
+            }))
+        }));
+
+        hmDataGroup.g2 = featureInfo.map(f => ({
+            id: f.xId,
+            data: samplesSortedGroup.g2.map(sample => ({
+                x: sample,
+                y: -xiJson[f.omic][sample][f.xId]
+            }))
+        }));
+
+        return hmDataGroup;
+    }, [workingOmics, samplesSortedGroup, pathway]);
+
+    return (
+        <Dialog
+            open={showHeatmap}
+            maxWidth='xl'
+            onClose={() => setShowHeatmap(false)}
+        >
+            <DialogTitle>{pathway} | {pathwayInfo.Name}</DialogTitle>
+            <DialogContent>
+                <Box sx={{ display: 'flex', border: '0px solid red' }}>
+                    <Box sx={{ border: '0px solid red' }}>
+                        <Typography sx={{ fontSize: '1em', textAlign: 'right' }}><span>&#8203;</span></Typography>
+                        <HeatMapCanvas
+                            width={100}
+                            height={30 * featureInfo.length}
+                            data={featureInfo.map(e => ({ id: e.xId, data: [] }))}
+                            margin={{ top: 0, right: 0, bottom: 0, left: 100 }}
+                            axisLeft={{
+                                tickSize: 5,
+                                tickPadding: 5,
+                                tickRotation: 0,
+                                legend: '',
+                                legendPosition: 'middle',
+                                legendOffset: 40
+                            }}
+                        />
+                    </Box>
+                    <Box sx={{ border: '0px solid blue' }}>
+                        <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g1.id}</Typography>
+                        <HeatMapCanvas
+                            height={30 * featureInfo.length}
+                            width={Math.min(550, samplesSortedGroup.g1.length * 8)}
+                            data={hmDataGroup.g1}
+                            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                            axisLeft={null}
+                            axisTop={{
+                                tickSize: 0,
+                                tickPadding: 0,
+                                tickRotation: 0,
+                                legend: '',
+                                legendOffset: 0
+                            }}
+
+                            colors={{
+                                type: 'diverging',
+                                scheme: 'red_blue',
+                                minValue: zLegend.min,
+                                maxValue: zLegend.max,
+                                //divergeAt: 0
+                            }}
+                            emptyColor="#555555"
+                            isInteractive={false}
+                            animate={false}
+                            enableLabels={false}
+                        />
+                    </Box>
+                    <Box sx={{ mx: 0.4 }}></Box>
+                    <Box sx={{ border: '0px solid blue' }}>
+                        <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g2.id}</Typography>
+                        <HeatMapCanvas
+                            height={30 * featureInfo.length}
+                            width={Math.min(550, samplesSortedGroup.g2.length * 8)}
+                            data={hmDataGroup.g2}
+                            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                            axisLeft={null}
+                            axisTop={{
+                                tickSize: 0,
+                                tickPadding: 0,
+                                tickRotation: 0,
+                                legend: '',
+                                legendOffset: 0
+                            }}
+
+                            colors={{
+                                type: 'diverging',
+                                scheme: 'red_blue',
+                                minValue: zLegend.min,
+                                maxValue: zLegend.max,
+                                //divergeAt: 0
+                            }}
+                            emptyColor="#555555"
+                            isInteractive={false}
+                            animate={false}
+                            enableLabels={false}
+                        />
+                    </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+
+
+                </Box>
+            </DialogContent>
+            <DialogActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ width: "50%", position: 'relative', left: 17 }}>
+                    <Legend a={zLegend.min} b={zLegend.max} setZLegend={setZLegend} />
+                </Box>
+                <Box>
+                    <Button onClick={() => setShowHeatmap(false)}>Close</Button>
+                </Box>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
+const Legend = ({ a, b, setZLegend }) => {
+
+    // User inserted values
+    const [usrVal, setUsrVal] = useState({ min: a, max: b });
+
+    // Calcular el valor medio
+    const media = (a + b) / 2;
+
+    // Establecer los colores de gradiente
+    const colorRojo = `#9e2a2b`;
+    const colorBlanco = `rgb(255, 255, 255)`;
+    const colorAzul = `#1f4e79`;
+
+    // Calcular la posición del blanco en el gradiente
+    const blancoPosicion = ((media - a) / (b - a)) * 100;
+
+    // Establecer el estilo del componente
+    const estilo = {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        //width: '100%',
+        padding: '10px',
+        background: `linear-gradient(to right, ${colorAzul}, ${colorBlanco} ${blancoPosicion}%, ${colorRojo})`,
+        color: '#fff',
+        height: '15px'
+    };
+
+    const handleInput = (minmax, value) => {
+
+        const numValue = Number(value);
+
+        setUsrVal(prev => ({ ...prev, [minmax]: value }));
+
+        if (typeof numValue == 'number' && (!isNaN(numValue))) {
+            setZLegend(prev => ({ ...prev, [minmax]: numValue }))
+            /*updateZLegend(draft => {
+                draft[omic][minmax] = numValue
+            });
+            dispatchResults({ type: 'update-zlegend', omic, minmax, numValue });
+            plotHeatMap();*/
+        }
+    }
+
+    return (
+        <div style={estilo}>
+            <div>
+                <input
+                    type='text'
+                    style={{ width: 30, height: 20, textAlign: 'center' }}
+                    value={usrVal.min}
+                    onChange={e => handleInput('min', e.target.value)}
+                />
+            </div>
+            <div style={{ color: 'black' }}>{media.toFixed(0)}</div>
+            <div>
+                <input
+                    type='text'
+                    style={{ width: 30, height: 20, textAlign: 'center' }}
+                    value={usrVal.max}
+                    onChange={e => handleInput('max', e.target.value)}
+                />
+            </div>
+        </div>
+    );
+};
 
 export default PathwayExplorer
