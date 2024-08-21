@@ -7,6 +7,7 @@ import { MyScatter, MyScatter2D } from './MyScatter';
 import TableLoadings from './TableLoadings';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import SelectorPCA2D from './SelectorPCA2D';
+import HelpSectionBottom from './HelpSectionBottom';
 
 
 export default function PCAOmic({ omic }) {
@@ -95,6 +96,7 @@ export default function PCAOmic({ omic }) {
                             scatterMode={scatterMode}
                         />
                     </Box>
+                    <Box sx={{height:0, mt:5}}><HelpSectionBottom/></Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
                         <Box sx={{ width: '45%', mt:4 }}>
                             <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -203,7 +205,6 @@ const getMainData = (anova, explained_variance, mdata, status) => {
         pvRowNames = pvData.map(e => e[0][0]);
         pvColNames = pvData[0].map(e => e[1]);
         pvTable = pvData.map(e1 => e1.map(e2 => e2[2].pvalue));
-        //console.log(pvData, pvTable, pvRowNames, pvColNames);
 
         // Get explained variance
         pvExpVar = Object.keys(explained_variance).map(e => (100 * explained_variance[e]['Explained_Variance']).toFixed(1));
@@ -221,7 +222,15 @@ const getScatterData = (projections, mdata, mdataType, selectedPlot, selectedPlo
             element: element,
             projection: projections[element][selectedPlot.PCA],
             mdataValue: mdataColSerie.values[mdataColSerie.index.indexOf(element)]
-        }))
+        }));
+        
+        if (mdataType[selectedPlot.mdataCol].type == 'categorical') {
+            scatterData.sort(
+                (a, b) => mdataType[selectedPlot.mdataCol].levels.indexOf(a.mdataValue) -
+                    mdataType[selectedPlot.mdataCol].levels.indexOf(b.mdataValue)
+            );
+        }
+
     } else if (status.status == 'ok' && scatterMode == '2D' && selectedPlot2D) {
         if (Object.keys(mdataType).includes(selectedPlot2D.g)) {
             scatterData = {}

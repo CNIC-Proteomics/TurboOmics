@@ -20,7 +20,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-export default function HelpSection() {
+export default function HelpSectionFilter() {
     const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -39,11 +39,10 @@ export default function HelpSection() {
                 onClose={handleClose}
                 aria-labelledby="customized-dialog-title"
                 open={open}
-                maxWidth='lg'
-                sx={{ zIndex: 10000 }}
+                maxWidth='md'
             >
                 <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                    Principal Component Analysis (PCA)
+                    Data Distribution
                 </DialogTitle>
                 <IconButton
                     aria-label="close"
@@ -59,26 +58,13 @@ export default function HelpSection() {
                 </IconButton>
                 <DialogContent sx={{ textAlign: 'justify' }} dividers>
                     <Typography gutterBottom>
-                        This section allows users to explore and interpret the principal components of your omic data,
-                        helping to reveal patterns and reduce data dimensionality. The PCA section is organized by omic type,
-                        and users can navigate between different omics using the Omic Selector button at the top.
-                        Each omic subsection includes a <strong>Statistical Summary Table</strong>:
+                        The <strong>Biomolecule Table</strong> lists the identifiers of biomolecules used in the
+                        visualization on the left. It helps users track which biomolecules are currently being analyzed.
+                        users to
+                        Users can <strong>filter the biomolecules</strong> based on a specific column from the Omic Metadata Table.
+                        After selecting a filter, only the biomolecules that match the string criteria (regex are accepted)
+                        will be displayed in the density plot.
                     </Typography>
-                    <Box sx={{ pl: 3 }}>
-                        <List sx={{ listStyleType: 'disc', listStyle: 'outside' }}>
-                            <ListItem sx={{ display: 'list-item', textAlign: 'justify' }}>
-                                <strong>Principal Components</strong>: The first row of the table displays the percentage of
-                                variability explained by each of the first ten principal components. This helps users understand
-                                how much of the total data variance is captured by each component.
-                            </ListItem>
-                            <ListItem sx={{ display: 'list-item', textAlign: 'justify' }}>
-                                <strong>Regression p-values</strong>: For each variable in your Experimental Metadata table,
-                                a row is included that shows the regression p-value between that variable and each principal component.
-                                These values indicate the strength of the relationship between the principal components and your
-                                experimental conditions, helping to identify significant associations.
-                            </ListItem>
-                        </List>
-                    </Box>
                 </DialogContent>
                 <DialogActions>
                 </DialogActions>

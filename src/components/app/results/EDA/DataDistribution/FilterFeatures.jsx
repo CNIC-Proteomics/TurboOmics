@@ -6,6 +6,7 @@ import FilterTable from './FilterTable';
 import MyMotion from '@/components/MyMotion';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import useFx2i from '@/hooks/useFx2i';
+import HelpSectionFilter from './HelpSectionFilter';
 
 export default function FilterFeatures({ omic, setFilteredID, updatePlot }) {
 
@@ -93,6 +94,7 @@ export default function FilterFeatures({ omic, setFilteredID, updatePlot }) {
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
             <Box sx={{ display: 'flex', height:80 }}>
+                <Box sx={{mt:3}}><HelpSectionFilter/></Box>
                 <Box sx={{ width: '40%', pt: 1 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...fx2i.columns.map(c => ({ label: c, value: c }))]}

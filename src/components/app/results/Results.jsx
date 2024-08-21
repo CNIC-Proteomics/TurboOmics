@@ -83,7 +83,6 @@ export default function Results() {
             fetchRef.current = setInterval(fetchStatus, 2500);
             return () => clearInterval(fetchRef.current);
         }
-
     }, [fetchRef, fetchStatus, savedStatus]);
 
     // Start importing of MetaboID

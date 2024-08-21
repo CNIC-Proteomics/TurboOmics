@@ -467,12 +467,14 @@ const HeatMapDialog = ({
         });
 
         const hmDataGroup = {}
+        console.log(featureInfo)
 
         hmDataGroup.g1 = featureInfo.map(f => ({
             id: f.xId,
             data: samplesSortedGroup.g1.map(sample => ({
                 x: sample,
-                y: -xiJson[f.omic][sample][f.xId]
+                y: -xiJson[f.omic][sample][f.xId],
+                name: f.Name
             }))
         }));
 
@@ -480,7 +482,8 @@ const HeatMapDialog = ({
             id: f.xId,
             data: samplesSortedGroup.g2.map(sample => ({
                 x: sample,
-                y: -xiJson[f.omic][sample][f.xId]
+                y: -xiJson[f.omic][sample][f.xId],
+                name: f.Name
             }))
         }));
 
@@ -511,6 +514,7 @@ const HeatMapDialog = ({
                                 legendPosition: 'middle',
                                 legendOffset: 40
                             }}
+
                         />
                     </Box>
                     <Box sx={{ border: '0px solid blue' }}>
@@ -540,6 +544,7 @@ const HeatMapDialog = ({
                             ///isInteractive={false}
                             animate={false}
                             enableLabels={false}
+                            tooltip={(props) => CustomTooltipComponent(props)}
                         />
                     </Box>
                     <Box sx={{ mx: 0.2, width: 0, border: '1px solid rgba(0,0,0,1)' }}></Box>
@@ -570,6 +575,7 @@ const HeatMapDialog = ({
                             //isInteractive={false}
                             animate={false}
                             enableLabels={false}
+                            tooltip={(props) => CustomTooltipComponent(props)}
                         />
                     </Box>
                 </Box>
@@ -653,5 +659,24 @@ const Legend = ({ a, b, setZLegend }) => {
         </div>
     );
 };
+
+const CustomTooltipComponent = ({cell}) => {
+    console.log(cell)
+    return (
+        <Box sx={{
+            border:'1px solid rgba(0,0,0,0.5)',
+            borderRadius:3,
+            backgroundColor: 'rgba(255,255,255,0.8)',
+            p:2,
+            position:'relative', top:50,
+            //maxWidth:200
+        }}
+        >
+            <Typography variant='body2'>Sample: <strong>{cell.data.x}</strong></Typography>
+            <Typography variant='body2'>Biomolecule: <strong>{cell.data.name}</strong></Typography>
+            <Typography variant='body2'>Value: <strong>{-cell.data.y.toExponential(4)}</strong></Typography>
+        </Box>
+    )
+}
 
 export default PathwayExplorer

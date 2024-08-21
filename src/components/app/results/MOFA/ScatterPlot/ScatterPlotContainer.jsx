@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
-import {SelectorFactor2D, SelectorFactor} from './SelectorFactor'
+import { SelectorFactor2D, SelectorFactor } from './SelectorFactor'
 import ScatterModeSelector from './ScatterModeSelector'
 import { useJob } from '@/components/app/JobContext'
 import { MyScatter, MyScatter2D } from './MyScatter'
@@ -35,16 +35,16 @@ function ScatterPlotContainer({
     );
 
     return (
-        <Grid container>
-            <Box><HelpSection/></Box>
-            <Grid sx={{ pt: 2 }} item xs={6}>
+        <Box sx={{}} >
+            <Box sx={{height:0}}><HelpSection /></Box>
+            <Box sx={{ pt: 2 }} >
                 <ScatterModeSelector
                     scatterMode={scatterMode}
                     setScatterMode={setScatterMode}
                     disable2D={Object.keys(Object.values(projections)[0]).length < 2}
                 />
 
-                <Box sx={{ px: 3, pt: 7, textAlign: 'center' }}>
+                <Box sx={{ px: 3, pb: 2, textAlign: 'center', width:600, margin: 'auto' }}>
                     {scatterMode == '1D' ?
                         <SelectorFactor
                             factorNames={factorNames}
@@ -62,11 +62,11 @@ function ScatterPlotContainer({
                         />
                     }
                 </Box>
-            </Grid>
+            </Box>
 
-            <Grid item xs={6}>
+            <Box sx={{pb:2}}>
                 {scatterData &&
-                    <Box sx={{ height: 470 }}>
+                    <Box sx={{ width: 750, margin: 'auto' }}>
                         {scatterMode == '1D' ?
                             <MyScatter
                                 scatterData={scatterData}
@@ -81,9 +81,9 @@ function ScatterPlotContainer({
 
                     </Box>
                 }
-            </Grid>
+            </Box>
 
-        </Grid>
+        </Box>
     )
 }
 
@@ -114,7 +114,14 @@ const getScatterData = (
                 mdataValue: mdataColJson[element],
                 projection: projections[element][selectedPlot.Factor],
             })
-        })
+        });
+
+        if (mdataType[selectedPlot.mdataCol].type == 'categorical') {
+            scatterData.sort(
+                (a, b) => mdataType[selectedPlot.mdataCol].levels.indexOf(a.mdataValue) -
+                    mdataType[selectedPlot.mdataCol].levels.indexOf(b.mdataValue)
+            );
+        }
 
     } else if (scatterMode == '2D') {
         scatterData = {};

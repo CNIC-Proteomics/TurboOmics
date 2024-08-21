@@ -140,7 +140,7 @@ export default function TablePvalues({ omic, data, rowNames, colNames, expVar, s
                                         <TableCell sx={{ padding: 0, border: 0 }}>
                                             <Box
                                                 sx={firstColStyles}
-                                            >{rowName}
+                                            >p-value [ {rowName} ]
                                             </Box>
                                         </TableCell>
                                     </TableRow>
