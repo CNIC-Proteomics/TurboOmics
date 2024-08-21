@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useVars } from '../../../VarsContext'
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import handleExportData from '../../../../utils/exportDataTable';
@@ -207,7 +207,9 @@ const PathwayTable = ({ pathwaySelection, setPathwaySelection, path_info, omic }
         enableDensityToggle: false,
         enableHiding: false,
         enableFullScreenToggle: false,
-        enableFilters: false,
+        enableFilters: true,
+        enableGlobalFilter: false,
+        initialState: { showColumnFilters: true },
         positionToolbarAlertBanner: 'none',
         renderTopToolbarCustomActions: ({ table }) => (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -338,6 +340,7 @@ const FeatureTable = ({
 
     // Show heatmap
     const [showHeatmap, setShowHeatmap] = useState(false);
+    const setShowHeatmapTrue = useCallback(() => setShowHeatmap(true), [setShowHeatmap]);
 
     const table = useMaterialReactTable({
         columns: columns,
@@ -363,6 +366,9 @@ const FeatureTable = ({
         enableFullScreenToggle: false,
         enableFilters: false,
         muiTableBodyCellProps: { sx: { px: 0, py: 0 } },
+        enableFilters: true,
+        enableGlobalFilter: false,
+        initialState: { showColumnFilters: true },
         renderTopToolbarCustomActions: ({ table }) => (
             <Box sx={{
                 display: 'flex',
@@ -389,7 +395,8 @@ const FeatureTable = ({
                 {false && <Box><Typography variant='body1'>{pathway}</Typography></Box>}
                 <Box>
                     <Button
-                        onClick={() => setShowHeatmap(true)}
+                        //onClick={() => setShowHeatmap(true)}
+                        onClick={setShowHeatmapTrue}
                         startIcon={<GradientIcon />}
                     >
                         Plot Heatmap
@@ -478,7 +485,7 @@ const HeatMapDialog = ({
         }));
 
         return hmDataGroup;
-    }, [workingOmics, samplesSortedGroup, pathway]);
+    }, [workingOmics, samplesSortedGroup, featureInfo, xi]);
 
     return (
         <Dialog
@@ -487,7 +494,7 @@ const HeatMapDialog = ({
             onClose={() => setShowHeatmap(false)}
         >
             <DialogTitle>{pathway} | {pathwayInfo.Name}</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ overflowX: 'hidden' }}>
                 <Box sx={{ display: 'flex', border: '0px solid red' }}>
                     <Box sx={{ border: '0px solid red' }}>
                         <Typography sx={{ fontSize: '1em', textAlign: 'right' }}><span>&#8203;</span></Typography>
@@ -530,12 +537,12 @@ const HeatMapDialog = ({
                                 //divergeAt: 0
                             }}
                             emptyColor="#555555"
-                            isInteractive={false}
+                            ///isInteractive={false}
                             animate={false}
                             enableLabels={false}
                         />
                     </Box>
-                    <Box sx={{ mx: 0.4 }}></Box>
+                    <Box sx={{ mx: 0.2, width: 0, border: '1px solid rgba(0,0,0,1)' }}></Box>
                     <Box sx={{ border: '0px solid blue' }}>
                         <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g2.id}</Typography>
                         <HeatMapCanvas
@@ -560,15 +567,11 @@ const HeatMapDialog = ({
                                 //divergeAt: 0
                             }}
                             emptyColor="#555555"
-                            isInteractive={false}
+                            //isInteractive={false}
                             animate={false}
                             enableLabels={false}
                         />
                     </Box>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-
-
                 </Box>
             </DialogContent>
             <DialogActions sx={{ display: 'flex', justifyContent: 'space-between' }}>

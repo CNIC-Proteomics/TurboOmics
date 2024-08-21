@@ -378,7 +378,8 @@ const resultsTemplate = {
         workingOmics: [],
         mdataCategoricalRes: null,
         jobStatus: { status: '', pwa_res: null, runId: null },
-        rId2info: null
+        rId2info: null,
+        MetaboID: null
     }
 }
 

@@ -40,7 +40,7 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', overflow:'auto' }}>
                 <Box>
                     <Box sx={{ width: 0 }}>
                         <DownloadComponent scatterRef={scatterRef} fileName='PathwayAnalysis_Scatter' />

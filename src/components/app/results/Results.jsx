@@ -86,6 +86,15 @@ export default function Results() {
 
     }, [fetchRef, fetchStatus, savedStatus]);
 
+    // Start importing of MetaboID
+    // Load MetaboID and load
+    useEffect(() => {
+        import('@/utils/MetaboID.json').then(data => {
+            dispatchResults({ type: 'set-pwa-attr', attr: 'MetaboID', value: data });
+            console.log('MetaboID loaded');
+        });
+    }, [dispatchResults]);
+
     return (
         <>
             <Typography variant='body2' sx={{ textAlign: 'right', pr: 4 }}>

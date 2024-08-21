@@ -41,14 +41,19 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
     const savedResultsPWA = useResults().PWA;
 
     // Load MetaboID and load
-    const [MetaboID, setMetaboID] = useState(null);
+    const [MetaboID, setMetaboID] = useState(savedResultsPWA.MetaboID);
     useEffect(() => {
-        import('@/utils/MetaboID.json').then(data => {
-            setMetaboID(data);
+        if (!MetaboID) {
+            import('@/utils/MetaboID.json').then(data => {
+                setMetaboID(data);
+                dispatchResults({type:'set-pwa-attr', attr: 'MetaboID', value: data});
+                setLoading(false);
+                console.log('MetaboID loaded');
+            });
+        } else {
             setLoading(false);
-            console.log('MetaboID loaded');
-        });
-    }, [setLoading, setMetaboID]);
+        }
+    }, [setLoading, setMetaboID, dispatchResults, MetaboID]);
 
     // Select metadata column
     const mdata = jobUser.mdata;
@@ -87,7 +92,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
 
     const [omicIdR, setOmicIdR] = useState(
         savedResultsPWA.omicIdR ? savedResultsPWA.omicIdR :
-        omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
+            omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
     );
 
     const handleOmicIdChange = async (o, omicIdCol_i, omicIdType_i) => {
@@ -208,7 +213,8 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                         endIcon={<SendIcon />}
                         disabled={!(
                             mdataCol && (!mdataCategorical.isCategorical || (mdataCategorical.g1 && mdataCategorical.g2)) &&
-                            (Object.values(omicIdCol).some(e => e))
+                            (Object.values(omicIdCol).some(e => e)) &&
+                            omics.every(omic => (!(omicIdCol[omic] && omicIdType[omic]) || omicIdR[omic]))
                         )}
                         onClick={() => {
                             dispatchResults({
