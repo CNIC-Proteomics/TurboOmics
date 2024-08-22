@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, FormControlLabel, MenuItem, Switch, TextField, Typography } from "@mui/material";
+import { Box, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, TextField, Typography } from "@mui/material";
 import Slider from '@mui/material/Slider';
 
 import { useDispatchJob, useJob } from '../JobContext';
@@ -35,7 +35,8 @@ export default function PlotMV({ fileType, omic }) {
 
     const { omics } = useJob();
 
-    const myLog = useJob().results.PRE.log[fileType];
+    const myNorm = useJob().results.PRE.norm[fileType];
+    //const myLog = useJob().results.PRE.log[fileType];
     const myScale = useJob().results.PRE.scale[fileType];
 
     const MVdata = useJob().results.PRE.MV[fileType];
@@ -66,7 +67,7 @@ export default function PlotMV({ fileType, omic }) {
         <Box sx={{ width: "30%" }}>
             {omics.includes(fileType.slice(-1)) && <>
                 <Typography variant='h6' sx={{ textAlign: 'center' }}>Apply:</Typography>
-                <MySwitch actionType='set-log' fileType={fileType} myChecked={myLog} label={'Log Transformation'} />
+                <MySelect myNorm={myNorm} fileType={fileType} />
                 <MySwitch actionType='set-scale' fileType={fileType} myChecked={myScale} label={'Center & Scale'} />
 
                 {xTable.isNa().sum({ axis: 0 }).sum() == 0 ?
@@ -147,6 +148,30 @@ function DiscreteSlider({ thr, setThr }) {
             onChange={e => setThr(e.target.value)}
         />
     );
+}
+
+const MySelect = ({ myNorm, fileType }) => {
+    const dispatchJob = useDispatchJob();
+    return (
+        <Box sx={{ width: 200, margin: 'auto', py: 2, textAlign: 'center' }}>
+            <FormControl fullWidth>
+                <InputLabel id="preprocessing">Normalization</InputLabel>
+                <Select
+                    labelId="preprocessing"
+                    value={myNorm}
+                    onChange={(e) => dispatchJob({
+                        type: 'set-norm', fileType, normType: e.target.value
+                    })}
+                    label="Preprocessing"
+                >
+                    <MenuItem value='None'><em>None</em></MenuItem>
+                    <MenuItem value='log2'>Log2</MenuItem>
+                    <MenuItem value='log2+median'>Median & Log2</MenuItem>
+                    <MenuItem value='vsn'>VSN</MenuItem>
+                </Select>
+            </FormControl>
+        </Box>
+    )
 }
 
 const MySwitch = ({ actionType, fileType, myChecked, label }) => {

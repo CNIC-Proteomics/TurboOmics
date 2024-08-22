@@ -155,7 +155,7 @@ export default function TablePvalues({
                                         <TableCell sx={{ padding: 0, border: 0 }}>
                                             <Box
                                                 sx={firstColStyles}
-                                            >p-value [ {rowName} ]
+                                            >p-value [ <strong>{rowName}</strong> ]
                                             </Box>
                                         </TableCell>
                                     </TableRow>
