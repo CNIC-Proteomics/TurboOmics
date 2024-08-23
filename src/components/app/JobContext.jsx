@@ -135,15 +135,6 @@ function jobReducer(draft, action) {
             break;
         }
 
-        /*case 'set-log': {
-            if (draft.user[action.fileType].min().min() > 0) {
-                draft.results.PRE.log[action.fileType] = action.checked;
-            } else {
-                alert('Logarithm cannot be calculated due to the presence of invalid values (<=0)');
-            }
-            break;
-        }*/
-
         case 'set-scale': {
             draft.results.PRE.scale[action.fileType] = action.checked;
             break;
@@ -217,16 +208,11 @@ const jobTemplate = {
 
     "results": {
         "PRE": { // Results computed when user upload the files
-            'norm': { // Type of normalization applied {None, log2, vsn}
+            'norm': { // Type of normalization applied {None, log2, log2+median, vsn}
                 'xq': 'None',
                 'xm': 'None',
                 'xt': 'None'
             },
-            /*'log': { // log transformation
-                'xq': false,
-                'xm': false,
-                'xt': false
-            },*/
             'scale': { // center and scale
                 'xq': false,
                 'xm': true,

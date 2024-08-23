@@ -36,7 +36,6 @@ export default function PlotMV({ fileType, omic }) {
     const { omics } = useJob();
 
     const myNorm = useJob().results.PRE.norm[fileType];
-    //const myLog = useJob().results.PRE.log[fileType];
     const myScale = useJob().results.PRE.scale[fileType];
 
     const MVdata = useJob().results.PRE.MV[fileType];
@@ -68,7 +67,12 @@ export default function PlotMV({ fileType, omic }) {
             {omics.includes(fileType.slice(-1)) && <>
                 <Typography variant='h6' sx={{ textAlign: 'center' }}>Apply:</Typography>
                 <MySelect myNorm={myNorm} fileType={fileType} />
-                <MySwitch actionType='set-scale' fileType={fileType} myChecked={myScale} label={'Center & Scale'} />
+                <MySwitch
+                    actionType='set-scale'
+                    fileType={fileType}
+                    myChecked={myScale}
+                    label={'Center & Scale'}
+                />
 
                 {xTable.isNa().sum({ axis: 0 }).sum() == 0 ?
                     <>
