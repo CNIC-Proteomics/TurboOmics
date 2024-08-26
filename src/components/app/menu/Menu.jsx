@@ -9,18 +9,23 @@ import MyMotion from '../../MyMotion';
 import MenuOption from './MenuOption';
 import CreateJobBtn from './CreateJobBtn';
 import LoadSampleBtn from './LoadSampleBtn';
-import { Box } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
+import { getStyle } from './getStyle';
+import MultiAssayExperiment from './MultiAssayExperiment';
+import { useVars } from '@/components/VarsContext';
 
 export default function Menu({ page, setPage, setCreatingJob, setAnnotating }) {
+
 
     const { user, OS, omics } = useJob();
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
             {
-                page == 'new-job' &&
-                <LoadSampleBtn />
-            }
+                page == 'new-job' && <>
+                    <LoadSampleBtn />
+                    <MultiAssayExperiment />
+                </>}
             <MenuOption text='New Job' id='new-job' setPage={setPage} page={page}>
                 <CreateIcon />
             </MenuOption>

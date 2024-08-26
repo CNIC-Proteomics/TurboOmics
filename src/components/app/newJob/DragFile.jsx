@@ -42,7 +42,7 @@ export default function DragFile({ title, fileType, traspose = false, DialogHelp
                         types={fileFormat}
                     />
                 </Box>
-                <Box sx={{py:2}}>{fileName ? `File name: ${fileName}` : "no files uploaded yet"}</Box>
+                <Box sx={{py:2}}>{fileName ? `File name: ${fileName}` : "no file uploaded yet"}</Box>
             </Card>
         </div>
     );
