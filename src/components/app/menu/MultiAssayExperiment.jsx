@@ -33,7 +33,6 @@ const MultiAssayExperiment = () => {
 
     // Handle file upload by user
     const handleChange = (file) => {
-        console.log(file);
         setMaeFile(file);
     }
 
@@ -104,7 +103,7 @@ const MultiAssayExperiment = () => {
                 onClick={() => setOpenDialog(true)}
             >
                 <Box sx={{ pt: 1 }}>
-                    <img width={30} src={`${BASE_URL}/R.ico`} style={{ opacity: 0.7 }} />
+                    <img width={30} src={`${BASE_URL}/R.ico`} style={{ opacity: 0.7 }} alt="R" />
                 </Box>
                 <Box>
                     <Typography gutterBottom variant="h7" component="div">MultiAssayExperiment</Typography>
@@ -146,7 +145,7 @@ const MultiAssayExperiment = () => {
                             The <code>colData</code> slot should contain metadata describing the primary biological units involved in your study.
                         </ListItem>
                         <ListItem sx={{ display: 'list-item', textAlign: 'justify' }}>
-                            The <code>ExperimentList</code> slot should contain a list of ID-based elements where each element is a <code>SummarizedExperiment::SummarizedExperiment</code> object representing a specific omic type. The <strong>IDs</strong> in this list must be <strong>"Proteomics"</strong>, <strong>"Transcriptomics"</strong>, and/or <strong>"Metabolomics"</strong>, depending on the types of omic data included. These identifiers allow the TurboOmics platform to correctly interpret and process the uploaded data.
+                            The <code>ExperimentList</code> slot should contain a list of ID-based elements where each element is a <code>SummarizedExperiment::SummarizedExperiment</code> object representing a specific omic type. The <strong>IDs</strong> in this list must be <strong>Proteomics</strong>, <strong>Transcriptomics</strong>, and/or <strong>Metabolomics</strong>, depending on the types of omic data included. These identifiers allow the TurboOmics platform to correctly interpret and process the uploaded data.
                         </ListItem>
                         <ListItem sx={{ display: 'list-item', textAlign: 'justify' }}>
                             Each <code>SummarizedExperiment</code> object in the <code>ExperimentList</code> must adhere to the following structure:
@@ -164,7 +163,7 @@ const MultiAssayExperiment = () => {
                 <Typography>
                     Please, find more information in <Link target='_blank' href='https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html'>MultiAssayExperiment</Link> and <Link target='_blank' href="https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html">SummarizedExperiment</Link> vignettes.
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, py:2, borderTop:'1px solid rgba(0,0,0,0.2)', borderBottom:'1px solid rgba(0,0,0,0.2)' }}>
                     <Card sx={{ px: 5, pb: 2, pt: 0 }}>
                         <Box sx={{ textAlign: 'center', py: 1 }}>
                             <Typography sx={{ fontSize: '1.2em' }} >

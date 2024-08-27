@@ -153,7 +153,7 @@ const VSNPlot = ({ openVSNPlot, setOpenVSNPlot, omic }) => {
         }
         const myTimeout = setTimeout(fetchVSNImage, 500);
         return () => clearTimeout(myTimeout);
-    }, [setImage]);
+    }, [setImage, API_URL, jobID, omic]);
 
     return (
         <Dialog

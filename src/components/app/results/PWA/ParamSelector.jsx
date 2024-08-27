@@ -171,11 +171,14 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             const res2Json = await res2.json();
             GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
 
+            // Add a prefix to distinguish transcriptomics from proteomics
+            GPresult = GPresult.map(e => ({...e, converted_prefix: `${o}_${e.converted}`}))
+
             // Generate rId preserving order
             let _xId2uId = {};
             xId.map((e, i) => _xId2uId[e] = uId[i]);
             let _uId2rId = {};
-            GPresult.map(e => _uId2rId[e.incoming] = e.converted);
+            GPresult.map(e => _uId2rId[e.incoming] = e.converted_prefix);
             rId = xId.map(e => _uId2rId[_xId2uId[e]]);
 
             // Generate rId2info
@@ -183,7 +186,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             uId.map((e, i) => _uId2xId[e] = xId[i]);
 
             GPresult.map(e => {
-                _rId2info[e.converted] = {
+                _rId2info[e.converted_prefix] = {
                     uId: e.incoming,
                     xId: _uId2xId[e.incoming],
                     name: e.name,

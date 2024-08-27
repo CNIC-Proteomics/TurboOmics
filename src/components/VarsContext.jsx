@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 
-const DEV_MODE = true;
+const DEV_MODE = false;
 
 const VarsContext = createContext({
     DEV_MODE: DEV_MODE,
