@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Card, Typography, Box } from "@mui/material";
+import { Card, Typography, Box, IconButton } from "@mui/material";
 import { FileUploader } from "react-drag-drop-files";
-
+import ClearIcon from '@mui/icons-material/Clear';
 import { useDispatchJob, useJob } from "../JobContext";
 
 import { tsvToDanfo } from "../../../utils/tsvToDanfo.js";
@@ -32,7 +32,16 @@ export default function DragFile({ title, fileType, traspose = false, DialogHelp
                 transition: "all 1s ease",
                 backgroundColor: fileName ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)'
             }}>
-                <Typography sx={{pt:2}} variant="h6" >{title}</Typography>
+                {fileName &&
+                    <Box sx={{ height: 0, width: 0 }}>
+                        <IconButton
+                            onClick={() => dispatchJob({ type: 'delete-file', fileType })}
+                        >
+                            <ClearIcon sx={{ width: 20 }} />
+                        </IconButton>
+                    </Box>
+                }
+                <Typography sx={{ pt: 2 }} variant="h6" >{title}</Typography>
                 {DialogHelp}
                 <Box sx={{ width: 400, margin: 'auto' }}>
                     <FileUploader
@@ -42,7 +51,7 @@ export default function DragFile({ title, fileType, traspose = false, DialogHelp
                         types={fileFormat}
                     />
                 </Box>
-                <Box sx={{py:2}}>{fileName ? `File name: ${fileName}` : "no file uploaded yet"}</Box>
+                <Box sx={{ py: 2 }}>{fileName ? `File name: ${fileName}` : "no file uploaded yet"}</Box>
             </Card>
         </div>
     );

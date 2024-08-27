@@ -55,6 +55,13 @@ function jobReducer(draft, action) {
                 thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }));
                 draft.results.PRE.MV[action.fileType] = thr;
 
+                // delete f2i in case it was associated to previous table
+                if (draft.x_f2i[`${omic}2i`]) {
+                    draft.user[`${omic}2i`] = null;
+                    draft.index[`${omic}2i`] = null;
+                    draft.x_f2i[`${omic}2i`] = false;
+                }
+
                 // Create omic2i in case it was not uploaded
                 if (draft.user[`${omic}2i`] == null) {
                     let myKey = `${omic}ID`;
@@ -64,6 +71,7 @@ function jobReducer(draft, action) {
                     omic2i.setIndex({ column: myKey, inplace: true });
                     draft.user[`${omic}2i`] = omic2i;
                     draft.index[`${omic}2i`] = omic2i.index;
+                    draft.x_f2i[`${omic}2i`] = true;
                 }
 
                 // Set omic
@@ -120,9 +128,51 @@ function jobReducer(draft, action) {
                 })
             }
 
+            if (['q2i', 't2i', 'm2i'].includes(action.fileType)) {
+                draft.x_f2i[action.fileType] = false;
+            }
+
             draft.user[action.fileType] = df;
             draft.userFileNames[action.fileType] = action.userFileName;
             draft.index[action.fileType] = df.index;
+            break;
+        }
+
+        case 'delete-file': {
+            draft.user[action.fileType] = null;
+            draft.userFileNames[action.fileType] = null;
+            draft.index[action.fileType] = null;
+
+            // if removed file is xi, remove from omic list
+            if (['xq', 'xm', 'xt'].includes(action.fileType)) {
+                const omic = action.fileType.slice(-1);
+                draft.omics = draft.omics.filter(o => o != omic)
+                
+                //remove its associated f2i (only if associated)
+                if (draft.x_f2i[`${omic}2i`]) {
+                    draft.user[`${omic}2i`] = null;
+                    draft.userFileNames[`${omic}2i`] = null;
+                    draft.index[`${omic}2i`] = null;
+                    draft.x_f2i[`${omic}2i`] = false;
+                }
+            }
+
+            // if removed file is f2i and there is xi, use this to generate f2i
+            if(['q2i', 'm2i','t2i'].includes(action.fileType)) {
+                const omic = action.fileType.slice(0,1);
+
+                if (draft.user[`x${omic}`]) {
+                    let myKey = `${omic}ID`;
+                    let omic2i = [];
+                    draft.user[`x${omic}`].columns.map(e => omic2i.push({ [myKey]: e }));
+                    omic2i = new dfd.DataFrame(omic2i);
+                    omic2i.setIndex({ column: myKey, inplace: true });
+                    draft.user[action.fileType] = omic2i;
+                    draft.index[action.fileType] = omic2i.index;
+                    draft.x_f2i[action.fileType] = true;
+                }
+            }
+
             break;
         }
 
@@ -193,6 +243,9 @@ const jobTemplate = {
     },
     "idCol": { // Name of the column containing id
         ...fileInfoTemplate
+    },
+    "x_f2i": { // is the f2i file created from quantitative file?
+        "m2i": false, "q2i": false, "t2i": false
     },
     "norm": { // Feature-center, scaled and imputed Danfo dataframes
         "xq": null,
