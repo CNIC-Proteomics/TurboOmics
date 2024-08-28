@@ -55,7 +55,7 @@ function jobReducer(draft, action) {
                 thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }));
                 draft.results.PRE.MV[action.fileType] = thr;
 
-                // delete f2i in case it was associated to previous table
+                // delete f2i in case it was associated to previous xi
                 if (draft.x_f2i[`${omic}2i`]) {
                     draft.user[`${omic}2i`] = null;
                     draft.index[`${omic}2i`] = null;
@@ -147,6 +147,8 @@ function jobReducer(draft, action) {
             if (['xq', 'xm', 'xt'].includes(action.fileType)) {
                 const omic = action.fileType.slice(-1);
                 draft.omics = draft.omics.filter(o => o != omic)
+                draft.results.PRE.MV[action.fileType] = null;
+                draft.results.PRE.norm[action.fileType] = 'None';
                 
                 //remove its associated f2i (only if associated)
                 if (draft.x_f2i[`${omic}2i`]) {

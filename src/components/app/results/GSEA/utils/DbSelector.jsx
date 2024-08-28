@@ -39,7 +39,7 @@ const SetButton = ({
         setDb(prev => prev.map(e =>
             e.db == dbid ? { ...e, show: true } : { ...e, show: false }
         ));
-        
+
     }
 
     let bgColor = '#00000015';
@@ -67,13 +67,20 @@ const SetButton = ({
                 backgroundColor: bgColor,
                 userSelect: 'none',
                 cursor: status == 'ok' ? 'pointer' : 'no-drop',
-                transition: 'ease 1s'
+                transition: 'ease 1s',
+                zIndex: 10
             }}
-            onMouseEnter={() => setIsHover(true)}
+            onMouseEnter={() => { console.log('enter'); setIsHover(true) }}
             onMouseLeave={() => setIsHover(false)}
             onClick={handleClick}
         >
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                }}
+            >
                 {status == 'waiting' &&
                     <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
                         <CircularProgress disableShrink size={15} />

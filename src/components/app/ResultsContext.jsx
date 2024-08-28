@@ -240,6 +240,7 @@ function resultsReducer(draft, action) {
             draft.PWA.omicIdCol = action.omicIdCol;
             draft.PWA.omicIdType = action.omicIdType;
             draft.PWA.omicIdR = action.omicIdR;
+            draft.PWA.OSsearch = action.OS;
             break;
         }
         
@@ -379,7 +380,8 @@ const resultsTemplate = {
         mdataCategoricalRes: null,
         jobStatus: { status: '', pwa_res: null, runId: null },
         rId2info: null,
-        MetaboID: null
+        MetaboID: null,
+        OSsearch: null
     }
 }
 

@@ -163,8 +163,12 @@ const MultiAssayExperiment = () => {
                 <Typography>
                     Please, find more information in <Link target='_blank' href='https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html'>MultiAssayExperiment</Link> and <Link target='_blank' href="https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html">SummarizedExperiment</Link> vignettes.
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, py:2, borderTop:'1px solid rgba(0,0,0,0.2)', borderBottom:'1px solid rgba(0,0,0,0.2)' }}>
-                    <Card sx={{ px: 5, pb: 2, pt: 0 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2, py: 2, borderTop: '1px solid rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(0,0,0,0.2)' }}>
+                    <Card sx={{
+                        transition: "all 1s ease",
+                        backgroundColor: maeFile ? 'rgba(220,220,220,0.5)' : 'rgba(250,250,250,0.5)',
+                        px: 5, pb: 2, pt: 0
+                    }}>
                         <Box sx={{ textAlign: 'center', py: 1 }}>
                             <Typography sx={{ fontSize: '1.2em' }} >
                                 MultiAssayExperiment Object

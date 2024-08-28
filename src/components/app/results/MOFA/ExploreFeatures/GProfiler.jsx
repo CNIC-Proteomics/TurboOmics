@@ -78,6 +78,8 @@ function GProfiler({
             ...e,
             myid: resJson.myid.filter((f, i) => e.intersections[i].length > 0)
         }));
+        
+        resJson.myid.length == 0 && alert("No protein/transcript ID could be mapped. Please, check that the correct species was selected");
 
         setGoRes(resJson);
 

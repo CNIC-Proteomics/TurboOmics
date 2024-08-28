@@ -46,7 +46,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
         if (!MetaboID) {
             import('@/utils/MetaboID.json').then(data => {
                 setMetaboID(data);
-                dispatchResults({type:'set-pwa-attr', attr: 'MetaboID', value: data});
+                dispatchResults({ type: 'set-pwa-attr', attr: 'MetaboID', value: data });
                 setLoading(false);
                 console.log('MetaboID loaded');
             });
@@ -80,18 +80,20 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
     }
 
     // Select omic identifier column
+    const OSchanged = savedResultsPWA.OSsearch ? savedResultsPWA.OSsearch.id != OS.id : true
+
     const [omicIdCol, setOmicIdCol] = useState(
-        savedResultsPWA.omicIdCol ? savedResultsPWA.omicIdCol :
+        (!OSchanged) && savedResultsPWA.omicIdCol ? savedResultsPWA.omicIdCol :
             omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
     );
 
     const [omicIdType, setOmicIdType] = useState(
-        savedResultsPWA.omicIdType ? savedResultsPWA.omicIdType :
+        (!OSchanged) && savedResultsPWA.omicIdType ? savedResultsPWA.omicIdType :
             omics.reduce((prev, curr) => ({ ...prev, [curr]: "" }), {})
     );
 
     const [omicIdR, setOmicIdR] = useState(
-        savedResultsPWA.omicIdR ? savedResultsPWA.omicIdR :
+        (!OSchanged) && savedResultsPWA.omicIdR ? savedResultsPWA.omicIdR :
             omics.reduce((prev, curr) => ({ ...prev, [curr]: null }), {})
     );
 
@@ -171,8 +173,10 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
             const res2Json = await res2.json();
             GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
 
+            GPresult.length == 0 && alert("No protein/transcript ID could be mapped. Please, check that the correct species was selected");
+
             // Add a prefix to distinguish transcriptomics from proteomics
-            GPresult = GPresult.map(e => ({...e, converted_prefix: `${o}_${e.converted}`}))
+            GPresult = GPresult.map(e => ({ ...e, converted_prefix: `${o}_${e.converted}` }));
 
             // Generate rId preserving order
             let _xId2uId = {};
@@ -226,13 +230,14 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                                 mdataCategorical,
                                 omicIdCol,
                                 omicIdType,
-                                omicIdR
+                                omicIdR,
+                                OS
                             })
                             fetchJobRun(
                                 mdataCol,
                                 mdataCategorical,
                                 omicIdR,
-                                getRunId(mdataCol, mdataCategorical, omicIdCol, omicIdType)
+                                getRunId(mdataCol, mdataCategorical, omicIdCol, omicIdType, OS.id)
                             )
                         }
                         }
@@ -433,9 +438,9 @@ const getOmicIdType = (uId, o) => {
     }
 }
 
-const getRunId = (mdataCol, mdataCategorical, omicIdCol, omicIdType) => {
+const getRunId = (mdataCol, mdataCategorical, omicIdCol, omicIdType, os) => {
     let runId = '';
-    runId += mdataCol.id;
+    runId += os + '_' + mdataCol.id;
     if (mdataCategorical.isCategorical) {
         runId += '_' + mdataCategorical.g1.id;
         runId += '_' + mdataCategorical.g2.id;
