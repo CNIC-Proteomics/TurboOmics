@@ -54,6 +54,7 @@ function jobReducer(draft, action) {
                 let thr = generateArray(0, 1.05, 0.05);
                 thr = thr.map(i => ({ MVThr: Math.round(i * 100) / 100, Features: dfMV.le(i).sum() }));
                 draft.results.PRE.MV[action.fileType] = thr;
+                draft.results.PRE.norm[action.fileType] = 'None';
 
                 // delete f2i in case it was associated to previous xi
                 if (draft.x_f2i[`${omic}2i`]) {
@@ -179,10 +180,13 @@ function jobReducer(draft, action) {
         }
 
         case 'set-norm': {
-            if (draft.user[action.fileType].min().min() > 0) {
-                draft.results.PRE.norm[action.fileType] = action.normType;
-            } else {
+            if (
+                ['log2', 'log2+median'].includes(action.normType) &&
+                draft.user[action.fileType].min().min() <= 0
+            ) {
                 alert('Logarithm cannot be calculated due to the presence of invalid values (<=0)');
+            } else {
+                draft.results.PRE.norm[action.fileType] = action.normType;
             }
             break;
         }
