@@ -93,8 +93,8 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
 
     return (
         <Box sx={{ width: "95%", margin: 'auto' }}>
-            <Box sx={{ display: 'flex', height: '6vh' }}>
-                <Box sx={{ mt: 4, ml: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb:1 }}>
+                <Box sx={{ mt: 3, ml: 0 }}>
                     <IconButton
                         aria-label="download"
                         size='small'
@@ -105,7 +105,7 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         <GridOnIcon />
                     </IconButton>
                 </Box>
-                <Box sx={{ width: '40%', pt: 1, ml: 3 }}>
+                <Box sx={{ width: '40%', pt: 0, pb:0, ml: 3 }}>
                     <MySelect
                         options={[{ label: 'All features', value: 'All features' }, ...f2i.columns.map(c => ({ label: c, value: c }))]}
                         onChange={e => {
