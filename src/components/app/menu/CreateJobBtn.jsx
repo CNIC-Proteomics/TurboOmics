@@ -27,8 +27,8 @@ export default function CreateJobBtn({ setCreatingJob, setPage, setAnnotating })
         setCreatingJob('waiting');
 
         // Get and set jobID
-        const jobID = DEV_MODE ? '123456' : generateIdentifier(10);
-        //const jobID = generateIdentifier(10);
+        //const jobID = DEV_MODE ? '123456' : generateIdentifier(10);
+        const jobID = generateIdentifier(10);
 
         console.log(`Creating job: ${jobID}`);
         /*dispatchJob({
