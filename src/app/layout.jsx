@@ -23,10 +23,10 @@ export default function RootLayout({ children }) {
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
           crossOrigin="anonymous"
         />
-        
+
       </head>
       <body className={roboto.className}>
-        {children}
+          {children}
         <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.2/lib/bundle.min.js" async />
       </body>
     </html>
