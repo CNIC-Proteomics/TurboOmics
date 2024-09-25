@@ -116,6 +116,7 @@ function Annotating() {
 
             try {
                 const res = await fetch(
+                    //"https://ceumass.eps.uspceu.es/mediator/api/v3/batch",
                     FETCH_CMM_URL[i%FETCH_CMM_URL.length],
                     //`${PROXY}/?${encodeURIComponent(CMM_URI)}`,
                     {
@@ -136,7 +137,7 @@ function Annotating() {
                 }
             } catch (error) {
                 console.error('Error al realizar la solicitud POST:', error);
-                reject([]);
+                resolve([]);
             }
         })
     }, [annParams, FETCH_CMM_URL])

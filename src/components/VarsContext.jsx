@@ -12,8 +12,9 @@ const VarsContext = createContext({
     FETCH_CMM_URL: false ? ['http://localhost:8000/get_cmm'] :
         [
             'https://truboomics.alwaysdata.net/get_cmm',//turboputative@gmail.com
-            'https://turboomicsprimero.alwaysdata.net/get_cmm'//turboomicsprimero@gmail.com
+            //'https://turboomicsprimero2.alwaysdata.net/get_cmm'//turboomicsprimero@gmail.com
             //'https://turboomicssegundo.alwaysdata.net/get_cmm'//molewa4369@brinkc.com
+            'https://turboomicstercero.alwaysdata.net/get_cmm'//turboomicstercero@gmail.com
         ],
     OMIC2NAME: {
         'q': 'Proteomics',
