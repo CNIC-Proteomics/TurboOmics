@@ -116,8 +116,8 @@ function Annotating() {
 
             try {
                 const res = await fetch(
-                    //"https://ceumass.eps.uspceu.es/mediator/api/v3/batch",
-                    FETCH_CMM_URL[i%FETCH_CMM_URL.length],
+                    "https://ceumass.eps.uspceu.es/mediator/api/v3/batch", // Web app
+                    //FETCH_CMM_URL[i%FETCH_CMM_URL.length], // Docker
                     //`${PROXY}/?${encodeURIComponent(CMM_URI)}`,
                     {
                         method: 'POST',
