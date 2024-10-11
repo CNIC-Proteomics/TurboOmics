@@ -58,7 +58,7 @@ function ExploreFeaturesContainer({
                 scrollOmic={scrollOmic}
             /> 
             <Box sx={{height:0, zIndex:1000}}><HelpSection/></Box>
-            <Box sx={{ overflow: 'hidden' }} ref={boxOmicRef}>
+            <Box sx={{ overflowY: 'auto', overflowX: 'hidden', mt:1 }} ref={boxOmicRef}>
                 <Box
                     sx={{ display: 'flex', width: `${100 * omics.length}%` }}
                 >

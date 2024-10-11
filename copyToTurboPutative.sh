@@ -6,7 +6,7 @@ destination_folder="/home/$USER/projects/TurboPutative-web/src/TurboOmicsIntegra
 
 # New name for the file
 old_name="index.html"
-new_name="TurboOmicsApp.html"
+new_name="TurbOmicsApp.html"
 
 # Check if the source folder exists
 if [ ! -d "$source_folder" ]; then

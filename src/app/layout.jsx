@@ -1,7 +1,7 @@
 //import './globals.css'
 
 export const metadata = {
-  title: 'TurboOmics',
+  title: 'TurbOmics',
   description: 'A web-based platform for the analysis of untargeted metabolomics with multi-omics integrative approach',
 }
 

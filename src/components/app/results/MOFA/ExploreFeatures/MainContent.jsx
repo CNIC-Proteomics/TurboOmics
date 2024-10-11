@@ -134,8 +134,8 @@ function MainContent({ omic, thrLRef }) {
                         <Typography variant='h5'>
                             {sign == 'up' ? 'Positively' : 'Negatively'} Associated {OMIC2NAME[omic]}
                         </Typography>
-                        <MySectionContainer height='85vh'>
-                            <MySection>
+                        <Box>
+                            <Box>
                                 <MyMRTable
                                     omic={omic}
                                     sign={sign}
@@ -170,8 +170,8 @@ function MainContent({ omic, thrLRef }) {
                                         }
                                     </Box>
                                 }
-                            </MySection>
-                        </MySectionContainer>
+                            </Box>
+                        </Box>
                     </Box>
                 </SplideSlide>
             ))
