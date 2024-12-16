@@ -1,6 +1,6 @@
 #LICENSE
 
-TurboOmics developed by the Cardiovascular Proteomics and Metabolomics Unit at CNIC is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Unported License https://creativecommons.org/licenses/by-nc-nd/4.0/
+TurbOmics developed by the Cardiovascular Proteomics and Metabolomics Unit at CNIC is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Unported License https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 #YOU ARE FREE TO:
 

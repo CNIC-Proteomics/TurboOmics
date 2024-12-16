@@ -49,7 +49,7 @@ export default function LoadSampleBtn() {
     }
 
     return (
-        <Box sx={{ alignSelf: 'center', position: 'absolute', left: '10%' }}>
+        <Box sx={{ alignSelf: 'center', position: 'absolute', left: '10%', pt: 3 }}>
             <Box>
                 <Button
                     variant='outlined'
@@ -62,6 +62,14 @@ export default function LoadSampleBtn() {
             <Box sx={{ textAlign: 'center', mt: 1 }}>
                 <Link href='#' onClick={handleDownload}>
                     Download Sample Data
+                </Link>
+            </Box>
+            <Box sx={{ textAlign: 'center', mt: 1 }}>
+                <Link
+                    href='https://github.com/CNIC-Proteomics/TurboOmics/blob/main/LICENSE.md'
+                    target='_blank'
+                >
+                    License
                 </Link>
             </Box>
         </Box>
