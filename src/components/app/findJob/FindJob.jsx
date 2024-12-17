@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 
 import TextField from '@mui/material/TextField';
-import { Backdrop, Box, CircularProgress, IconButton } from '@mui/material';
+import { Backdrop, Box, CircularProgress, IconButton, Link } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { useVars } from '../../VarsContext';
 import { useDispatchJob } from '../JobContext';
 import { json2Danfo } from '@/utils/jobDanfoJsonConverter';
 import { useDispatchResults } from '../ResultsContext';
+
+const EXAMPLE_JOB = 'dtkgbe8mId'
 
 export default function FindJob({ setPage, setAnnotating }) {
 
@@ -58,7 +60,7 @@ export default function FindJob({ setPage, setAnnotating }) {
     )
 
     return (
-        <div className="mx-auto mt-4 text-center">
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loading}
@@ -72,18 +74,30 @@ export default function FindJob({ setPage, setAnnotating }) {
                     </Box>
                 </Box>
             </Backdrop>
-            <TextField
-                id="outlined-basic"
-                label="Search Job"
-                variant="outlined"
-                onChange={e => { setSearchedJobID(e.target.value); setExist(true); }}
-                value={searchedJobID}
-                InputProps={{ endAdornment: <SearchButton /> }}
-                sx={{ width: "70%", marginTop: "20%" }}
-                autoFocus
-                error={!exist}
-                helperText={!exist && 'Job not found'}
-            />
-        </div>
+            <Box sx={{ marginTop: '15%', width: '70%', border: '0px solid red' }}>
+                <Box sx={{ textAlign: 'end' }}>
+                    <Link
+                        component="button"
+                        underline='hover'
+                        sx={{fontSize:'1.1rem'}}
+                        onClick={() => {setSearchedJobID(EXAMPLE_JOB); handleSearch(EXAMPLE_JOB)}}
+                    >
+                        Load example
+                    </Link>
+                </Box>
+                <TextField
+                    id="outlined-basic"
+                    label="Search Job"
+                    variant="outlined"
+                    onChange={e => { setSearchedJobID(e.target.value); setExist(true); }}
+                    value={searchedJobID}
+                    InputProps={{ endAdornment: <SearchButton /> }}
+                    sx={{ width: "100%", border: '0px solid red' }}
+                    autoFocus
+                    error={!exist}
+                    helperText={!exist && 'Job not found'}
+                />
+            </Box>
+        </Box>
     )
 }
