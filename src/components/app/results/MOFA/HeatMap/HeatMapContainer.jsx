@@ -13,7 +13,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
     const { omics } = useJob();
 
     // Show observation id in heatmap
-    const showIndex = useJob().user.mdata.shape[0] <= 24;
+    //const showIndex = useJob().user.mdata.shape[0] <= 24;
     const mdataIdCol = useJob().user.mdata.columns[0];
 
     const savedZLegend = useResults().MOFA.displayOpts.zLegend;
@@ -49,59 +49,58 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
         return myFeat
     }, [omics, nFeatRef, fLVec, plotHM]);
 
-
-
     return (
-        <Box>
-            <Box><HelpSection/></Box>
-            <HeatMapHeader nFeatRef={nFeatRef} />
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
-                    <HeatMapIndex 
-                    myIndex={myIndex} 
-                    mdataCol={mdataCol}  
-                    showBorder={true}
-                    showLevel={true}
-                    />
-                </Box>
-                {omics.map(omic => (
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>
-                        {nFeatRef.current[omic].down > 0 &&
-                            <MyHeatMap
-                                omic={omic}
-                                myIndex={myIndex}
-                                myFeat={myFeat[omic].down}
-                                mdataCol={mdataCol}
-                                zLegend={zLegend[omic]}
-                            />
-                        }
-                        {nFeatRef.current[omic].up > 0 &&
-                            <MyHeatMap
-                                omic={omic}
-                                myIndex={myIndex}
-                                myFeat={myFeat[omic].up}
-                                mdataCol={mdataCol}
-                                zLegend={zLegend[omic]}
-                            />
-                        }
+        <Box sx={{ overflowX: 'auto' }}>
+            <Box sx={{ height: 0 }}><HelpSection /></Box>
+            <Box sx={{ width: 1400, margin: 'auto', overflowY: 'hidden' }}>
+                <HeatMapHeader nFeatRef={nFeatRef} />
+                <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-end' }}>
+                        <HeatMapIndex
+                            myIndex={myIndex}
+                            mdataCol={mdataCol}
+                            showBorder={true}
+                            showLevel={true}
+                        />
                     </Box>
-                ))}
-                <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-start' }}>
-                    {showIndex && 
-                    <HeatMapIndex 
-                    myIndex={myIndex} 
-                    mdataCol={mdataCol} 
-                    showBorder={false} 
-                    showLevel={false}
-                    />}
+                    {omics.map(omic => (
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }} key={omic}>
+                            {nFeatRef.current[omic].down > 0 &&
+                                <MyHeatMap
+                                    omic={omic}
+                                    myIndex={myIndex}
+                                    myFeat={myFeat[omic].down}
+                                    mdataCol={mdataCol}
+                                    zLegend={zLegend[omic]}
+                                />
+                            }
+                            {nFeatRef.current[omic].up > 0 &&
+                                <MyHeatMap
+                                    omic={omic}
+                                    myIndex={myIndex}
+                                    myFeat={myFeat[omic].up}
+                                    mdataCol={mdataCol}
+                                    zLegend={zLegend[omic]}
+                                />
+                            }
+                        </Box>
+                    ))}
+                    <Box sx={{ width: '5%', display: 'flex', justifyContent: 'flex-start' }}>
+                        <HeatMapIndex
+                            myIndex={myIndex}
+                            mdataCol={mdataCol}
+                            showBorder={false}
+                            showLevel={false}
+                        />
+                    </Box>
                 </Box>
+                <HeatMapLegend
+                    nFeatRef={nFeatRef}
+                    zLegend={zLegend}
+                    updateZLegend={updateZLegend}
+                    plotHeatMap={plotHeatMap}
+                />
             </Box>
-            <HeatMapLegend
-                nFeatRef={nFeatRef}
-                zLegend={zLegend}
-                updateZLegend={updateZLegend}
-                plotHeatMap={plotHeatMap}
-            />
         </Box>
     )
 }

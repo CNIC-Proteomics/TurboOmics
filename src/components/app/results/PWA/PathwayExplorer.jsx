@@ -536,8 +536,8 @@ const HeatMapDialog = ({
                             colors={{
                                 type: 'diverging',
                                 scheme: 'red_blue',
-                                minValue: zLegend.min,
-                                maxValue: zLegend.max,
+                                minValue: -zLegend.max,
+                                maxValue: -zLegend.min,
                                 //divergeAt: 0
                             }}
                             emptyColor="#555555"
@@ -567,8 +567,8 @@ const HeatMapDialog = ({
                             colors={{
                                 type: 'diverging',
                                 scheme: 'red_blue',
-                                minValue: zLegend.min,
-                                maxValue: zLegend.max,
+                                minValue: -zLegend.max,
+                                maxValue: -zLegend.min,
                                 //divergeAt: 0
                             }}
                             emptyColor="#555555"
@@ -616,7 +616,8 @@ const Legend = ({ a, b, setZLegend }) => {
         justifyContent: 'space-between',
         //width: '100%',
         padding: '10px',
-        background: `linear-gradient(to right, ${colorAzul}, ${colorBlanco} ${blancoPosicion}%, ${colorRojo})`,
+        //background: `linear-gradient(to right, ${colorAzul}, ${colorBlanco} ${blancoPosicion}%, ${colorRojo})`,
+        background: `linear-gradient(to right, #053061 0%, #296fad 12%, #7cb6d6 24%, #97c6df 36%, #ffffff 50%, #f7bca1 62%, #f3ab8d 74%, #cf5349 86%, #67001f 100%)`,
         color: '#fff',
         height: '15px'
     };

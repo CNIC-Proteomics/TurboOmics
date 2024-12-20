@@ -11,7 +11,7 @@ export function MyHeatMap({
     zLegend
 }) {
 
-    const nPlots = 2*useJob().omics.length;
+    const nPlots = 2 * useJob().omics.length;
 
     const xi = useJob().norm[`x${omic}`];
     const mdataColInfo = useJob().mdataType[mdataCol];
@@ -20,13 +20,13 @@ export function MyHeatMap({
     Get data to plot heatmap
     */
     const hmData = useMemo(
-        () => {return getHmData(myIndex, myFeat, xi, mdataColInfo)},
+        () => { return getHmData(myIndex, myFeat, xi, mdataColInfo) },
         [myIndex, myFeat, xi, mdataColInfo]//[myIndex, myFeat, xi, mdataColInfo]
     )
     /**/
 
     return (
-        <Box sx={{ height: 510, width: 1160/nPlots, marginRight: 0.5, border: '2px solid #444444' }}>
+        <Box sx={{ height: 510, width: 1160 / nPlots, marginRight: 0.5, border: '2px solid #444444' }}>
             <ResponsiveHeatMapCanvas
                 data={hmData}
                 margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -41,8 +41,8 @@ export function MyHeatMap({
                 colors={{
                     type: 'diverging',
                     scheme: 'red_blue',
-                    minValue: zLegend.min,
-                    maxValue: zLegend.max,
+                    minValue: -zLegend.max,
+                    maxValue: -zLegend.min,
                     //divergeAt: 0
                 }}
                 emptyColor="#555555"
@@ -76,26 +76,31 @@ export const HeatMapIndex = ({ myIndex, mdataCol, showBorder, showLevel }) => {
         frequencyCount[value] = (frequencyCount[value] || 0) + 1;
     });
 
-    // Obtener valores únicos del array y ordenarlos
+    // Obtener valores únicos del array
     const uniqueValues = [...new Set(arrayA)];
 
     return (
-        <table>
-            <tbody>
-                {uniqueValues.map((value, index) => (
-                    <tr
-                        key={index}
-                        style={{
-                            height: frequencyCount[value] * 500 / arrayA.length,
-                            borderTop: showBorder && '2px solid #444444',
-                            borderBottom: showBorder && '2px solid #444444',
-                        }}
-                    >
-                        <td style={{ paddingRight: 5 }}><Typography variant='h7'>{value}</Typography></td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <>
+            {uniqueValues.length <= 24 &&
+                <table>
+                    <tbody>
+                        {uniqueValues.map((value, index) => (
+                            <tr
+                                key={index}
+                                style={{
+                                    pading: 0,
+                                    height: frequencyCount[value] * 500 / arrayA.length,
+                                    borderTop: showBorder && '2px solid #444444',
+                                    borderBottom: showBorder && '2px solid #444444',
+                                }}
+                            >
+                                <td style={{ paddingRight: 5, fontSize: Math.min(10 * Math.pow(frequencyCount[value], 1 / 4), 14) }}>{value}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            }
+        </>
     );
 };
 
