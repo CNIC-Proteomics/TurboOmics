@@ -59,7 +59,7 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
     return (
         <Box>
             <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
-            <DownloadComponent scatterRef={scatterRef} fileName={'MOFA_Scatter_1D'} />
+            <DownloadComponent scatterRef={scatterRef} name={'MOFA_1D'} />
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart
                     ref={scatterRef}
@@ -76,16 +76,33 @@ export function MyScatter({ scatterData, mdataCol, Factor }) {
                         dataKey="mdataValue"
                         name={mdataCol}
                         allowDuplicatedCategory={false}
+                        style={{ fontFamily: 'Calibri' }}
                     >
-                        <Label value={mdataCol} offset={-10} position="insideBottom" />
+                        <Label
+                            value={mdataCol}
+                            offset={-10}
+                            position="insideBottom"
+                            style={{ fontFamily: 'Calibri' }}
+                        />
                     </XAxis>
-                    <YAxis type="number" dataKey="projection" name={`${Factor}`} >
-                        <Label value={`${Factor}`} offset={20} position="insideLeft" angle={-90} />
+                    <YAxis
+                        type="number"
+                        dataKey="projection"
+                        name={`${Factor}`}
+                        style={{ fontFamily: 'Calibri' }}
+                    >
+                        <Label
+                            value={`${Factor}`}
+                            offset={20}
+                            position="insideLeft"
+                            angle={-90}
+                            style={{ fontFamily: 'Calibri' }}
+                        />
                     </YAxis>
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                     <Scatter data={scatterData} fill={myPalette[0]}>
                         {showLabels &&
-                            <LabelList dataKey="element" position='right' />
+                            <LabelList dataKey="element" position='right' style={{fontFamily: 'Calibri'}} />
                         }
                     </Scatter>
                 </ScatterChart>
@@ -100,10 +117,10 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
     const scatterRef = useRef();
 
     return (
-        <Box sx={{ display:'flex', justifyContent:'center' }}>
-            <Box sx={{ width:600}}>
-            <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
-                <DownloadComponent scatterRef={scatterRef} fileName='MOFA_Scatter_2D' />
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ width: 600 }}>
+                <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
+                <DownloadComponent scatterRef={scatterRef} name='MOFA_2D' />
                 <ScatterChart
                     ref={scatterRef}
                     width={600}
@@ -120,15 +137,28 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                         type="number"
                         dataKey="x"
                         name={`${selectedPlot2D.x}`}
+                        style={{ fontFamily: 'Calibri' }}
                     >
-                        <Label value={`${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
+                        <Label
+                            value={`${selectedPlot2D.x}`}
+                            offset={-10}
+                            position="insideBottom"
+                            style={{ fontFamily: 'Calibri' }}
+                        />
                     </XAxis>
                     <YAxis
                         type="number"
                         dataKey="y"
                         name={`${selectedPlot2D.y}`}
+                        style={{ fontFamily: 'Calibri' }}
                     >
-                        <Label value={`${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
+                        <Label
+                            value={`${selectedPlot2D.y}`}
+                            offset={20}
+                            position="insideLeft"
+                            angle={-90}
+                            style={{ fontFamily: 'Calibri' }}
+                        />
                     </YAxis>
                     <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                     {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
@@ -142,7 +172,7 @@ export function MyScatter2D({ scatterData, selectedPlot2D }) {
                                     name={level}
                                 >
                                     {showLabels &&
-                                        <LabelList dataKey="element" position='top' />
+                                        <LabelList dataKey="element" position='top' style={{fontFamily: 'Calibri'}} />
                                     }
                                 </Scatter>
                             )

@@ -1,6 +1,6 @@
 import { useJob } from '@/components/app/JobContext'
 import React, { useEffect, useMemo } from 'react'
-import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas } from '@nivo/heatmap'
+import { ResponsiveHeatMap, HeatMap, ResponsiveHeatMapCanvas, HeatMapCanvas } from '@nivo/heatmap'
 import { Box, Typography } from '@mui/material';
 
 export function MyHeatMap({
@@ -28,6 +28,8 @@ export function MyHeatMap({
     return (
         <Box sx={{ height: 510, width: 1160 / nPlots, marginRight: 0.5, border: '2px solid #444444' }}>
             <ResponsiveHeatMapCanvas
+                //width={100}
+                //height={510}
                 data={hmData}
                 margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                 axisTop={{

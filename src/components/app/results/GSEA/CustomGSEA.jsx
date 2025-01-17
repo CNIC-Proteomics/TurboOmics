@@ -3,13 +3,13 @@ import { useJob } from '@/components/app/JobContext'
 import { useResults } from '@/components/app/ResultsContext';
 import { Box, Typography } from '@mui/material';
 import Image from 'next/image';
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 //import { MySelect } from '../../EDA/DataDistribution/MyFormComponents';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area, Label } from 'recharts';
 import generateArray from '@/utils/generateArray';
 //import { resolve } from 'styled-jsx/css';
 
-
+import { DownloadComponentGSEA } from '@/utils/DownloadRechartComponent';
 
 function CustomGSEA({ f2MeanL, fSet }) {
 
@@ -21,12 +21,12 @@ function CustomGSEA({ f2MeanL, fSet }) {
     const dataZ = useMemo(() => {
         return Object.keys(f2MeanL).map(
             e => [e, f2MeanL[e]]
-        );
+        ).filter(e => !isNaN(e[1]));
     }, [f2MeanL]);
 
     const { ES, setBool, deltaZ, score } = useMemo(
         () => calculateGSEA(dataZ, fSet), [dataZ, fSet]
-    )
+    );
 
     const [empPvalue, setEmpPvalue] = useState(null);
     const getPvalue = useCallback(async () => {
@@ -74,6 +74,8 @@ function CustomGSEA({ f2MeanL, fSet }) {
 
 const GSEAplot = ({ ES, setBool, deltaZ, score, pvalue }) => {
 
+    const plotRef = useRef({});
+
     const interval = Math.ceil(ES.length / 100);
     const ESdata = ES/*.filter((e,i) => i%interval==0)*/.map((e, i) => ({ ES: e, index: i }));
     const Zdata = deltaZ.map((e, i) => ({ deltaZ: e, index: i }));
@@ -82,32 +84,44 @@ const GSEAplot = ({ ES, setBool, deltaZ, score, pvalue }) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', justifyContent:'center', my:0}}>
-                <Typography>
-                    Enrichment Score = {Math.round(score * 1000) / 1000}
-                </Typography>
-            </Box>
-            <Box sx={{display: 'flex', justifyContent:'center', my:1}}>
-                <Typography>
-                    Empirical p-value {'≤'} {pvalue}
-                </Typography>
-                </Box>
             <Box>
-                <ResponsiveContainer width="100%" height={250}>
+                <DownloadComponentGSEA scatterRef={plotRef} name="GSEA" />
+            </Box>
+            <Box ref={(node) => { plotRef.current['values'] = node }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 0 }}>
+                    <Typography>
+                        Enrichment Score = {Math.round(score * 1000) / 1000}
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
+                    <Typography>
+                        Empirical p-value {'≤'} {pvalue}
+                    </Typography>
+                </Box>
+            </Box>
+            <Box>
+                <ResponsiveContainer ref={(node) => { plotRef.current['p1'] = node }} width="100%" height={250}>
                     <LineChart data={ESdata} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
-                        <XAxis dataKey="index" tick={false} />
-                        <YAxis label={{ value: 'ES', angle: -90, position: 'insideLeft' }} />
+                        <XAxis dataKey="index" tick={false} style={{ fontFamily: 'Calibri' }} />
+                        <YAxis style={{ fontFamily: 'Calibri' }}>
+                            <Label
+                                value='ES'
+                                position="insideLeft"
+                                angle={-90}
+                                style={{ fontFamily: 'Calibri' }}
+                            />
+                        </YAxis>
                         <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
                         <Line type="monotone" dataKey="ES" stroke="grey" strokeWidth={1} dot={false} />
                     </LineChart>
                 </ResponsiveContainer>
             </Box>
             <Box sx={{ position: 'relative', top: -28, border: '0px solid red' }}>
-                <ResponsiveContainer width="100%" height={80}>
+                <ResponsiveContainer ref={(node) => { plotRef.current['p2'] = node }} width="100%" height={80}>
                     <LineChart margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" domain={generateArray(0, setBool.length, 1)} tick={false} />
-                        <YAxis />
+                        <XAxis dataKey="name" domain={generateArray(0, setBool.length, 1)} tick={false} style={{ fontFamily: 'Calibri' }} />
+                        <YAxis style={{ fontFamily: 'Calibri' }} />
                         {setBool.map((isInSet, index) => (
                             isInSet && <ReferenceLine key={index} x={index} strokeWidth={0.5} stroke="grey" />
                         ))}
@@ -115,10 +129,17 @@ const GSEAplot = ({ ES, setBool, deltaZ, score, pvalue }) => {
                 </ResponsiveContainer>
             </Box>
             <Box sx={{ position: 'relative', top: -58, border: '0px solid red' }}>
-                <ResponsiveContainer width="100%" height={120}>
+                <ResponsiveContainer ref={(node) => { plotRef.current['p3'] = node }} width="100%" height={120}>
                     <AreaChart data={Zdata} margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
-                        <XAxis dataKey="index" tick={false} />
-                        <YAxis label={{ value: 'ΔZ', angle: -90, position: 'insideLeft' }} />
+                        <XAxis dataKey="index" tick={false} style={{ fontFamily: 'Calibri' }} />
+                        <YAxis style={{ fontFamily: 'Calibri' }} >
+                            <Label
+                                value='ΔZ'
+                                position="insideLeft"
+                                angle={-90}
+                                style={{ fontFamily: 'Calibri' }}
+                            />
+                        </YAxis>
                         <CartesianGrid stroke="#ccc" strokeDasharray="3 3" />
                         <Area type="monotone" dataKey="deltaZ" stroke="grey" fill="grey" />
                     </AreaChart>
@@ -139,10 +160,10 @@ const calculateGSEA = (dataZ, fSet) => {
         e[2], // boolean with true if element is in set
         e[2] ? Math.abs(e[1]) : 0, // Score to calculate Fset
         e[2] ? 0 : 1 // Score to calculate FNset
-    ])
+    ]);
+
 
     data.sort((a, b) => b[1] - a[1]);
-
     const sumFset = data.map(e => e[3]).reduce((prev, e) => prev + e);
     const sumFNset = data.map(e => e[4]).reduce((prev, e) => prev + e);
 
@@ -152,7 +173,11 @@ const calculateGSEA = (dataZ, fSet) => {
     const ES = cumFset.map((v, i) => v - cumFNset[i]);
     const setBool = data.map(e => e[2]);
     const deltaZ = data.map(e => e[1]);
-    const score = Math.abs(Math.max(...ES)) > Math.abs(Math.min(...ES)) ? Math.max(...ES) : Math.min(...ES);
+    let [min, max] = ES.reduce(([prevMin, prevMax], curr) =>
+        [Math.min(prevMin, curr), Math.max(prevMax, curr)], [Infinity, -Infinity]);
+    const score = Math.abs(max) > Math.abs(min) ? max : min;
+    //console.log(ES)
+    //const score = Math.abs(Math.max(...ES)) > Math.abs(Math.min(...ES)) ? Math.max(...ES) : Math.min(...ES);
 
     return { ES, setBool, deltaZ, score }
 }

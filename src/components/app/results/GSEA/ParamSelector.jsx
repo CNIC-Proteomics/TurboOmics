@@ -97,7 +97,43 @@ function ParamSelector({
                 });
 
                 console.log('Fetch ENTREZ identifiers');
-                const res = await fetch(
+                const URI = ['https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                    'https://biit.cs.ut.ee/gprofiler_beta/api/convert/convert/'];
+
+                const fetchGProfiler = (URI) => {
+                    return new Promise(async (resolve, reject) => {
+                        console.log('Trying ', URI);
+                        try {
+                            const res = await fetch(
+                                URI,
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        "organism": OS.id,
+                                        "target": "ENTREZGENE_ACC",
+                                        "query": Object.keys(g2i)
+                                    })
+                                }
+                            );
+                            resolve(res);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
+                }
+
+                let res;
+                try {
+                    res = await fetchGProfiler(URI[0]);
+                } catch (error) {
+                    console.log(error);
+                    res = await fetchGProfiler(URI[1]);
+                }
+
+                /*const res = await fetch(
                     'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
                     {
                         method: 'POST',
@@ -110,7 +146,7 @@ function ParamSelector({
                             "query": Object.keys(g2i)
                         })
                     }
-                );
+                );*/
 
                 const resJson = await res.json();
 
@@ -478,7 +514,7 @@ function ParamSelector({
                                                         setMParams(
                                                             prev => ({ ...prev, ionVal: { ...prev.ionVal, neg: newValue } })
                                                         );
-                                                        dispatchResults({type:'set-ion-val', mode: 'neg', value: newValue});
+                                                        dispatchResults({ type: 'set-ion-val', mode: 'neg', value: newValue });
                                                     }
                                                 }
                                                 renderOption={(props, option) => {

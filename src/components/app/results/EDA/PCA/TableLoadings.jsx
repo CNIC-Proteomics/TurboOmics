@@ -6,6 +6,7 @@ import MyMotion from '@/components/MyMotion';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import GridOnIcon from '@mui/icons-material/GridOn';
+import DownloadIcon from '@mui/icons-material/Download';
 import { useDispatchResults, useResults } from '@/components/app/ResultsContext';
 import { useVars } from '@/components/VarsContext';
 
@@ -99,10 +100,10 @@ export default function TableLoadings({ omic, selectedLoadings, selectedPCA }) {
                         aria-label="download"
                         size='small'
                         onClick={e => downloadTable(OMIC2NAME[omic], filteredFeatures, columns)}
-                        sx={{ opacity: 0.5, color: 'rgb(13,110,253)' }}
+                        sx={{ opacity: 0.5 }}
                         variant='danger'
                     >
-                        <GridOnIcon />
+                        <DownloadIcon />
                     </IconButton>
                 </Box>
                 <Box sx={{ width: '40%', pt: 0, pb:0, ml: 3 }}>

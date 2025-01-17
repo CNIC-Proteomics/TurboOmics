@@ -1,4 +1,3 @@
-//import './globals.css'
 
 export const metadata = {
   title: 'TurbOmics',
@@ -12,6 +11,8 @@ const roboto = Roboto({
   styles: ["italic", "normal"],
   subsets: ['latin']
 })
+
+import './global.css';
 
 export default function RootLayout({ children }) {
   return (

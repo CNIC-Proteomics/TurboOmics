@@ -10,7 +10,7 @@ import { useVars } from '@/components/VarsContext';
 import Image from 'next/image';
 import { MaterialReactTable, useMaterialReactTable } from 'material-react-table/dist';
 import { download, generateCsv, mkConfig } from 'export-to-csv';
-import { DownloadComponent } from '@/utils/DownloadRechartComponent';
+import { DownloadComponentBarChart } from '@/utils/DownloadRechartComponent';
 
 
 const DATABASES = ['GO:MF', 'GO:BP', 'GO:CC', 'KEGG', 'REAC']
@@ -45,7 +45,47 @@ function GProfiler({
 
     // gProfiler fetch
     const gProfiler = useCallback(async () => {
-        const res = await fetch(
+
+        const URI =['https://biit.cs.ut.ee/gprofiler/api/gost/profile/',
+            'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/'];
+
+        const fetchGProfiler = (URI) => {
+            return new Promise(async (resolve, reject) => {
+                console.log('Trying ', URI);
+                try {
+                    const res = await fetch(
+                        URI,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                "organism": OS.id,
+                                "query": fSet,
+                                "domain_scope": "custom",
+                                "background": myBackg,
+                                "user_threshold": 1e-1,
+                                "significance_threshold_method": "bonferroni",
+                                'sources': DATABASES
+                            })
+                        }
+                    );
+                    resolve(res);
+                } catch (error) {
+                    reject(error)
+                }
+
+            });
+        }
+
+        let res;
+        try {
+            res = await fetchGProfiler(URI[0]);
+        } catch (error) {
+            console.log(error);
+            res = await fetchGProfiler(URI[1]);
+        }
+
+        /*const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/gost/profile/',
             {
                 method: 'POST',
@@ -60,7 +100,7 @@ function GProfiler({
                     'sources': DATABASES
                 })
             }
-        );
+        );*/
         const resJson = await res.json();
 
         // Find features per category
@@ -78,8 +118,8 @@ function GProfiler({
             ...e,
             myid: resJson.myid.filter((f, i) => e.intersections[i].length > 0)
         }));
-        
-        resJson.myid.length == 0 && alert("No protein/transcript ID could be mapped. Please, check that the correct species was selected");
+
+        resJson.myid.length == 0 && alert("No protein/transcript ID could be mapped. Please, check that organism and column containing ID were correctly selected");
 
         setGoRes(resJson);
 
@@ -152,7 +192,7 @@ function GProfiler({
                     }}>
                         <MyBarChart myData={myDataF} />
                     </Box>
-                    <Box sx={{ pl: 2, mt: 1, width:"206%" }}>
+                    <Box sx={{ pl: 2, mt: 1, width: "206%" }}>
                         <CategoryTable
                             myData={myData}
                             setCategory={setCategory}
@@ -179,7 +219,7 @@ const MyBarChart = ({ myData }) => {
                 m: 'auto',
             }}>
                 <Box sx={{ width: 0, position: 'relative', left: 50 }}>
-                    <DownloadComponent scatterRef={plotRef} fileName='GO_Enrichment' />
+                    <DownloadComponentBarChart scatterRef={plotRef} name='GO_Enrichment' />
                 </Box>
                 <BarChart
                     ref={plotRef}
@@ -195,9 +235,23 @@ const MyBarChart = ({ myData }) => {
                     layout='vertical'
                 >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <YAxis type='category' dataKey="labelName" minTickGap={30} />
-                    <XAxis type='number'>
-                        <Label value={`-Log10 (FDR)`} offset={-10} position="insideBottom" />
+                    <YAxis
+                        type='category'
+                        //dataKey="labelName"
+                        dataKey="name"
+                        minTickGap={30}
+                        style={{ fontFamily: 'Calibri', border:'1px solid red' }}
+                        padding={{top:30}}
+                    />
+                    <XAxis type='number'
+                        style={{ fontFamily: 'Calibri' }}
+                    >
+                        <Label
+                            value={`-Log10 (FDR)`}
+                            offset={-10}
+                            position="insideBottom"
+                            style={{ fontFamily: 'Calibri' }}
+                        />
                     </XAxis>
                     <Tooltip
                         content={<CustomTooltip />}

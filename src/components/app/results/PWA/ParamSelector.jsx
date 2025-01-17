@@ -139,27 +139,67 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
         } else if (o == 'q' || o == 't') {
 
             let GPresult = [];
+            
+            const URI =['https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+                'https://biit.cs.ut.ee/gprofiler_beta/api/convert/convert/'];
+
+            const fetchGProfiler = (URI, uId) => {
+                return new Promise( async (resolve, reject) => {
+                    console.log('Trying ', URI);
+                    try {
+                        const res = await fetch(
+                            URI,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json',  },
+                                body: JSON.stringify({
+                                    "organism": OS.id,
+                                    "query": uId,
+                                    "target": "UNIPROTSWISSPROT_ACC"
+                                })
+                            }
+                        );
+                        resolve(res);
+                    } catch (error) {
+                        reject(error);
+                    }
+                })
+            }
 
             // First search in SwissProt
-            const res = await fetch(
-                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+            let res;
+            try {
+                res = await fetchGProfiler(URI[0], uId);
+            } catch (error) {
+                console.log(error);
+                res = await fetchGProfiler(URI[1], uId);
+            }
+            /*const res = await fetch(
+                'https://biit.cs.ut.ee/gprofiler_beta/api/convert/convert/',
                 {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json',  },
                     body: JSON.stringify({
                         "organism": OS.id,
                         "query": uId,
                         "target": "UNIPROTSWISSPROT_ACC"
                     })
                 }
-            );
+            );*/
             const resJson = await res.json();
             GPresult = resJson.result.filter(e => e.converted != 'None' && e.n_converted == 1);
 
             // Second search in Trembl
             const _targeted = GPresult.map(e => e.incoming);
-            const res2 = await fetch(
-                'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+            let res2
+            try {
+                res2 = await fetchGProfiler(URI[0], uId.filter(e => !_targeted.includes(e)));
+            } catch (error) {
+                console.log(error);
+                res2 = await fetchGProfiler(URI[1], uId.filter(e => !_targeted.includes(e)));
+            }
+            /*const res2 = await fetch(
+                'https://biit.cs.ut.ee/gprofiler_beta/api/convert/convert/',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -169,7 +209,7 @@ function ParamSelector({ setRId2info, fetchJobRun, setLoading }) {
                         "target": "UNIPROTSPTREMBL_ACC"
                     })
                 }
-            );
+            );*/
             const res2Json = await res2.json();
             GPresult.concat(res2Json.result.filter(e => e.converted != 'None' && e.n_converted == 1));
 

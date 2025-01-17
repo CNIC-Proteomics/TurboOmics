@@ -40,10 +40,10 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', overflow:'auto' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', overflow: 'auto' }}>
                 <Box>
                     <Box sx={{ width: 0 }}>
-                        <DownloadComponent scatterRef={scatterRef} fileName='PathwayAnalysis_Scatter' />
+                        <DownloadComponent scatterRef={scatterRef} name='PathwayAnalysis' />
                     </Box>
                     <ScatterChart
                         ref={scatterRef}
@@ -54,14 +54,31 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
                     >
                         <CartesianGrid />
                         <XAxis
-                            type="number" dataKey={selectedLV.x.label} name={selectedLV.x.label}
+                            type="number"
+                            dataKey={selectedLV.x.label}
+                            name={selectedLV.x.label}
+                            style={{ fontFamily: 'Calibri' }}
                         >
-                            <Label value={`${selectedLV.x.label}`} offset={-10} position="insideBottom" />
+                            <Label
+                                value={`${selectedLV.x.label}`}
+                                offset={-10}
+                                position="insideBottom"
+                                style={{ fontFamily: 'Calibri' }}
+                            />
                         </XAxis>
                         <YAxis
-                            type="number" dataKey={selectedLV.y.label} name={selectedLV.y.label}
+                            type="number"
+                            dataKey={selectedLV.y.label}
+                            name={selectedLV.y.label}
+                            style={{ fontFamily: 'Calibri' }}
                         >
-                            <Label value={selectedLV.y.label} offset={20} position="insideLeft" angle={-90} />
+                            <Label
+                                value={selectedLV.y.label}
+                                offset={20}
+                                position="insideLeft"
+                                angle={-90}
+                                style={{ fontFamily: 'Calibri' }}
+                            />
                         </YAxis>
                         <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                         <Legend verticalAlign="top" />
@@ -70,14 +87,14 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
                             data={data.filter(e => e.g == mdataCategorical.g1.id)}
                             fill={myPalette[0]}
                         >
-                            {showLabels && <LabelList dataKey="sample" position='top' />}
+                            {showLabels && <LabelList dataKey="sample" position='top' style={{fontFamily: 'Calibri'}} />}
                         </Scatter>
                         <Scatter
                             name={mdataCategorical.g2.id}
                             data={data.filter(e => e.g == mdataCategorical.g2.id)}
                             fill={myPalette[1]}
                         >
-                            {showLabels && <LabelList dataKey="sample" position='top' />}
+                            {showLabels && <LabelList dataKey="sample" position='top' style={{fontFamily: 'Calibri'}} />}
                         </Scatter>
                     </ScatterChart>
                 </Box>

@@ -12,6 +12,8 @@ import { useResults } from '../../ResultsContext';
 import { danfo2RowColJson } from '@/utils/jobDanfoJsonConverter'
 import { HeatMapCanvas, ResponsiveHeatMapCanvas } from '@nivo/heatmap';
 
+import { DownloadHeatmap } from "@/utils/DownloadRechartComponent";
+
 function PathwayExplorer({ view, path_info, rId2info, workingOmics }) {
 
     // Import global variables
@@ -495,99 +497,105 @@ const HeatMapDialog = ({
             open={showHeatmap}
             maxWidth='xl'
             onClose={() => setShowHeatmap(false)}
+            className="printable"
         >
-            <DialogTitle>{pathway} | {pathwayInfo.Name}</DialogTitle>
-            <DialogContent sx={{ overflowX: 'hidden' }}>
-                <Box sx={{ display: 'flex', border: '0px solid red' }}>
-                    <Box sx={{ border: '0px solid red' }}>
-                        <Typography sx={{ fontSize: '1em', textAlign: 'right' }}><span>&#8203;</span></Typography>
-                        <HeatMapCanvas
-                            width={100}
-                            height={30 * featureInfo.length}
-                            data={featureInfo.map(e => ({ id: e.xId, data: [] }))}
-                            margin={{ top: 0, right: 0, bottom: 0, left: 100 }}
-                            axisLeft={{
-                                tickSize: 5,
-                                tickPadding: 5,
-                                tickRotation: 0,
-                                legend: '',
-                                legendPosition: 'middle',
-                                legendOffset: 40
-                            }}
+            <Box className="no-printable" sx={{ position: 'relative', top: 40, left: 10, width: 0 }}>
+                <DownloadHeatmap name={'Pathway-Analysis'} />
+            </Box>
+            <Box sx={{}}>
+                <DialogTitle>{pathway} | {pathwayInfo.Name}</DialogTitle>
+                <DialogContent sx={{ overflowX: 'hidden' }}>
+                    <Box sx={{ display: 'flex', border: '0px solid red' }}>
+                        <Box sx={{ border: '0px solid red' }}>
+                            <Typography sx={{ fontSize: '1em', textAlign: 'right' }}><span>&#8203;</span></Typography>
+                            <HeatMapCanvas
+                                width={100}
+                                height={30 * featureInfo.length}
+                                data={featureInfo.map(e => ({ id: e.xId, data: [] }))}
+                                margin={{ top: 0, right: 0, bottom: 0, left: 100 }}
+                                axisLeft={{
+                                    tickSize: 5,
+                                    tickPadding: 5,
+                                    tickRotation: 0,
+                                    legend: '',
+                                    legendPosition: 'middle',
+                                    legendOffset: 40
+                                }}
 
-                        />
-                    </Box>
-                    <Box sx={{ border: '0px solid blue' }}>
-                        <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g1.id}</Typography>
-                        <HeatMapCanvas
-                            height={30 * featureInfo.length}
-                            width={Math.min(550, samplesSortedGroup.g1.length * 8)}
-                            data={hmDataGroup.g1}
-                            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                            axisLeft={null}
-                            axisTop={{
-                                tickSize: 0,
-                                tickPadding: 0,
-                                tickRotation: 0,
-                                legend: '',
-                                legendOffset: 0
-                            }}
+                            />
+                        </Box>
+                        <Box sx={{ border: '0px solid blue' }}>
+                            <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g1.id}</Typography>
+                            <HeatMapCanvas
+                                height={30 * featureInfo.length}
+                                width={Math.min(550, samplesSortedGroup.g1.length * 8)}
+                                data={hmDataGroup.g1}
+                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                                axisLeft={null}
+                                axisTop={{
+                                    tickSize: 0,
+                                    tickPadding: 0,
+                                    tickRotation: 0,
+                                    legend: '',
+                                    legendOffset: 0
+                                }}
 
-                            colors={{
-                                type: 'diverging',
-                                scheme: 'red_blue',
-                                minValue: -zLegend.max,
-                                maxValue: -zLegend.min,
-                                //divergeAt: 0
-                            }}
-                            emptyColor="#555555"
-                            ///isInteractive={false}
-                            animate={false}
-                            enableLabels={false}
-                            tooltip={(props) => CustomTooltipComponent(props)}
-                        />
-                    </Box>
-                    <Box sx={{ mx: 0.2, width: 0, border: '1px solid rgba(0,0,0,1)' }}></Box>
-                    <Box sx={{ border: '0px solid blue' }}>
-                        <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g2.id}</Typography>
-                        <HeatMapCanvas
-                            height={30 * featureInfo.length}
-                            width={Math.min(550, samplesSortedGroup.g2.length * 8)}
-                            data={hmDataGroup.g2}
-                            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                            axisLeft={null}
-                            axisTop={{
-                                tickSize: 0,
-                                tickPadding: 0,
-                                tickRotation: 0,
-                                legend: '',
-                                legendOffset: 0
-                            }}
+                                colors={{
+                                    type: 'diverging',
+                                    scheme: 'red_blue',
+                                    minValue: -zLegend.max,
+                                    maxValue: -zLegend.min,
+                                    //divergeAt: 0
+                                }}
+                                emptyColor="#555555"
+                                ///isInteractive={false}
+                                animate={false}
+                                enableLabels={false}
+                                tooltip={(props) => CustomTooltipComponent(props)}
+                            />
+                        </Box>
+                        <Box sx={{ mx: 0.2, width: 0, border: '1px solid rgba(0,0,0,1)' }}></Box>
+                        <Box sx={{ }}>
+                            <Typography sx={{ textAlign: 'center' }}>{mdataCategoricalRes.g2.id}</Typography>
+                            <HeatMapCanvas
+                                height={30 * featureInfo.length}
+                                width={Math.min(550, samplesSortedGroup.g2.length * 8)}
+                                data={hmDataGroup.g2}
+                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                                axisLeft={null}
+                                axisTop={{
+                                    tickSize: 0,
+                                    tickPadding: 0,
+                                    tickRotation: 0,
+                                    legend: '',
+                                    legendOffset: 0
+                                }}
 
-                            colors={{
-                                type: 'diverging',
-                                scheme: 'red_blue',
-                                minValue: -zLegend.max,
-                                maxValue: -zLegend.min,
-                                //divergeAt: 0
-                            }}
-                            emptyColor="#555555"
-                            //isInteractive={false}
-                            animate={false}
-                            enableLabels={false}
-                            tooltip={(props) => CustomTooltipComponent(props)}
-                        />
+                                colors={{
+                                    type: 'diverging',
+                                    scheme: 'red_blue',
+                                    minValue: -zLegend.max,
+                                    maxValue: -zLegend.min,
+                                    //divergeAt: 0
+                                }}
+                                emptyColor="#555555"
+                                //isInteractive={false}
+                                animate={false}
+                                enableLabels={false}
+                                tooltip={(props) => CustomTooltipComponent(props)}
+                            />
+                        </Box>
                     </Box>
-                </Box>
-            </DialogContent>
-            <DialogActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box sx={{ width: "50%", position: 'relative', left: 17 }}>
-                    <Legend a={zLegend.min} b={zLegend.max} setZLegend={setZLegend} />
-                </Box>
-                <Box>
-                    <Button onClick={() => setShowHeatmap(false)}>Close</Button>
-                </Box>
-            </DialogActions>
+                </DialogContent>
+                <DialogActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box sx={{ width: "50%", position: 'relative', left: 17 }}>
+                        <Legend a={zLegend.min} b={zLegend.max} setZLegend={setZLegend} />
+                    </Box>
+                    <Box className="no-printable">
+                        <Button onClick={() => setShowHeatmap(false)}>Close</Button>
+                    </Box>
+                </DialogActions>
+            </Box>
         </Dialog>
     )
 }
@@ -661,15 +669,15 @@ const Legend = ({ a, b, setZLegend }) => {
     );
 };
 
-const CustomTooltipComponent = ({cell}) => {
+const CustomTooltipComponent = ({ cell }) => {
     console.log(cell)
     return (
         <Box sx={{
-            border:'1px solid rgba(0,0,0,0.5)',
-            borderRadius:3,
+            border: '1px solid rgba(0,0,0,0.5)',
+            borderRadius: 3,
             backgroundColor: 'rgba(255,255,255,0.8)',
-            p:2,
-            position:'relative', top:50,
+            p: 2,
+            position: 'relative', top: 50,
             //maxWidth:200
         }}
         >

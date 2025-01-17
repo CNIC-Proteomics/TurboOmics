@@ -45,7 +45,42 @@ function EnrichmentQ({
     // Fetch all proteins of selected category
     const fetchProteins = useCallback(async () => {
         setLoadingPCTable(true);
-        const res = await fetch(
+
+        const URI =['https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
+            'https://biit.cs.ut.ee/gprofiler_beta/api/convert/convert/'];
+
+        const fetchGProfiler = (URI) => {
+            return new Promise(async (resolve, reject) => {
+                console.log('Trying ', URI)
+                try {
+                    const res = await fetch(
+                        URI,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                "organism": OS.id,
+                                "query": category.native,
+                                "target": typeID.id
+                            })
+                        }
+                    );
+                    resolve(res);
+                } catch (error) {
+                    reject(error);
+                }
+            })
+        }
+
+        let res;
+        try {
+            res = await fetchGProfiler(URI[0]);
+        } catch(error) {
+            console.log(error);
+            res = await fetchGProfiler(URI[1]);
+        }
+
+        /*const res = await fetch(
             'https://biit.cs.ut.ee/gprofiler/api/convert/convert/',
             {
                 method: 'POST',
@@ -56,7 +91,7 @@ function EnrichmentQ({
                     "target": typeID.id
                 })
             }
-        );
+        );*/
 
         const resJson = await res.json();
 

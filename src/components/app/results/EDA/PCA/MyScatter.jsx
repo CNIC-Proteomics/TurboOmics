@@ -20,6 +20,8 @@ import {
 import downloadSVG from '@/utils/downloadSVG';
 import { useVars } from '@/components/VarsContext';
 
+import { DownloadComponent } from '@/utils/DownloadRechartComponent';
+
 export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
 
     const [showLabels, setShowLabels] = useState(false);
@@ -35,40 +37,58 @@ export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]} />
-                <ScatterChart
-                    width={600}
-                    height={550}
-                    ref={scatterRef}
-                    margin={{
-                        top: 20,
-                        right: 20,
-                        bottom: 20,
-                        left: 20
-                    }}
+            <DownloadComponent scatterRef={scatterRef} name={`PCA-1D-${OMIC2NAME[omic]}`} />
+            <ScatterChart
+                width={600}
+                height={550}
+                ref={scatterRef}
+                margin={{
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20
+                }}
+            >
+                <CartesianGrid />
+                <XAxis
+                    type={scatterType}
+                    dataKey="mdataValue"
+                    name={mdataCol}
+                    allowDuplicatedCategory={false}
+                    style={{ fontFamily: 'Calibri' }}
                 >
-                    <CartesianGrid />
-                    <XAxis
-                        type={scatterType}
-                        dataKey="mdataValue"
-                        name={mdataCol}
-                        allowDuplicatedCategory={false}
-                    >
-                        <Label value={mdataCol} offset={-10} position="insideBottom" />
-                    </XAxis>
-                    <YAxis type="number" dataKey="projection" name={`PCA ${PCA}`} >
-                        <Label value={`PCA ${PCA}`} offset={20} position="insideLeft" angle={-90} />
-                    </YAxis>
-                    <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
-                    <Scatter data={scatterData} fill={myPalette[0]}>
-                        {showLabels &&
-                            <LabelList
-                                dataKey="element"
-                                position="right"
-                            />
-                        }
-                    </Scatter>
-                </ScatterChart>
+                    <Label
+                        value={mdataCol}
+                        offset={-10}
+                        position="insideBottom"
+                        style={{ fontFamily: 'Calibri' }}
+                    />
+                </XAxis>
+                <YAxis
+                    type="number"
+                    dataKey="projection"
+                    name={`PCA ${PCA}`}
+                    style={{ fontFamily: 'Calibri' }}
+                >
+                    <Label
+                        value={`PCA ${PCA}`}
+                        offset={20}
+                        position="insideLeft"
+                        angle={-90}
+                        style={{ fontFamily: 'Calibri' }}
+                    />
+                </YAxis>
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
+                <Scatter data={scatterData} fill={myPalette[0]}>
+                    {showLabels &&
+                        <LabelList
+                            dataKey="element"
+                            position="right"
+                            style={{fontFamily: 'Calibri'}}
+                        />
+                    }
+                </Scatter>
+            </ScatterChart>
             <ShowLabels showLabels={showLabels} setShowLabels={setShowLabels} />
         </Box>
     )
@@ -83,7 +103,7 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} name={OMIC2NAME[omic]} />
+            <DownloadComponent scatterRef={scatterRef} name={`PCA-2D-${OMIC2NAME[omic]}`} />
             <ScatterChart
                 ref={scatterRef}
                 width={600}
@@ -100,16 +120,29 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
                     type="number"
                     dataKey="x"
                     name={`PCA ${selectedPlot2D.x}`}
+                    style={{ fontFamily: 'Calibri' }}
                 //allowDuplicatedCategory={false}
                 >
-                    <Label value={`PCA ${selectedPlot2D.x}`} offset={-10} position="insideBottom" />
+                    <Label
+                        value={`PCA ${selectedPlot2D.x}`}
+                        offset={-10}
+                        position="insideBottom"
+                        style={{ fontFamily: 'Calibri' }}
+                    />
                 </XAxis>
                 <YAxis
                     type="number"
                     dataKey="y"
                     name={`PCA ${selectedPlot2D.y}`}
+                    style={{ fontFamily: 'Calibri' }}
                 >
-                    <Label value={`PCA ${selectedPlot2D.y}`} offset={20} position="insideLeft" angle={-90} />
+                    <Label
+                        value={`PCA ${selectedPlot2D.y}`}
+                        offset={20}
+                        position="insideLeft"
+                        angle={-90}
+                        style={{ fontFamily: 'Calibri' }}
+                    />
                 </YAxis>
                 <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltip />} />
                 {Object.keys(scatterData).length > 1 && <Legend verticalAlign="top" />}
@@ -126,6 +159,7 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
                                     <LabelList
                                         dataKey="element"
                                         position="top"
+                                        style={{fontFamily: 'Calibri'}}
                                     />
                                 }
                             </Scatter>
@@ -191,27 +225,3 @@ const CustomTooltip = ({ active, payload }) => {
 
     return null;
 };
-
-const DownloadComponent = ({ scatterRef, name }) => {
-    const downloadScatter = () => {
-        const scatterComp = scatterRef.current.container.cloneNode(true);
-        const fullFig = window.document.createElement('div');
-        fullFig.appendChild(scatterComp);
-        downloadSVG(fullFig, `PCA_Scatter-${name}`);
-    }
-
-    return (
-        <Box sx={{ height: 0 }}>
-            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 5000 }}>
-                <IconButton
-                    aria-label="download"
-                    size='small'
-                    onClick={downloadScatter}
-                    sx={{ opacity: 0.5 }}
-                >
-                    <DownloadIcon />
-                </IconButton>
-            </Box>
-        </Box>
-    )
-}

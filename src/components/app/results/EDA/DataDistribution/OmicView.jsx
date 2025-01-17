@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import TimelineIcon from '@mui/icons-material/Timeline';
 
 import React, { useEffect, useState } from 'react'
-import downloadImage from './downloadImage'
+import {downloadImageDensityPlot} from '@/utils/DownloadRechartComponent'//./downloadImage'
 import PlotData from './PlotData'
 import FilterFeatures from './FilterFeatures'
 import { useJob } from '../../../JobContext';
@@ -94,7 +94,7 @@ function OmicView({
                         <IconButton
                             aria-label="download"
                             size='small'
-                            onClick={e => downloadImage(
+                            onClick={e => downloadImageDensityPlot(
                                 figRef.current[omic]['Hist'],
                                 figRef.current[omic]['Box'],
                                 OMIC2NAME[omic]

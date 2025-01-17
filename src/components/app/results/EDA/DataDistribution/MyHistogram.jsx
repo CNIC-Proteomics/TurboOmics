@@ -34,8 +34,8 @@ export default function MyHistogram({
             }}
         >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={'binCenter'} type='number' ticks={xTicks} domain={xrange} />
-            <YAxis domain={yrange} />
+            <XAxis dataKey={'binCenter'} type='number' ticks={xTicks} domain={xrange} style={{fontFamily: 'Calibri'}} />
+            <YAxis domain={yrange} style={{fontFamily: 'Calibri'}} />
             <Tooltip />
             {
                 gValues.map(

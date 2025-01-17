@@ -96,60 +96,62 @@ export default function PCAOmic({ omic }) {
                             scatterMode={scatterMode}
                         />
                     </Box>
-                    <Box sx={{height:0, mt:5}}><HelpSectionBottom/></Box>
+                    <Box sx={{ height: 0, mt: 5 }}><HelpSectionBottom /></Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
-                        <Box sx={{ width: '45%', mt:4 }}>
-                            <Box sx={{ textAlign: 'center', mt: 2 }}>
-                                <Box sx={{ mb: 2 }}>
-                                    <ToggleButtonGroup
-                                        color="primary"
-                                        value={scatterMode}
-                                        exclusive
-                                        onChange={(e, mode) => {
-                                            setScatterMode(e.target.value);
-                                            dispatchResults({ type: 'set-scatter-mode', mode: e.target.value, omic: omic });
-                                        }}
-                                        aria-label="Platform"
-                                    >
-                                        <ToggleButton value="1D">1D</ToggleButton>
-                                        <ToggleButton value="2D">2D</ToggleButton>
-                                    </ToggleButtonGroup>
-                                </Box>
-                            </Box>
-
-                            <Box sx={{ textAlign: 'center' }}>
-                                {scatterMode == '1D' ?
-                                    <Box sx={{ height: 75, pt: 3 }}>
-                                        <Typography variant='body1'>Select a p-value cell to plot PCA</Typography>
+                        <Box sx={{ width: '45%', mt: 4, overflowX: 'auto' }}>
+                            <Box sx={{width: 600, margin:'auto'}}>
+                                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <ToggleButtonGroup
+                                            color="primary"
+                                            value={scatterMode}
+                                            exclusive
+                                            onChange={(e, mode) => {
+                                                setScatterMode(e.target.value);
+                                                dispatchResults({ type: 'set-scatter-mode', mode: e.target.value, omic: omic });
+                                            }}
+                                            aria-label="Platform"
+                                        >
+                                            <ToggleButton value="1D">1D</ToggleButton>
+                                            <ToggleButton value="2D">2D</ToggleButton>
+                                        </ToggleButtonGroup>
                                     </Box>
-                                    :
-                                    <SelectorPCA2D
-                                        pvColNames={pvColNames}
-                                        pvRowNames={pvRowNames}
-                                        selectedPlot2D={selectedPlot2D}
-                                        setSelectedPlot2D={setSelectedPlot2D}
-                                        omic={omic}
-                                    />
-                                }
-                            </Box>
-                            {scatterData &&
-                                <Box sx={{ display: 'flex', 'justifyContent': 'center' }}>
+                                </Box>
+
+                                <Box sx={{ textAlign: 'center' }}>
                                     {scatterMode == '1D' ?
-                                        <MyScatter
-                                            omic={omic}
-                                            scatterData={scatterData}
-                                            mdataCol={selectedPlot.mdataCol}
-                                            PCA={selectedPlot.PCA}
-                                        />
+                                        <Box sx={{ height: 75, pt: 3 }}>
+                                            <Typography variant='body1'>Select a p-value cell to plot PCA</Typography>
+                                        </Box>
                                         :
-                                        <MyScatter2D
-                                            omic={omic}
-                                            scatterData={scatterData}
+                                        <SelectorPCA2D
+                                            pvColNames={pvColNames}
+                                            pvRowNames={pvRowNames}
                                             selectedPlot2D={selectedPlot2D}
+                                            setSelectedPlot2D={setSelectedPlot2D}
+                                            omic={omic}
                                         />
                                     }
                                 </Box>
-                            }
+                                {scatterData &&
+                                    <Box sx={{ display: 'flex', 'justifyContent': 'center' }}>
+                                        {scatterMode == '1D' ?
+                                            <MyScatter
+                                                omic={omic}
+                                                scatterData={scatterData}
+                                                mdataCol={selectedPlot.mdataCol}
+                                                PCA={selectedPlot.PCA}
+                                            />
+                                            :
+                                            <MyScatter2D
+                                                omic={omic}
+                                                scatterData={scatterData}
+                                                selectedPlot2D={selectedPlot2D}
+                                            />
+                                        }
+                                    </Box>
+                                }
+                            </Box>
                         </Box>
                         <Box sx={{ width: '45%' }}>
                             {selectedLoadings &&
@@ -223,7 +225,7 @@ const getScatterData = (projections, mdata, mdataType, selectedPlot, selectedPlo
             projection: projections[element][selectedPlot.PCA],
             mdataValue: mdataColSerie.values[mdataColSerie.index.indexOf(element)]
         }));
-        
+
         if (mdataType[selectedPlot.mdataCol].type == 'categorical') {
             scatterData.sort(
                 (a, b) => mdataType[selectedPlot.mdataCol].levels.indexOf(a.mdataValue) -
