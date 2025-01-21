@@ -87,14 +87,14 @@ function ScatterPlot({ projections, nLV, mdataCategorical }) {
                             data={data.filter(e => e.g == mdataCategorical.g1.id)}
                             fill={myPalette[0]}
                         >
-                            {showLabels && <LabelList dataKey="sample" position='top' style={{fontFamily: 'Calibri'}} />}
+                            {showLabels && <LabelList dataKey="sample" position='top' style={{ fontFamily: 'Calibri' }} />}
                         </Scatter>
                         <Scatter
                             name={mdataCategorical.g2.id}
                             data={data.filter(e => e.g == mdataCategorical.g2.id)}
                             fill={myPalette[1]}
                         >
-                            {showLabels && <LabelList dataKey="sample" position='top' style={{fontFamily: 'Calibri'}} />}
+                            {showLabels && <LabelList dataKey="sample" position='top' style={{ fontFamily: 'Calibri' }} />}
                         </Scatter>
                     </ScatterChart>
                 </Box>

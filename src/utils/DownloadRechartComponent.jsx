@@ -49,7 +49,7 @@ export const DownloadComponent = ({ scatterRef, name }) => {
 
     return (
         <Box sx={{ height: 0 }}>
-            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 5000 }}>
+            <Box sx={{ width: 50, position: 'relative', top: 5, zIndex: 10 }}>
                 <IconButton
                     aria-label="download"
                     size='small'

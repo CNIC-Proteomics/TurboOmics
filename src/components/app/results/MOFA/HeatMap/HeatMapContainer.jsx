@@ -54,7 +54,7 @@ function HeatMapContainer({ nFeatRef, fLVec, mdataCol, plotHM, plotHeatMap }) {
     return (
         <Box sx={{ overflowX: 'auto' }}>
             <Box sx={{ height: 0 }}><HelpSection /></Box>
-            <Box sx={{position:'relative', top:40, left:10, width:0, zIndex: 0}}>
+            <Box sx={{position: 'relative', top:7, left:60, width:0, zIndex: 0}}>
                 <DownloadHeatmap name={'MOFA'} />
             </Box>
             <Box className="printable" sx={{ width: 1400, margin: 'auto', overflowY: 'hidden' }}>

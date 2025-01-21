@@ -37,7 +37,9 @@ export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} name={`PCA-1D-${OMIC2NAME[omic]}`} />
+            <Box sx={{}}>
+                <DownloadComponent scatterRef={scatterRef} name={`PCA-1D-${OMIC2NAME[omic]}`} />
+            </Box>
             <ScatterChart
                 width={600}
                 height={550}
@@ -84,7 +86,7 @@ export function MyScatter({ omic, scatterData, mdataCol, PCA }) {
                         <LabelList
                             dataKey="element"
                             position="right"
-                            style={{fontFamily: 'Calibri'}}
+                            style={{ fontFamily: 'Calibri' }}
                         />
                     }
                 </Scatter>
@@ -103,7 +105,9 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
 
     return (
         <Box>
-            <DownloadComponent scatterRef={scatterRef} name={`PCA-2D-${OMIC2NAME[omic]}`} />
+            <Box>
+                <DownloadComponent scatterRef={scatterRef} name={`PCA-2D-${OMIC2NAME[omic]}`} />
+            </Box>
             <ScatterChart
                 ref={scatterRef}
                 width={600}
@@ -159,7 +163,7 @@ export function MyScatter2D({ omic, scatterData, selectedPlot2D }) {
                                     <LabelList
                                         dataKey="element"
                                         position="top"
-                                        style={{fontFamily: 'Calibri'}}
+                                        style={{ fontFamily: 'Calibri' }}
                                     />
                                 }
                             </Scatter>
